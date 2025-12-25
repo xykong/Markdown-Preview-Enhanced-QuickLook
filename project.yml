@@ -10,9 +10,9 @@ targets:
     sources: [Sources/MarkdownQuickLook]
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.markdownquicklook.app
+      INFOPLIST_FILE: Sources/MarkdownQuickLook/Info.plist
       INFOPLIST_KEY_NSMainStoryboardFile: ""
       ENABLE_PREVIEWS: YES
-      GENERATE_INFOPLIST_FILE: YES
     dependencies:
       - target: MarkdownPreview
         embed: true

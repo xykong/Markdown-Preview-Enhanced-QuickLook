@@ -4,8 +4,6 @@
 <dict>
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
-    <key>CFBundleDisplayName</key>
-    <string>Markdown Preview</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -20,22 +18,29 @@
     <string>1.0</string>
     <key>CFBundleVersion</key>
     <string>1</string>
-    <key>NSExtension</key>
-    <dict>
-        <key>NSExtensionAttributes</key>
+    <key>LSMinimumSystemVersion</key>
+    <string>$(MACOSX_DEPLOYMENT_TARGET)</string>
+    <key>UTImportedTypeDeclarations</key>
+    <array>
         <dict>
-            <key>QLSupportedContentTypes</key>
+            <key>UTTypeConformsTo</key>
             <array>
-                <string>net.daringfireball.markdown</string>
-                <string>public.markdown</string>
+                <string>public.plain-text</string>
             </array>
-            <key>QLSupportsSearchableItems</key>
-            <false/>
+            <key>UTTypeDescription</key>
+            <string>Markdown Document</string>
+            <key>UTTypeIdentifier</key>
+            <string>net.daringfireball.markdown</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>md</string>
+                    <string>markdown</string>
+                    <string>mdown</string>
+                </array>
+            </dict>
         </dict>
-        <key>NSExtensionPointIdentifier</key>
-        <string>com.apple.quicklook.preview</string>
-        <key>NSExtensionPrincipalClass</key>
-        <string>$(PRODUCT_MODULE_NAME).PreviewViewController</string>
-    </dict>
+    </array>
 </dict>
 </plist>
