@@ -1,11 +1,11 @@
 import SwiftUI
 
 @main
-struct MarkdownQuickLookApp: App {
+struct MarkdownApp: App {
     var body: some Scene {
         WindowGroup {
             VStack {
-                Text("Markdown Quick Look Host App")
+                Text("Markdown Host App")
                     .font(.headline)
                     .padding()
                 Text("This app hosts the Quick Look extension.")

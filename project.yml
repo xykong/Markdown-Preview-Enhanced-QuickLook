@@ -1,18 +1,18 @@
-name: MarkdownQuickLook
+name: Markdown
 options:
   bundleIdPrefix: com.xykong
   deploymentTarget:
     macOS: "11.0"
 targets:
-  MarkdownQuickLook:
+  Markdown:
     type: application
     platform: macOS
-    sources: [Sources/MarkdownQuickLook]
+    sources: [Sources/Markdown]
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.xykong.Markdown
-      INFOPLIST_FILE: Sources/MarkdownQuickLook/Info.plist
+      INFOPLIST_FILE: Sources/Markdown/Info.plist
       INFOPLIST_KEY_NSMainStoryboardFile: ""
-      CODE_SIGN_ENTITLEMENTS: Sources/MarkdownQuickLook/MarkdownQuickLook.entitlements
+      CODE_SIGN_ENTITLEMENTS: Sources/Markdown/Markdown.entitlements
       ENABLE_PREVIEWS: NO
       MARKETING_VERSION: ${MARKETING_VERSION}
       CURRENT_PROJECT_VERSION: ${CURRENT_PROJECT_VERSION}
