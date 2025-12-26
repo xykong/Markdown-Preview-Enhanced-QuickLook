@@ -1,0 +1,21 @@
+Copyright (c) 2024 xykong. All rights reserved.
+
+1. Grant of License
+   This software and its associated source code ("Software") are free for personal, educational, and non-commercial use only.
+
+2. Restrictions on Commercial Use
+   You may NOT use this Software for any commercial purpose without prior explicit written permission from the copyright holder.
+   
+   "Commercial purpose" includes, but is not limited to:
+   - Selling, renting, or leasing the Software.
+   - Including the Software in a product or service that is sold or monetized.
+   - Using the Software in a business workflow for commercial advantage.
+   - Using the source code to build a competing commercial product.
+
+   If you wish to use this Software for commercial purposes, you must obtain a commercial license from the author.
+
+3. Third-Party Software
+   This Software includes third-party libraries (e.g., markdown-it, highlight.js, mermaid, katex) which are governed by their respective licenses (MIT, BSD-3-Clause, etc.). This license does not restrict your rights under those third-party licenses regarding those specific libraries. However, the combination and specific implementation in this project are subject to this Non-Commercial License.
+
+4. Disclaimer
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED.
