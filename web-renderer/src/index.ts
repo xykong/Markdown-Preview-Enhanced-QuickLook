@@ -1,3 +1,38 @@
+// Helper to send logs to Swift
+function logToSwift(message: string) {
+    try {
+        // @ts-ignore
+        if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.logger) {
+            // @ts-ignore
+            window.webkit.messageHandlers.logger.postMessage(message);
+        }
+    } catch (e) {
+        // Fallback
+        console.log("Failed to log to Swift:", e);
+    }
+    console.log(message);
+}
+
+// Global error handler for debugging
+window.onerror = function(message, source, lineno, colno, error) {
+    const errorMsg = `JS Error: ${message} at ${source}:${lineno}`;
+    logToSwift(errorMsg);
+
+    const errorDiv = document.createElement('div');
+    errorDiv.style.color = 'red';
+    errorDiv.style.backgroundColor = '#ffeeee';
+    errorDiv.style.padding = '20px';
+    errorDiv.style.border = '1px solid red';
+    errorDiv.style.margin = '20px';
+    errorDiv.style.zIndex = '9999';
+    errorDiv.style.position = 'relative';
+    errorDiv.innerHTML = `<h3>JS Error</h3><p><strong>Message:</strong> ${message}</p><p><strong>Source:</strong> ${source}:${lineno}</p>`;
+    if (error && error.stack) {
+        errorDiv.innerHTML += `<pre>${error.stack}</pre>`;
+    }
+    document.body.prepend(errorDiv);
+};
+
 import 'github-markdown-css/github-markdown.css';
 import 'highlight.js/styles/github.css';
 import 'katex/dist/katex.min.css';
@@ -66,8 +101,12 @@ declare global {
 
 // Render function called by Swift
 window.renderMarkdown = function (text: string) {
+    logToSwift("JS: renderMarkdown called with length: " + text.length);
     const outputDiv = document.getElementById('markdown-preview');
-    if (!outputDiv) return;
+    if (!outputDiv) {
+        logToSwift("JS Error: markdown-preview element not found");
+        return;
+    }
 
     // 1. Render Markdown to HTML
     let html = md.render(text);
@@ -101,4 +140,4 @@ window.renderMarkdown = function (text: string) {
     });
 };
 
-console.log('Markdown Renderer Loaded');
+logToSwift('JS: Markdown Renderer Loaded');

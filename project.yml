@@ -13,7 +13,7 @@ targets:
       INFOPLIST_FILE: Sources/MarkdownQuickLook/Info.plist
       INFOPLIST_KEY_NSMainStoryboardFile: ""
       CODE_SIGN_ENTITLEMENTS: Sources/MarkdownQuickLook/MarkdownQuickLook.entitlements
-      ENABLE_PREVIEWS: YES
+      ENABLE_PREVIEWS: NO
     dependencies:
       - target: MarkdownPreview
         embed: true
@@ -23,10 +23,6 @@ targets:
     platform: macOS
     sources:
       - Sources/MarkdownPreview
-      - path: web-renderer/dist
-        name: dist
-        type: folder
-        buildPhase: resources
     settings:
       PRODUCT_BUNDLE_IDENTIFIER: com.markdownquicklook.app.MarkdownPreview
       INFOPLIST_FILE: Sources/MarkdownPreview/Info.plist
@@ -34,4 +30,3 @@ targets:
       SKIP_INSTALL: YES
     dependencies:
       - sdk: QuickLookUI.framework
-      - sdk: WebKit.framework

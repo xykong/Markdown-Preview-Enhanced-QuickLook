@@ -45,10 +45,22 @@
         </dict>
     </array>
 
-    <!-- Associate our app as a viewer for Markdown documents.
-         This makes Quick Look consider our preview extension when
-         the user previews .md files in Finder. We use LSHandlerRank
-         = Alternate so we don't steal the global default app. -->
+    <!-- Associate our app as the *default* viewer for Markdown documents.
+         IMPORTANT: Quick Look Preview Extensions are only consulted for a
+         given UTI when the owning app is the default handler for that UTI.
+         If we only declare ourselves as an "Alternate" handler, macOS will
+         continue to route Quick Look requests to the system's built-in
+         Markdown / plain-text generator, which results in plain-text
+         previews instead of our web-rendered Markdown.
+
+         Therefore we deliberately set LSHandlerRank = Owner here so that:
+         - MarkdownQuickLook becomes the primary handler for
+           net.daringfireball.markdown / public.markdown
+         - The com.markdownquicklook.app.MarkdownPreview Quick Look
+           extension is actually used when previewing .md files.
+
+         Users can still change the default app for .md files via Finder's
+         "Open With" → "Change All…" if they prefer another editor. -->
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>
@@ -62,7 +74,7 @@
             <key>CFBundleTypeRole</key>
             <string>Viewer</string>
             <key>LSHandlerRank</key>
-            <string>Alternate</string>
+            <string>Owner</string>
         </dict>
     </array>
 </dict>

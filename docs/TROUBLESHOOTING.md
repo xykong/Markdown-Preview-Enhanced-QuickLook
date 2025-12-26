@@ -131,3 +131,93 @@ ls -la "$APP_PATH/Contents/PlugIns/MarkdownPreview.appex/Contents/Resources/dist
 
 ### Sandbox Restrictions  
 macOS App Sandbox 会限制文件访问权限。如果 Markdown 文件引用了本地图片，可能需要额外的 Entitlements。
+
+## Plain Text Preview Even Though Extension Is Registered
+
+### Issue
+`pluginkit -m -A -D -p com.apple.quicklook.preview | grep -i markdownquicklook` 能看到：
+
+```bash
+com.markdownquicklook.app.MarkdownPreview(1.0)
+```
+
+说明 Quick Look 扩展已经被系统识别并注册。但在 Finder 中选中 `.md` 文件按空格时，
+Quick Look 仍然只显示**纯文本内容**，没有任何 Markdown 渲染效果（看起来就像普通的
+文本预览一样）。
+
+### Root Cause：Host App 不是 Markdown UTI 的默认 Owner
+
+macOS 在选择 Quick Look Preview Extension 时，会优先考虑**默认处理该 UTI 的应用**。
+
+如果我们的宿主应用 `MarkdownQuickLook.app` 仅仅把自己声明为 `Alternate` 处理程序
+（即 `LSHandlerRank = Alternate`），系统会继续优先使用内置的 Markdown/Plain Text 预览
+器，从而完全绕过 `com.markdownquicklook.app.MarkdownPreview` 扩展——这就导致 Quick Look
+看起来“只有纯文本”，好像插件失效了一样。
+
+**本仓库中已通过以下方式修复：**
+
+在 `Sources/MarkdownQuickLook/Info.plist` 中，将 `CFBundleDocumentTypes` 的
+`LSHandlerRank` 调整为：
+
+```xml
+<key>LSHandlerRank</key>
+<string>Owner</string>
+```
+
+并在注释中明确说明：我们故意将宿主应用设置为 Markdown UTI 的默认 Owner，以便
+Quick Look 在预览 `.md` 文件时能实际使用我们的 Preview Extension。
+
+### Fix Steps（如何让你的本地环境生效）
+
+1. **更新代码**（如果你是从旧版本升级上来）：
+   - 确认本地 `Sources/MarkdownQuickLook/Info.plist` 中的 `LSHandlerRank` 已是 `Owner`。
+
+2. **重新生成并构建工程**：
+
+   ```bash
+   make app
+   ```
+
+   这一步会：
+   - 构建 `web-renderer`（生成 `dist/index.html` + `dist/bundle.js`）
+   - 生成并构建 Xcode 工程与宿主 App + Extension
+
+3. **运行宿主 App 以注册扩展**：
+
+   ```bash
+   open ~/Library/Developer/Xcode/DerivedData/MarkdownQuickLook-*/Build/Products/Debug/MarkdownQuickLook.app
+   ```
+
+   或者在 Xcode 中选择 **MarkdownQuickLook** scheme，按 `Cmd+R` 运行。
+
+4. **刷新 Quick Look 缓存**：
+
+   ```bash
+   qlmanage -r
+   qlmanage -r cache
+   killall Finder
+   ```
+
+5. **再次测试 `.md` 预览**：
+   - 在 Finder 中选中 `test-sample.md`（见 `docs/TESTING.md` 中的示例）
+   - 按空格触发 Quick Look
+   - 预期行为：
+     - 标题、副标题、代码块、数学公式、Mermaid 图表、任务列表都以富文本形式渲染
+     - 不再是简单的纯文本显示
+
+6. **可选：使用系统日志确认扩展已被调用**：
+
+   ```bash
+   log stream --style compact --predicate 'process == "MarkdownPreview"'
+   ```
+
+   然后在 Finder 中对 `.md` 文件按空格预览，日志中应该能看到类似：
+
+   ```text
+   MarkdownPreview: viewDidLoad called
+   MarkdownPreview: preparePreviewOfFile called for: /path/to/file.md
+   ```
+
+   这说明：
+   - Quick Look 已经不再使用系统内置的纯文本预览器
+   - 我们的 `PreviewViewController` 和内置的 Web 渲染器已经实际参与渲染流程
