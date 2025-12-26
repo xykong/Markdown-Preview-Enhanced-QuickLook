@@ -112,31 +112,33 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             }
         }
 
+        #if DEBUG
         // Debug Information Overlay
-        // let debugInfo = Bundle(for: type(of: self)).infoDictionary
-        // let version = debugInfo?["CFBundleShortVersionString"] as? String ?? "Unknown"
-        // let build = debugInfo?["CFBundleVersion"] as? String ?? "Unknown"
-        //
-        // let dateFormatter = DateFormatter()
-        // dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        // let now = dateFormatter.string(from: Date())
-        //
-        // let debugLabel = NSTextField(labelWithString: "v\(version) (\(build)) | Run: \(now)")
-        // debugLabel.font = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
-        // debugLabel.textColor = NSColor.white
-        // debugLabel.drawsBackground = true
-        // debugLabel.backgroundColor = NSColor.black.withAlphaComponent(0.6)
-        // debugLabel.translatesAutoresizingMaskIntoConstraints = false
-        //
-        // self.view.addSubview(debugLabel)
-        //
-        // NSLayoutConstraint.activate([
-        //     debugLabel.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 5),
-        //     debugLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -5)
-        // ])
-        //
-        // // Bring debug label to front
-        // self.view.addSubview(debugLabel, positioned: .above, relativeTo: webView)
+        let debugInfo = Bundle(for: type(of: self)).infoDictionary
+        let version = debugInfo?["CFBundleShortVersionString"] as? String ?? "Unknown"
+        let build = debugInfo?["CFBundleVersion"] as? String ?? "Unknown"
+        
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+        let now = dateFormatter.string(from: Date())
+        
+        let debugLabel = NSTextField(labelWithString: "DEBUG v\(version) (\(build)) | Run: \(now)")
+        debugLabel.font = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
+        debugLabel.textColor = NSColor.white
+        debugLabel.drawsBackground = true
+        debugLabel.backgroundColor = NSColor.red.withAlphaComponent(0.6)
+        debugLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        self.view.addSubview(debugLabel)
+        
+        NSLayoutConstraint.activate([
+            debugLabel.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 5),
+            debugLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -5)
+        ])
+        
+        // Bring debug label to front
+        self.view.addSubview(debugLabel, positioned: .above, relativeTo: webView)
+        #endif
     }
 
     public func preparePreviewOfFile(at url: URL, completionHandler handler: @escaping (Error?) -> Void) {

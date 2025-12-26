@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2025-12-27
+
 ### Added
 - Integrated `xcodegen` for automated Xcode project generation.
 - Added `Makefile` to orchestrate build and project generation.

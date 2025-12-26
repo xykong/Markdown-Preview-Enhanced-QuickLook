@@ -14,7 +14,7 @@ echo "📦 Building application..."
 make app
 
 # 2. Locate the built app
-APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "${APP_BUNDLE}" -path "*/Build/Products/Debug/*" | head -n 1)
+APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "${APP_BUNDLE}" -path "*/Build/Products/Release/*" | head -n 1)
 
 if [ -z "$APP_PATH" ]; then
     echo "❌ Error: Could not find built ${APP_BUNDLE}"
