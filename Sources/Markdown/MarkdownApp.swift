@@ -11,6 +11,14 @@ struct MarkdownApp: App {
                 Text("This app hosts the Quick Look extension.")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                
+                if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String,
+                   let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String {
+                    Text("Version \(version) (\(build))")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.top, 5)
+                }
             }
             .frame(width: 400, height: 300)
         }
