@@ -16,6 +16,26 @@ struct MarkdownWebView: NSViewRepresentable {
         let webConfiguration = WKWebViewConfiguration()
         let userContentController = WKUserContentController()
         userContentController.add(coordinator, name: "logger")
+        
+        let debugSource = """
+        window.onerror = function(msg, url, line, col, error) {
+            window.webkit.messageHandlers.logger.postMessage("JS Error: " + msg + " at " + line + ":" + col);
+        };
+        var originalLog = console.log;
+        console.log = function(msg) {
+            window.webkit.messageHandlers.logger.postMessage("JS Log: " + msg);
+            if (originalLog) originalLog(msg);
+        };
+        console.error = function(msg) {
+            window.webkit.messageHandlers.logger.postMessage("JS Error Log: " + msg);
+        };
+        window.addEventListener('load', function() {
+             window.webkit.messageHandlers.logger.postMessage("Window Loaded");
+        });
+        """
+        let userScript = WKUserScript(source: debugSource, injectionTime: .atDocumentStart, forMainFrameOnly: true)
+        userContentController.addUserScript(userScript)
+        
         webConfiguration.userContentController = userContentController
         
         webConfiguration.preferences.setValue(true, forKey: "allowFileAccessFromFileURLs")
@@ -31,53 +51,10 @@ struct MarkdownWebView: NSViewRepresentable {
         if let url = bundleURL {
             let dir = url.deletingLastPathComponent()
             os_log("Loading HTML from: %{public}@", log: coordinator.logger, type: .debug, url.path)
-            
-            do {
-                var htmlContent = try String(contentsOf: url, encoding: .utf8)
-                
-                // Inject Debug JS
-                let debugScript = """
-                <script>
-                window.onerror = function(msg, url, line, col, error) {
-                    var extra = !col ? '' : '\\ncolumn: ' + col;
-                    extra += !error ? '' : '\\nerror: ' + error;
-                    var message = "Error: " + msg + "\\nurl: " + url + "\\nline: " + line + extra;
-                    if(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.logger) {
-                         window.webkit.messageHandlers.logger.postMessage(message);
-                    }
-                };
-                console.log = function(message) {
-                    if(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.logger) {
-                         window.webkit.messageHandlers.logger.postMessage("JS Log: " + message);
-                    }
-                };
-                // Verify body existence and change color to verify rendering
-                document.addEventListener('DOMContentLoaded', function() {
-                     if(window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.logger) {
-                         window.webkit.messageHandlers.logger.postMessage("DOM Content Loaded");
-                     }
-                     // Optional: Visual Debug
-                     // document.body.style.backgroundColor = 'lightyellow';
-                });
-                </script>
-                """
-                
-                // Insert script before </head> or at the beginning if not found
-                if let range = htmlContent.range(of: "</head>") {
-                    htmlContent.insert(contentsOf: debugScript, at: range.lowerBound)
-                } else {
-                    htmlContent = debugScript + htmlContent
-                }
-                
-                webView.loadHTMLString(htmlContent, baseURL: dir)
-            } catch {
-                os_log("Failed to read index.html: %{public}@", log: coordinator.logger, type: .error, error.localizedDescription)
-                webView.loadFileURL(url, allowingReadAccessTo: dir)
-            }
+            webView.loadFileURL(url, allowingReadAccessTo: dir)
         } else {
              os_log("Failed to find index.html in bundle", log: coordinator.logger, type: .error)
         }
-
         
         return webView
     }
