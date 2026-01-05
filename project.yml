@@ -63,5 +63,7 @@ targets:
     platform: macOS
     sources:
       - Tests/MarkdownTests
-    dependencies:
-      - target: Markdown
+      - Sources/Markdown/ResourceLoader.swift
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      PRODUCT_BUNDLE_IDENTIFIER: com.xykong.MarkdownTests
