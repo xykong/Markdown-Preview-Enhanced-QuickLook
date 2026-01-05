@@ -83,6 +83,25 @@ try {
     md.use(mark);
     md.use(sub);
     md.use(sup);
+
+    const defaultImageRender = md.renderer.rules.image || function(tokens, idx, options, env, self) {
+        return self.renderToken(tokens, idx, options);
+    };
+
+    md.renderer.rules.image = function (tokens, idx, options, env, self) {
+        const token = tokens[idx];
+        const srcIndex = token.attrIndex('src');
+        if (srcIndex >= 0) {
+            const src = token.attrs[srcIndex][1];
+            const isAbsolute = /^(http:\/\/|https:\/\/|file:\/\/|\/)/.test(src);
+            
+            if (!isAbsolute && env && env.baseUrl) {
+                 const base = env.baseUrl.endsWith('/') ? env.baseUrl : env.baseUrl + '/';
+                 token.attrs[srcIndex][1] = "file://" + base + src;
+            }
+        }
+        return defaultImageRender(tokens, idx, options, env, self);
+    };
     
 } catch (e) {
     logToSwift("JS: MarkdownIt init failed: " + e);
@@ -91,12 +110,12 @@ try {
 // Define global interface for window
 declare global {
     interface Window {
-        renderMarkdown: (text: string) => void;
+        renderMarkdown: (text: string, options?: { baseUrl?: string }) => void;
     }
 }
 
 // Render function called by Swift
-window.renderMarkdown = function (text: string) {
+window.renderMarkdown = function (text: string, options: { baseUrl?: string } = {}) {
     const outputDiv = document.getElementById('markdown-preview');
     if (!outputDiv) {
         logToSwift("JS Error: markdown-preview element not found");
@@ -105,7 +124,7 @@ window.renderMarkdown = function (text: string) {
 
     try {
         // 1. Render Markdown to HTML
-        let html = md.render(text);
+        let html = md.render(text, { baseUrl: options.baseUrl });
 
         // 2. Render Mermaid diagrams
         const tempDiv = document.createElement('div');

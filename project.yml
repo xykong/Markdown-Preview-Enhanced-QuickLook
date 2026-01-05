@@ -7,7 +7,11 @@ targets:
   Markdown:
     type: application
     platform: macOS
-    sources: [Sources/Markdown]
+    sources: 
+      - Sources/Markdown
+      - path: web-renderer/dist
+        name: WebRenderer
+        type: folder
     settings:
       PRODUCT_NAME: "Markdown Preview Enhanced"
       PRODUCT_BUNDLE_IDENTIFIER: com.xykong.Markdown

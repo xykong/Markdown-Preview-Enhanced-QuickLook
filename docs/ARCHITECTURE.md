@@ -68,6 +68,11 @@ graph TD
 - [ ] **Network Access**: Enable Client-Side Network entitlement to support external images (Note: Privacy implications).
 - [ ] **Search**: Implement `QLSupportsSearchableItems` to allow Spotlight to index rendered content (text extraction).
 
+### Phase 5: Host App Browser
+- [ ] Transform the Host App into a full-featured Markdown Viewer.
+- [ ] Support local file browsing, image rendering, and navigation.
+- [ ] See [DESIGN_HOST_APP_BROWSER.md](DESIGN_HOST_APP_BROWSER.md) for detailed architecture.
+
 ## 5. Development Workflow
 
 1.  **Modify Renderer**:
