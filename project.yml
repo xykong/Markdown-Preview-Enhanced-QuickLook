@@ -9,6 +9,7 @@ targets:
     platform: macOS
     sources: 
       - Sources/Markdown
+      - Sources/Shared
       - path: web-renderer/dist
         name: WebRenderer
         type: folder
@@ -40,6 +41,7 @@ targets:
     platform: macOS
     sources:
       - Sources/MarkdownPreview
+      - Sources/Shared
       - path: web-renderer/dist
         name: WebRenderer
         type: folder

@@ -13,7 +13,7 @@ A macOS QuickLook extension to beautifully preview Markdown files with full rend
 - **Diagrams**: Mermaid support for flowcharts, sequence diagrams, etc.
 - **Syntax Highlighting**: Code blocks with language-specific highlighting
 - **Emoji**: Full emoji support with `:emoji_name:` syntax
-- **Theme**: Automatic light/dark mode based on system settings
+- **Theme**: Configurable appearance (Light, Dark, or System). Defaults to Light mode for better readability.
 
 ## Quick Start
 

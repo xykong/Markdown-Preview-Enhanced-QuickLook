@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Changed
+- **Appearance**: Changed default appearance mode to **Light** (previously followed system settings).
 - **Installation**: Updated `install.sh` to build `Release` configuration by default and robustly locate the built application in DerivedData.
 - **Host App**: Improved `index.html` resource discovery logic to fallback to multiple directories.
 
@@ -11,6 +12,7 @@
 - **Security**: Added missing entitlements (Network Client, JIT, Printing, Downloads) to support WebView features and stability.
 
 ### Added
+- **Appearance Settings**: Added "View" > "Appearance" menu to switch between Light, Dark, and System modes.
 - **Host App Browser**: The main app now functions as a standalone Markdown viewer/editor (Read-Only mode).
   - Supports opening local `.md` files via Finder or File > Open.
   - Implemented `MarkdownWebView` with `baseUrl` injection for resolving local resources.

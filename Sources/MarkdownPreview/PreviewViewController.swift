@@ -51,6 +51,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         self.view.wantsLayer = true
         self.view.layer?.backgroundColor = NSColor.white.cgColor
         
+        AppearancePreference.shared.apply(to: self.view)
+        
         os_log("🔵 configuring WebView...", log: logger, type: .default)
         
         // Initialize WebView

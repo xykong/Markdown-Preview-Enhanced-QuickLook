@@ -1,10 +1,12 @@
 import SwiftUI
+import AppKit
 import WebKit
 import os.log
 
 struct MarkdownWebView: NSViewRepresentable {
     var content: String
     var fileURL: URL?
+    var appearanceMode: AppearanceMode = .light
     
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -44,6 +46,7 @@ struct MarkdownWebView: NSViewRepresentable {
         #endif
 
         let webView = ResizableWKWebView(frame: .zero, configuration: webConfiguration)
+        webView.appearance = NSAppearance(named: .aqua)
         webView.navigationDelegate = coordinator
         
         var bundleURL: URL?
@@ -67,6 +70,12 @@ struct MarkdownWebView: NSViewRepresentable {
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
+        if let appearance = appearanceMode.nsAppearance {
+            webView.appearance = appearance
+        } else {
+            webView.appearance = nil
+        }
+        
         context.coordinator.render(webView: webView, content: content, fileURL: fileURL)
     }
 
