@@ -3,7 +3,7 @@
 all: app
 
 build_renderer:
-	cd web-renderer && npm install && npm run build
+	cd web-renderer && npm install --no-audit --no-fund --loglevel=warn && npm run build -- --logLevel warn
 
 generate: build_renderer
 	@if ! command -v xcodegen >/dev/null; then \
@@ -14,10 +14,10 @@ generate: build_renderer
 	@n=$$(cat .build_number); \
 	echo "Current Build Number: $$n"; \
 	rm -rf MarkdownPreviewEnhanced.xcodeproj; \
-	MARKETING_VERSION=1.0 CURRENT_PROJECT_VERSION=$$n xcodegen generate
+	MARKETING_VERSION=1.0 CURRENT_PROJECT_VERSION=$$n xcodegen generate --quiet
 
 app: generate
-	xcodebuild -project MarkdownPreviewEnhanced.xcodeproj -scheme Markdown -configuration $(or $(CONFIGURATION),Release) -destination 'platform=macOS' clean build
+	xcodebuild -project MarkdownPreviewEnhanced.xcodeproj -scheme Markdown -configuration $(or $(CONFIGURATION),Release) -destination 'platform=macOS' clean build -quiet
 
 install:
 	./scripts/install.sh
