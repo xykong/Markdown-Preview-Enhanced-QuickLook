@@ -16,6 +16,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     // Category: MarkdownPreview
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "MarkdownPreview")
     
+    private let maxPreviewSizeBytes: UInt64 = 500 * 1024 // 500KB limit
+    
     public override init(nibName nibNameOrNil: NSNib.Name?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         os_log("🔵 init(nibName:bundle:) called", log: logger, type: .debug)
@@ -154,10 +156,37 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         // Update label to show we received the file
         DispatchQueue.main.async {
-            // self.statusLabel.stringValue = "Markdown Preview\nFile: \(url.lastPathComponent)"
             // Read file content and render
             do {
-                let content = try String(contentsOf: url, encoding: .utf8)
+                // Check file size
+                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+                let fileSize = attributes[.size] as? UInt64 ?? 0
+                
+                var content: String
+                
+                if fileSize > self.maxPreviewSizeBytes {
+                    os_log("🟠 File too large (%{public}llu bytes), truncating to %{public}llu bytes", log: self.logger, type: .default, fileSize, self.maxPreviewSizeBytes)
+                    
+                    let fileHandle = try FileHandle(forReadingFrom: url)
+                    defer { try? fileHandle.close() }
+                    
+                    let data = fileHandle.readData(ofLength: Int(self.maxPreviewSizeBytes))
+                    
+                    if var stringContent = String(data: data, encoding: .utf8) {
+                        // Find last newline to avoid breaking line
+                        if let lastNewline = stringContent.lastIndex(of: "\n") {
+                            stringContent = String(stringContent[...lastNewline])
+                        }
+                        
+                        content = stringContent + "\n\n> **Preview truncated for performance. This file is too large to render fully in QuickLook.**"
+                    } else {
+                        // Fallback if encoding fails
+                         content = "> **Error reading file content (Encoding issue).**"
+                    }
+                } else {
+                     content = try String(contentsOf: url, encoding: .utf8)
+                }
+
                 self.pendingMarkdown = content
                 
                 if self.isWebViewLoaded {
@@ -167,7 +196,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 }
             } catch {
                 os_log("🔴 Failed to read file: %{public}@", log: self.logger, type: .error, error.localizedDescription)
-                // self.statusLabel.stringValue = "Error reading file: \(error.localizedDescription)"
             }
         }
         
