@@ -1,24 +1,31 @@
-# Priority 4: Perfect Dark Mode Sync
+# How to Enable Dark Mode Sync (App Groups)
 
-**Status**: Completed
-**Date**: 2026-01-07
+To make the **Main App**'s appearance setting apply to the **QuickLook Extension**, we use **App Groups**.
 
-## Implementation Details
+We have already added the configuration to the code and entitlements files:
+1. `Sources/Shared/AppearancePreference.swift`: Updated to use `UserDefaults(suiteName: "group.com.xykong.Markdown")`.
+2. `*.entitlements`: Added `com.apple.security.application-groups`.
 
-### 1. Web Layer (`web-renderer`)
-- **Combined CSS**: Replaced separate light/dark CSS files for Highlight.js with a single `highlight-adaptive.css` using `@media (prefers-color-scheme: dark)`. This ensures instant theme switching without JS intervention for code blocks.
-- **Theme Awareness**: Updated `window.renderMarkdown` signature to accept a `theme` parameter (`'light' | 'dark' | 'system'`).
-- **Mermaid Sync**: Explicitly sets the Mermaid theme based on the passed `theme` parameter or system preference, preventing "white flash" or mismatched diagrams.
+## ⚠️ Critical Step: Xcode Configuration
 
-### 2. Swift Host (`MarkdownWebView.swift`)
-- **Theme Injection**: Now detects the `WKWebView.effectiveAppearance` and passes an explicit `"theme": "light" | "dark"` value to the JS renderer.
+Since App Groups require a valid provisioning profile from the Apple Developer Portal, you **must** perform these steps manually in Xcode if you change the Bundle ID or Team:
 
-### 3. Swift Extension (`PreviewViewController.swift`)
-- **Theme Injection**: Similarly detects `view.effectiveAppearance` and passes the theme to the renderer during QuickLook.
+1. Open `Markdown.xcodeproj` (generate it first with `make generate`).
+2. Select the project root in the Project Navigator.
+3. Select the **Markdown** (Main App) target -> **Signing & Capabilities**.
+   - Ensure **App Groups** is present.
+   - If there's an error (Red), click the "+" button to register the group `group.com.xykong.Markdown` with your Apple ID.
+4. Select the **MarkdownPreview** (Extension) target -> **Signing & Capabilities**.
+   - Ensure **App Groups** is present.
+   - Ensure the SAME group `group.com.xykong.Markdown` is checked.
 
-## Verification
-- **Build**: Successfully rebuilt web-renderer and macOS app.
-- **Code Check**: Verified `theme` parameter passing in all 3 relevant files using grep.
+## Troubleshooting
 
-## Next Steps
-- Proceed to **Priority 5: Rendering Stability** (Mermaid FOUC) or **Priority 6: State Persistence**.
+- **Setting doesn't sync?** 
+  - Check if both targets have the exact same App Group ID selected.
+  - Clean Build Folder (`Cmd+Shift+K`).
+  - Run `./install.sh` again to re-register the plugin.
+
+- **Build Error: "Provisioning profile doesn't include the App Group"?**
+  - You need to log in to Xcode with an Apple ID (Personal Team is fine).
+  - Xcode should offer a "Fix" or "Register" button. Click it.

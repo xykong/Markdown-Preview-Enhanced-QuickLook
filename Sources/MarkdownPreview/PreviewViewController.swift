@@ -2,6 +2,7 @@ import Cocoa
 import QuickLookUI
 import os.log
 import WebKit
+import SwiftUI
 
 public class PreviewViewController: NSViewController, QLPreviewingController, WKNavigationDelegate, WKScriptMessageHandler {
 
@@ -30,6 +31,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         super.init(coder: coder)
         os_log("🔵 init(coder:) called", log: logger, type: .debug)
     }
+    
+    private var themeButton: NSButton!
     
     public override func loadView() {
         os_log("🔵 loadView called", log: logger, type: .debug)
@@ -65,9 +68,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         let webConfiguration = WKWebViewConfiguration()
         webConfiguration.setURLSchemeHandler(LocalSchemeHandler(), forURLScheme: "local-resource")
         
-        // Enable developer extras for inspection
-        // webConfiguration.preferences.setValue(true, forKey: "developerExtras")
-        
         let userContentController = WKUserContentController()
         userContentController.add(self, name: "logger")
         webConfiguration.userContentController = userContentController
@@ -80,54 +80,91 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         os_log("🔵 WebView initialized and added to view", log: logger, type: .default)
         
+        setupThemeButton()
         
         // Load the HTML template from the bundle
-        // Since we added WebRenderer as a folder reference, it should be in Contents/Resources/WebRenderer
         var bundleURL: URL?
-        
         // Try finding in WebRenderer folder (most likely for folder reference)
         if let url = Bundle(for: type(of: self)).url(forResource: "index", withExtension: "html", subdirectory: "WebRenderer") {
             bundleURL = url
-            os_log("🔵 Found index.html in WebRenderer subdirectory: %{public}@", log: logger, type: .default, url.path)
         } else if let url = Bundle(for: type(of: self)).url(forResource: "index", withExtension: "html", subdirectory: "dist") {
             bundleURL = url
-            os_log("🔵 Found index.html in dist subdirectory: %{public}@", log: logger, type: .default, url.path)
         } else if let url = Bundle(for: type(of: self)).url(forResource: "index", withExtension: "html") {
             bundleURL = url
-            os_log("🔵 Found index.html in root: %{public}@", log: logger, type: .default, url.path)
         }
         
         if let url = bundleURL {
-            // When loading fileURL, we need to allow read access to the directory containing assets
-            // bundleURL points to index.html
-            // The assets are in ./assets/ relative to index.html
-            // So we need read access to the parent directory of index.html
             let dir = url.deletingLastPathComponent()
-            os_log("🔵 Loading HTML from bundle: %{public}@", log: logger, type: .default, url.path)
-            
-            // Critical: Ensure we allow read access to the directory so that relative paths like ./assets/script.js work
             webView.loadFileURL(url, allowingReadAccessTo: dir)
         } else {
-            os_log("🔴 Failed to find index.html in bundle", log: logger, type: .error)
-            
-            // Debug info - list resource path
-            let resourcePath = Bundle(for: type(of: self)).resourcePath ?? "nil"
-            os_log("🔴 Resource path: %{public}@", log: logger, type: .error, resourcePath)
-            
-            webView.loadHTMLString("<html><body style='background: #ffeeee; font-family: system-ui;'><div style='text-align: center; margin-top: 20%;'><h1 style='color:red'>Error</h1><p>Could not load index.html from bundle.</p><p>Resource Path: \(resourcePath)</p></div></body></html>", baseURL: nil)
+            webView.loadHTMLString("<h1>Error: index.html not found</h1>", baseURL: nil)
         }
 
         #if DEBUG
-        // Debug Information Overlay
+        setupDebugLabel()
+        #endif
+    }
+    
+    private func setupThemeButton() {
+        let button = NSButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.bezelStyle = .circular
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.cornerRadius = 15
+        button.target = self
+        button.action = #selector(toggleTheme)
+        
+        self.view.addSubview(button)
+        self.themeButton = button
+        
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 10),
+            button.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -10),
+            button.widthAnchor.constraint(equalToConstant: 30),
+            button.heightAnchor.constraint(equalToConstant: 30)
+        ])
+        
+        updateThemeButtonState()
+    }
+    
+    @objc private func toggleTheme() {
+        let current = AppearancePreference.shared.currentMode
+        let newMode: AppearanceMode = (current == .dark) ? .light : .dark
+        
+        AppearancePreference.shared.currentMode = newMode
+        AppearancePreference.shared.apply(to: self.view)
+        
+        updateThemeButtonState()
+        
+        if isWebViewLoaded {
+            renderPendingMarkdown()
+        }
+    }
+    
+    private func updateThemeButtonState() {
+        let isDark = AppearancePreference.shared.currentMode == .dark
+        let iconName = isDark ? "sun.max.fill" : "moon.fill"
+        let iconColor = isDark ? NSColor.yellow : NSColor.darkGray
+        
+        if let image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Toggle Theme") {
+            themeButton.image = image
+            themeButton.contentTintColor = iconColor
+        }
+    }
+    
+    #if DEBUG
+    private func setupDebugLabel() {
         let debugInfo = Bundle(for: type(of: self)).infoDictionary
         let version = debugInfo?["CFBundleShortVersionString"] as? String ?? "Unknown"
         let build = debugInfo?["CFBundleVersion"] as? String ?? "Unknown"
         
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
+        dateFormatter.dateFormat = "HH:mm"
         let now = dateFormatter.string(from: Date())
         
-        let debugLabel = NSTextField(labelWithString: "DEBUG v\(version) (\(build)) | Run: \(now)")
+        let debugLabel = NSTextField(labelWithString: "v\(version)(\(build)) \(now)")
         debugLabel.font = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
         debugLabel.textColor = NSColor.white
         debugLabel.drawsBackground = true
@@ -138,71 +175,56 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         NSLayoutConstraint.activate([
             debugLabel.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 5),
-            debugLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -5)
+            debugLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 5)
         ])
         
-        // Bring debug label to front
         self.view.addSubview(debugLabel, positioned: .above, relativeTo: webView)
-        #endif
     }
+    #endif
 
     public func preparePreviewOfFile(at url: URL, completionHandler handler: @escaping (Error?) -> Void) {
-        
         os_log("🔵 preparePreviewOfFile called for: %{public}@", log: logger, type: .default, url.path)
         self.currentURL = url
         
-        // Update label to show we received the file
         DispatchQueue.main.async {
-            // Read file content and render
+            AppearancePreference.shared.apply(to: self.view)
+            self.updateThemeButtonState()
+            
             do {
-                // Check file size
                 let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
                 let fileSize = attributes[.size] as? UInt64 ?? 0
                 
                 var content: String
-                
                 if fileSize > self.maxPreviewSizeBytes {
-                    os_log("🟠 File too large (%{public}llu bytes), truncating to %{public}llu bytes", log: self.logger, type: .default, fileSize, self.maxPreviewSizeBytes)
-                    
                     let fileHandle = try FileHandle(forReadingFrom: url)
                     defer { try? fileHandle.close() }
-                    
                     let data = fileHandle.readData(ofLength: Int(self.maxPreviewSizeBytes))
-                    
                     if var stringContent = String(data: data, encoding: .utf8) {
-                        // Find last newline to avoid breaking line
                         if let lastNewline = stringContent.lastIndex(of: "\n") {
                             stringContent = String(stringContent[...lastNewline])
                         }
-                        
-                        content = stringContent + "\n\n> **Preview truncated for performance. This file is too large to render fully in QuickLook.**"
+                        content = stringContent + "\n\n> **Preview truncated.**"
                     } else {
-                        // Fallback if encoding fails
-                         content = "> **Error reading file content (Encoding issue).**"
+                        content = "> **Encoding Error**"
                     }
                 } else {
-                     content = try String(contentsOf: url, encoding: .utf8)
+                    content = try String(contentsOf: url, encoding: .utf8)
                 }
-
-                self.pendingMarkdown = content
                 
+                self.pendingMarkdown = content
                 if self.isWebViewLoaded {
                     self.renderPendingMarkdown()
-                } else {
-                    os_log("🔵 WebView not yet loaded, queueing markdown", log: self.logger, type: .debug)
                 }
             } catch {
                 os_log("🔴 Failed to read file: %{public}@", log: self.logger, type: .error, error.localizedDescription)
             }
         }
-        
         handler(nil)
     }
     
     private func renderPendingMarkdown() {
         guard let content = pendingMarkdown else { return }
         
-        // Only render if we have completed the handshake
         guard isWebViewLoaded else {
             os_log("🟡 renderPendingMarkdown called but WebView not ready (handshake pending), queuing...", log: logger, type: .debug)
             return
@@ -240,7 +262,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             return
         }
         
-        // Directly call renderMarkdown since we know it exists (handshake complete)
         let callJs = """
         try {
             window.renderMarkdown(\(safeContentArg), \(optionsJson));
@@ -288,7 +309,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         if message.name == "logger", let body = message.body as? String {
             os_log("🟢 JS Log: %{public}@", log: logger, type: .debug, body)
             
-            // Check for Handshake
             if body == "rendererReady" {
                 os_log("🟢 Renderer Handshake Received!", log: logger, type: .default)
                 cancelHandshakeTimeout()
@@ -313,7 +333,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             if !self.isWebViewLoaded {
                 os_log("🔴 Renderer Handshake Timeout (%{public}.1fs)! Showing non-destructive error.", log: self.logger, type: .error, self.handshakeTimeoutInterval)
                 
-                // Non-destructive error UI: Update #loading-status text or show overlay
                 let js = """
                 (function() {
                     var status = document.getElementById('loading-status');
@@ -321,7 +340,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                         status.textContent = 'Renderer timed out. Please retry.';
                         status.style.color = 'red';
                     } else {
-                        // Create overlay if status is gone
                         var d = document.createElement('div');
                         d.style.position = 'fixed';
                         d.style.top = '10px';

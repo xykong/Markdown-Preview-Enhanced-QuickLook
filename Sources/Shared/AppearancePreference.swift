@@ -30,17 +30,35 @@ public class AppearancePreference: ObservableObject {
     public static let shared = AppearancePreference()
     
     // Key for UserDefaults
-    // Note: To share between App and Extension, we technically need App Groups.
-    // However, without App Groups, they will have separate storages.
-    // For now, we will use standard UserDefaults, but if App Groups are enabled
-    // in the future, we should switch to `UserDefaults(suiteName: "group.com.xykong.Markdown")`.
     private let key = "preferredAppearanceMode"
     
-    // We use a property wrapper or direct access. simpler is direct access.
-    @AppStorage("preferredAppearanceMode")
-    public var currentMode: AppearanceMode = .light // Default to Light as requested
+    // The App Group Identifier
+    // IMPORTANT: You must enable "App Groups" in Xcode Signing & Capabilities for BOTH targets
+    // and add "group.com.xykong.Markdown" (or your own ID) to the list.
+    public static let appGroupIdentifier = "group.com.xykong.Markdown"
     
-    public init() {}
+    // Use UserDefaults directly instead of @AppStorage to support conditional App Group
+    public var currentMode: AppearanceMode {
+        get {
+            let raw = store.string(forKey: key) ?? AppearanceMode.light.rawValue
+            return AppearanceMode(rawValue: raw) ?? .light
+        }
+        set {
+            objectWillChange.send()
+            store.set(newValue.rawValue, forKey: key)
+        }
+    }
+    
+    private let store: UserDefaults
+    
+    public init() {
+        // Try to load from App Group, fallback to standard
+        if let sharedStore = UserDefaults(suiteName: AppearancePreference.appGroupIdentifier) {
+            self.store = sharedStore
+        } else {
+            self.store = UserDefaults.standard
+        }
+    }
     
     // Helper to apply appearance to a view
     public func apply(to view: NSView) {

@@ -29,6 +29,12 @@
     <!-- Allow access to downloads (common read location) -->
     <key>com.apple.security.files.downloads.read-only</key>
     <true/>
+
+    <!-- App Groups for sharing settings with Main App -->
+    <key>com.apple.security.application-groups</key>
+    <array>
+        <string>group.com.xykong.Markdown</string>
+    </array>
 </dict>
 </plist>
 
