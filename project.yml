@@ -73,4 +73,22 @@ targets:
       - Sources/Markdown/ResourceLoader.swift
     settings:
       GENERATE_INFOPLIST_FILE: YES
-      PRODUCT_BUNDLE_IDENTIFIER: com.xykong.MarkdownTests
+      PRODUCT_BUNDLE_IDENTIFIER: com.xykong.Markdown.Tests
+
+schemes:
+  Markdown:
+    build:
+      targets:
+        Markdown: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - name: MarkdownTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
