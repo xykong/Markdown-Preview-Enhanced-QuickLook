@@ -1,21 +1,16 @@
 import { defineConfig } from 'vite';
+import { viteSingleFile } from 'vite-plugin-singlefile';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [],
+  plugins: [viteSingleFile()],
   base: './', // Use relative paths for assets
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
     emptyOutDir: true,
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          mermaid: ['mermaid']
-        }
-      }
-    }
+    assetsInlineLimit: 100000000,
   },
   resolve: {
     alias: {

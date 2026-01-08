@@ -11,6 +11,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     var currentURL: URL?
     var isWebViewLoaded = false
     
+    private var handshakeWorkItem: DispatchWorkItem?
+    private let handshakeTimeoutInterval: TimeInterval = 10.0
+    
     // Create a custom log object for easy filtering in Console.app
     // Subsystem: com.markdownquicklook.app
     // Category: MarkdownPreview
@@ -112,18 +115,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             os_log("🔴 Resource path: %{public}@", log: logger, type: .error, resourcePath)
             
             webView.loadHTMLString("<html><body style='background: #ffeeee; font-family: system-ui;'><div style='text-align: center; margin-top: 20%;'><h1 style='color:red'>Error</h1><p>Could not load index.html from bundle.</p><p>Resource Path: \(resourcePath)</p></div></body></html>", baseURL: nil)
-        }
-        
-        // Debug timeout check for handshake
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) { [weak self] in
-            guard let self = self else { return }
-            os_log("🔵 5s Check - isWebViewLoaded: %{public}@", log: self.logger, type: .debug, self.isWebViewLoaded ? "true" : "false")
-            if !self.isWebViewLoaded {
-                os_log("🔴 Renderer Handshake Timeout! Showing error.", log: self.logger, type: .error)
-                // Force load state to allow retry or at least show failure
-                // We could inject an error message into the webview here if we wanted
-                self.webView.evaluateJavaScript("document.body.innerHTML = '<div style=\"padding: 20px; color: red\">Renderer timed out. Please check console logs.</div>'") { _, _ in }
-            }
         }
 
         #if DEBUG
@@ -272,18 +263,22 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         os_log("🔵 WebView didFinish navigation (waiting for handshake)", log: logger, type: .debug)
+        startHandshakeTimeout()
     }
     
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
         os_log("🔴 WebView didFail navigation: %{public}@", log: logger, type: .error, error.localizedDescription)
+        cancelHandshakeTimeout()
     }
     
     public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         os_log("🔴 WebView didFailProvisionalNavigation: %{public}@", log: logger, type: .error, error.localizedDescription)
+        cancelHandshakeTimeout()
     }
 
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         os_log("🔴 WebContent process terminated! Attempting reload...", log: logger, type: .error)
+        cancelHandshakeTimeout()
         webView.reload()
     }
     
@@ -296,11 +291,69 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             // Check for Handshake
             if body == "rendererReady" {
                 os_log("🟢 Renderer Handshake Received!", log: logger, type: .default)
+                cancelHandshakeTimeout()
+                
                 if !isWebViewLoaded {
                     isWebViewLoaded = true
                     renderPendingMarkdown()
                 }
             }
         }
+    }
+    
+    // MARK: - Handshake Timeout Management
+    
+    private func startHandshakeTimeout() {
+        cancelHandshakeTimeout()
+        
+        if isWebViewLoaded { return }
+        
+        let item = DispatchWorkItem { [weak self] in
+            guard let self = self else { return }
+            if !self.isWebViewLoaded {
+                os_log("🔴 Renderer Handshake Timeout (%{public}.1fs)! Showing non-destructive error.", log: self.logger, type: .error, self.handshakeTimeoutInterval)
+                
+                // Non-destructive error UI: Update #loading-status text or show overlay
+                let js = """
+                (function() {
+                    var status = document.getElementById('loading-status');
+                    if (status) {
+                        status.textContent = 'Renderer timed out. Please retry.';
+                        status.style.color = 'red';
+                    } else {
+                        // Create overlay if status is gone
+                        var d = document.createElement('div');
+                        d.style.position = 'fixed';
+                        d.style.top = '10px';
+                        d.style.right = '10px';
+                        d.style.background = 'rgba(255,0,0,0.8)';
+                        d.style.color = 'white';
+                        d.style.padding = '5px 10px';
+                        d.style.borderRadius = '4px';
+                        d.style.zIndex = '9999';
+                        d.innerText = 'Renderer Timeout';
+                        document.body.appendChild(d);
+                    }
+                })();
+                """
+                self.webView.evaluateJavaScript(js, completionHandler: nil)
+            }
+        }
+        
+        self.handshakeWorkItem = item
+        DispatchQueue.main.asyncAfter(deadline: .now() + handshakeTimeoutInterval, execute: item)
+        os_log("🔵 Started handshake timer (%.1fs)", log: logger, type: .debug, handshakeTimeoutInterval)
+    }
+    
+    private func cancelHandshakeTimeout() {
+        if let item = handshakeWorkItem {
+            item.cancel()
+            handshakeWorkItem = nil
+            os_log("🔵 Cancelled handshake timer", log: logger, type: .debug)
+        }
+    }
+    
+    deinit {
+        handshakeWorkItem?.cancel()
     }
 }
