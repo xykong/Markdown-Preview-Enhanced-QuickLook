@@ -1,7 +1,18 @@
 import SwiftUI
 
+class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        // Check for silent registration flag used by installer
+        if CommandLine.arguments.contains("--register-only") {
+            NSApplication.shared.terminate(nil)
+        }
+    }
+}
+
 @main
 struct MarkdownApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     // Use the shared preference
     @ObservedObject var preference = AppearancePreference.shared
     
