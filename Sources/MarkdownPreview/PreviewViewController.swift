@@ -471,6 +471,55 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         os_log("🔴 WebView didFailProvisionalNavigation: %{public}@", log: logger, type: .error, error.localizedDescription)
         cancelHandshakeTimeout()
     }
+    
+    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        guard navigationAction.navigationType == .linkActivated,
+              let url = navigationAction.request.url else {
+            decisionHandler(.allow)
+            return
+        }
+        
+        os_log("🔵 Link clicked: %{public}@", log: logger, type: .debug, url.absoluteString)
+        
+        if let fragment = url.fragment, !fragment.isEmpty {
+            var urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+            urlComponents?.fragment = nil
+            let targetPath = urlComponents?.url?.absoluteString ?? ""
+            
+            var currentComponents = webView.url.flatMap { URLComponents(url: $0, resolvingAgainstBaseURL: false) }
+            currentComponents?.fragment = nil
+            let currentPath = currentComponents?.url?.absoluteString ?? ""
+            
+            let isSameDocument = targetPath.isEmpty || currentPath == targetPath || url.scheme == nil
+            
+            if isSameDocument {
+                os_log("🔵 Scrolling to anchor: #%{public}@", log: logger, type: .debug, fragment)
+                let escapedFragment = fragment.replacingOccurrences(of: "'", with: "\\'")
+                let js = "document.getElementById('\(escapedFragment)')?.scrollIntoView({behavior:'smooth',block:'start'})"
+                webView.evaluateJavaScript(js, completionHandler: nil)
+                decisionHandler(.cancel)
+                return
+            }
+        }
+        
+        // Handle external links (http/https) - open in default browser
+        if url.scheme == "http" || url.scheme == "https" {
+            os_log("🔵 Opening external URL in browser: %{public}@", log: logger, type: .debug, url.absoluteString)
+            NSWorkspace.shared.open(url)
+            decisionHandler(.cancel)
+            return
+        }
+        
+        // Handle local markdown file links - open with QuickLook or default app
+        if url.isFileURL && url.pathExtension.lowercased() == "md" {
+            os_log("🔵 Opening local markdown file: %{public}@", log: logger, type: .debug, url.path)
+            NSWorkspace.shared.open(url)
+            decisionHandler(.cancel)
+            return
+        }
+        
+        decisionHandler(.allow)
+    }
 
     public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
         os_log("🔴 WebContent process terminated! Attempting reload...", log: logger, type: .error)

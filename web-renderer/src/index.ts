@@ -54,6 +54,8 @@ import mark from 'markdown-it-mark';
 import sub from 'markdown-it-sub';
 // @ts-ignore
 import sup from 'markdown-it-sup';
+// @ts-ignore
+import anchor from 'markdown-it-anchor';
 
 // Configure MarkdownIt
 let md: MarkdownIt;
@@ -84,6 +86,10 @@ try {
     md.use(mark);
     md.use(sub);
     md.use(sup);
+    md.use(anchor, {
+        permalink: false,
+        slugify: (s: string) => s.toLowerCase().replace(/[^\w\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, '')
+    });
 
     const defaultImageRender = md.renderer.rules.image || function(tokens, idx, options, env, self) {
         return self.renderToken(tokens, idx, options);
@@ -275,5 +281,29 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
     }
 };
 
-// Notify Swift that the renderer is ready
+function handleAnchorClick(e: Event) {
+    const target = e.target as HTMLElement;
+    const anchor = target.closest('a');
+    if (!anchor) return;
+    
+    const href = anchor.getAttribute('href');
+    if (!href) return;
+    
+    if (href.startsWith('#')) {
+        e.preventDefault();
+        e.stopPropagation();
+        const targetId = decodeURIComponent(href.substring(1));
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    } else if (href.startsWith('http://') || href.startsWith('https://')) {
+        e.preventDefault();
+        e.stopPropagation();
+        logToSwift("openExternalURL:" + href);
+    }
+}
+
+document.addEventListener('click', handleAnchorClick, { capture: true, passive: false });
+
 logToSwift("rendererReady");

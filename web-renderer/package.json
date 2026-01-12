@@ -15,6 +15,7 @@
     "highlight.js": "^11.7.0",
     "katex": "^0.16.4",
     "markdown-it": "^13.0.1",
+    "markdown-it-anchor": "^9.2.0",
     "markdown-it-emoji": "^2.0.2",
     "markdown-it-footnote": "^3.0.3",
     "markdown-it-mark": "^3.0.1",
