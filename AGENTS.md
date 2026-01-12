@@ -27,12 +27,15 @@ macOS QuickLook extension for Markdown files. Hybrid architecture: Native Swift 
 | **Host UI** | `Sources/Markdown/MarkdownApp.swift` | Minimal SwiftUI container. |
 | **Rendering** | `web-renderer/src/index.ts` | Markdown parsing (see subdir AGENTS.md). |
 | **Rules** | `.clinerules` | TDD & Doc-first requirements. |
+| **Homebrew Cask** | `../homebrew-tap/Casks/markdown-preview-enhanced.rb` | Update version & SHA256 after each release. |
 
 ## ARCHITECTURE & PATTERNS
 - **Hybrid Bridge**: Swift loads `index.html`, calls `window.renderMarkdown(content)`. JS logs back via `window.webkit.messageHandlers.logger`.
 - **Ephemeral Project**: `.xcodeproj` is ignored. Always use `xcodegen` (`make generate`).
-- **Manual Versioning**: `.build_number` file tracked by `scripts/`.
+- **Versioning**: `.version` file stores base version (e.g., `1.2`). Full version = `{base}.{git_commit_count}`.
 - **Sandbox**: App Sandbox enabled. Read-only access to files.
+- **Release Flow**: `make release [major|minor|patch]` → Updates `.version`, `CHANGELOG.md`, builds DMG, creates GitHub release.
+- **Homebrew Distribution**: After release, manually update `../homebrew-tap/Casks/markdown-preview-enhanced.rb` with new version & SHA256.
 
 ## CONVENTIONS
 - **TDD**: Write tests/metrics *before* implementation (see `.clinerules`).
