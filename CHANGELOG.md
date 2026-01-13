@@ -5,7 +5,7 @@
 ## [1.3.73] - 2026-01-13
 
 ### Fixed
-- **QuickLook**: 修复双击 Markdown 文件时意外触发"使用默认应用打开"的问题。
+- **QuickLook**: 修复双击 Markdown 文件时意外触发"使用默认应用打开"的问题。（感谢 [@sxmad](https://github.com/sxmad) 的贡献 [#2](https://github.com/xykong/markdown-quicklook/pull/2)）
   - 通过自定义 `InteractiveWebView` 子类拦截鼠标事件，防止事件冒泡到 QuickLook 宿主。
   - 添加 `NSClickGestureRecognizer` 拦截双击手势，确保 WebView 内的交互（如文本选择）不受影响。
   - 实现 `acceptsFirstMouse(for:)` 方法，允许 WebView 直接响应首次点击事件。
