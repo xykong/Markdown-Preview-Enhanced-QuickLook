@@ -4,10 +4,26 @@ import os.log
 import WebKit
 import SwiftUI
 
+// Subclass WKWebView to intercept mouse events and prevent them from bubbling up 
+// to the QuickLook host, which would otherwise trigger "Open with default app".
+class InteractiveWebView: WKWebView {
+    override func mouseDown(with event: NSEvent) {
+        // Call super to ensure text selection and other web interactions still work.
+        super.mouseDown(with: event)
+        
+        // In some cases, we might need to ensure the event doesn't propagate further.
+        // However, WKWebView usually handles its own event loop.
+    }
+    
+    override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
+        return true
+    }
+}
+
 public class PreviewViewController: NSViewController, QLPreviewingController, WKNavigationDelegate, WKScriptMessageHandler {
 
     var statusLabel: NSTextField!
-    var webView: WKWebView!
+    var webView: InteractiveWebView!
     var pendingMarkdown: String?
     var currentURL: URL?
     var isWebViewLoaded = false
@@ -150,8 +166,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         userContentController.add(self, name: "logger")
         webConfiguration.userContentController = userContentController
         
-        os_log("🔵 initializing WKWebView instance...", log: logger, type: .default)
-        webView = WKWebView(frame: self.view.bounds, configuration: webConfiguration)
+        os_log("🔵 initializing InteractiveWebView instance...", log: logger, type: .default)
+        webView = InteractiveWebView(frame: self.view.bounds, configuration: webConfiguration)
         webView.autoresizingMask = [.width, .height]
         webView.navigationDelegate = self
         self.view.addSubview(webView)
@@ -176,11 +192,20 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             webView.loadHTMLString("<h1>Error: index.html not found</h1>", baseURL: nil)
         }
 
+        let doubleClickGesture = NSClickGestureRecognizer(target: self, action: #selector(handleDoubleClick(_:)))
+        doubleClickGesture.numberOfClicksRequired = 2
+        doubleClickGesture.delaysPrimaryMouseButtonEvents = false
+        webView.addGestureRecognizer(doubleClickGesture)
+
         #if DEBUG
         setupDebugLabel()
         #endif
         
         startResizeTracking()
+    }
+    
+    @objc func handleDoubleClick(_ gesture: NSClickGestureRecognizer) {
+        os_log("🔵 Intercepted double click gesture", log: logger, type: .debug)
     }
     
     public override func viewDidLayout() {
