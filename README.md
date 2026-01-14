@@ -15,7 +15,7 @@ A macOS QuickLook extension to beautifully preview Markdown files with full rend
 - **Emoji**: Full emoji support with `:emoji_name:` syntax
 - **Table of Contents**: Auto-generated, collapsible navigation panel with smart highlighting
 - **Theme**: Configurable appearance (Light, Dark, or System). Defaults to Light mode for better readability.
-- **Zoom**: Keyboard shortcuts (`Cmd +/-/0`) and scroll wheel zoom (0.5x - 3.0x) with persistence
+- **Zoom**: Keyboard shortcuts (`Cmd +/-/0`), scroll wheel zoom (hold `Cmd` and scroll), and pinch gesture (two-finger pinch) with persistence
 
 ## Quick Start
 

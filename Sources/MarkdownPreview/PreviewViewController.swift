@@ -246,6 +246,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         doubleClickGesture.delaysPrimaryMouseButtonEvents = false
         webView.addGestureRecognizer(doubleClickGesture)
         
+        let pinchGesture = NSMagnificationGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
+        webView.addGestureRecognizer(pinchGesture)
+        
         DispatchQueue.main.async {
             self.view.window?.makeFirstResponder(self.webView)
         }
@@ -261,6 +264,19 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     
     @objc func handleDoubleClick(_ gesture: NSClickGestureRecognizer) {
         os_log("🔵 Intercepted double click gesture", log: logger, type: .debug)
+    }
+    
+    @objc func handlePinch(_ gesture: NSMagnificationGestureRecognizer) {
+        guard gesture.state == .changed || gesture.state == .ended else { return }
+        
+        let magnification = gesture.magnification
+        let zoomDelta = magnification * currentZoomLevel
+        
+        if gesture.state == .changed {
+            currentZoomLevel = max(0.5, min(3.0, currentZoomLevel + zoomDelta))
+            applyZoom()
+            gesture.magnification = 0
+        }
     }
     
     public override func viewDidLayout() {
