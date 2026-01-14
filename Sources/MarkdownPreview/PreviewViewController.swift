@@ -246,8 +246,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         doubleClickGesture.delaysPrimaryMouseButtonEvents = false
         webView.addGestureRecognizer(doubleClickGesture)
         
-        let pinchGesture = NSMagnificationGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
-        webView.addGestureRecognizer(pinchGesture)
+        webView.allowsMagnification = true
+        webView.magnification = currentZoomLevel
+        os_log("🔵 Enabled WKWebView magnification, initial level: %.2f", log: logger, type: .default, currentZoomLevel)
         
         DispatchQueue.main.async {
             self.view.window?.makeFirstResponder(self.webView)
@@ -266,18 +267,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         os_log("🔵 Intercepted double click gesture", log: logger, type: .debug)
     }
     
-    @objc func handlePinch(_ gesture: NSMagnificationGestureRecognizer) {
-        guard gesture.state == .changed || gesture.state == .ended else { return }
-        
-        let magnification = gesture.magnification
-        let zoomDelta = magnification * currentZoomLevel
-        
-        if gesture.state == .changed {
-            currentZoomLevel = max(0.5, min(3.0, currentZoomLevel + zoomDelta))
-            applyZoom()
-            gesture.magnification = 0
-        }
-    }
     
     public override func viewDidLayout() {
         super.viewDidLayout()
@@ -416,22 +405,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     }
     
     private func applyZoom() {
-        guard isWebViewLoaded else { return }
-        
-        let js = """
-        if (window.setZoomLevel) {
-            window.setZoomLevel(\(currentZoomLevel));
-        }
-        """
-        
-        webView.evaluateJavaScript(js) { [weak self] (_, error) in
-            if let error = error {
-                os_log("🔴 Failed to apply zoom: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
-            } else {
-                os_log("🔵 Zoom applied: %.2f", log: self?.logger ?? .default, type: .debug, self?.currentZoomLevel ?? 1.0)
-                AppearancePreference.shared.zoomLevel = self?.currentZoomLevel ?? 1.0
-            }
-        }
+        webView.magnification = currentZoomLevel
+        os_log("🔵 Zoom applied via magnification: %.2f", log: logger, type: .debug, currentZoomLevel)
+        AppearancePreference.shared.zoomLevel = currentZoomLevel
     }
     
     private func handleKeyDownEvent(_ event: NSEvent) -> NSEvent? {

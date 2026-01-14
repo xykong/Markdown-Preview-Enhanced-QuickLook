@@ -236,38 +236,9 @@ class ResizableWKWebView: WKWebView {
         
         currentZoomLevel = AppearancePreference.shared.zoomLevel
         
-        let pinchGesture = NSMagnificationGestureRecognizer(target: self, action: #selector(handlePinch(_:)))
-        self.addGestureRecognizer(pinchGesture)
-    }
-    
-    @objc private func handlePinch(_ gesture: NSMagnificationGestureRecognizer) {
-        guard gesture.state == .changed || gesture.state == .ended else { return }
-        
-        let magnification = gesture.magnification
-        let zoomDelta = magnification * currentZoomLevel
-        
-        if gesture.state == .changed {
-            currentZoomLevel = max(0.5, min(3.0, currentZoomLevel + zoomDelta))
-            applyZoom()
-            gesture.magnification = 0
-        }
-    }
-    
-    private func applyZoom() {
-        let js = """
-        if (window.setZoomLevel) {
-            window.setZoomLevel(\(currentZoomLevel));
-        }
-        """
-        
-        self.evaluateJavaScript(js) { [weak self] (_, error) in
-            if let error = error {
-                os_log("🔴 Failed to apply zoom: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
-            } else {
-                os_log("🔵 Zoom applied: %.2f", log: self?.logger ?? .default, type: .debug, self?.currentZoomLevel ?? 1.0)
-                AppearancePreference.shared.zoomLevel = self?.currentZoomLevel ?? 1.0
-            }
-        }
+        self.allowsMagnification = true
+        self.magnification = currentZoomLevel
+        os_log("🔵 Enabled WKWebView magnification, initial level: %.2f", log: logger, type: .default, currentZoomLevel)
     }
 }
 
