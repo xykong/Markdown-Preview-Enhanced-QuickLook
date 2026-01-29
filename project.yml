@@ -52,6 +52,8 @@ targets:
     sources:
       - Tests/MarkdownTests
       - Sources/Markdown/ResourceLoader.swift
+      - Sources/MarkdownPreview
+      - Sources/Shared
     settings:
       GENERATE_INFOPLIST_FILE: YES
       PRODUCT_BUNDLE_IDENTIFIER: com.xykong.Markdown.Tests

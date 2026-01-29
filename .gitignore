@@ -24,3 +24,4 @@ xcuserdata/
 # Debug/Development Files
 *.sh
 check-keyboard.html
+.sisyphus/

@@ -66,7 +66,45 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     var currentURL: URL?
     var isWebViewLoaded = false
     var currentZoomLevel: Double = 1.0
-    
+
+    // MARK: - Size Persistence Constants
+
+    /// Minimum window size that should be persisted.
+    /// Sizes below this threshold are considered "near-minimum accidental sizes"
+    /// and will be rejected during both persistence and restore.
+    ///
+    /// Chosen threshold: 320x240
+    /// - Rationale: This is a safe minimum that allows readable content display
+    /// - Below this, the preview would be too small to be useful
+    /// - Significantly above the previous 200x200 threshold that allowed 203x269
+    public static let minimumPersistedWindowSize = CGSize(width: 320, height: 240)
+
+    // MARK: - Size Validation Helpers (Testable)
+
+    /// Determines whether a size is valid for persistence.
+    /// - Parameter size: The window size to validate
+    /// - Returns: `true` if the size meets minimum thresholds, `false` otherwise
+    public static func isSizeValidForPersistence(_ size: CGSize) -> Bool {
+        return size.width >= minimumPersistedWindowSize.width &&
+               size.height >= minimumPersistedWindowSize.height
+    }
+
+    /// Clamps a persisted size for restore, rejecting obviously-bad sizes.
+    /// - Parameter size: The persisted size from UserDefaults (may be nil)
+    /// - Returns: The clamped size, or `nil` if the size should be ignored
+    public static func clampPersistedSizeForRestore(_ size: CGSize?) -> CGSize? {
+        guard let size = size else { return nil }
+        return isSizeValidForPersistence(size) ? size : nil
+    }
+
+    /// Determines whether an invalid persisted size should be auto-cleared.
+    /// - Parameter size: The persisted size from UserDefaults (may be nil)
+    /// - Returns: `true` if the size exists but is invalid and should be cleared, `false` otherwise
+    public static func shouldClearInvalidPersistedSize(_ size: CGSize?) -> Bool {
+        guard let size = size else { return false }
+        return !isSizeValidForPersistence(size)
+    }
+
     public override var acceptsFirstResponder: Bool {
         return true
     }
@@ -77,8 +115,15 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     private var saveSizeWorkItem: DispatchWorkItem?
     private var resizeTrackingWorkItem: DispatchWorkItem?
     private var currentSize: CGSize?
-    
+
     private var isResizeTrackingEnabled = false
+    private var didUserResizeSinceOpen = false
+
+    // Track which window we saw a live resize start event for.
+    // This prevents spurious saves from programmatic resizes.
+    // We only persist size if we observe both willStartLiveResize AND
+    // didEndLiveResize for the SAME window.
+    private var sawLiveResizeStartForWindow: ObjectIdentifier?
     
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "MarkdownPreview")
     
@@ -161,33 +206,42 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     
     public override func loadView() {
         os_log("🔵 loadView called", log: logger, type: .debug)
-        
+
         let screen = NSScreen.main ?? NSScreen.screens.first
         let screenFrame = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1200, height: 800)
-        
+
         let width = screenFrame.width * 0.5
         let height = screenFrame.height * 0.8
-        
+
         os_log("🔵 Setting preferred size to: %.0f x %.0f", log: logger, type: .debug, width, height)
 
         self.view = NSView(frame: NSRect(x: 0, y: 0, width: width, height: height))
         self.view.autoresizingMask = [.width, .height]
-        
+
         logScreenEnvironment(context: "loadView-BEFORE")
-        
-        if let savedSize = AppearancePreference.shared.quickLookSize {
-             let targetScreen = getTargetScreen()
-             let constrainedSize = constrainSizeToScreen(savedSize, screen: targetScreen)
-             os_log("🔵 Restoring saved size: %.0f x %.0f (constrained to %.0f x %.0f)",
-                    log: logger, type: .debug,
-                    savedSize.width, savedSize.height,
-                    constrainedSize.width, constrainedSize.height)
-             self.preferredContentSize = NSSize(width: constrainedSize.width, height: constrainedSize.height)
-        } else {
-             self.preferredContentSize = NSSize(width: width, height: height)
+
+        if Self.shouldClearInvalidPersistedSize(AppearancePreference.shared.quickLookSize) {
+            os_log("🔵 Auto-clearing invalid persisted size: %.0f x %.0f",
+                   log: logger, type: .default,
+                   AppearancePreference.shared.quickLookSize?.width ?? 0,
+                   AppearancePreference.shared.quickLookSize?.height ?? 0)
+            AppearancePreference.shared.quickLookSize = nil
         }
-        
-        logScreenEnvironment(context: "loadView-AFTER")
+
+        if let clampedSize = Self.clampPersistedSizeForRestore(AppearancePreference.shared.quickLookSize) {
+            let targetScreen = getTargetScreen()
+            let constrainedSize = constrainSizeToScreen(clampedSize, screen: targetScreen)
+            os_log("🔵 Restoring saved size: %.0f x %.0f (constrained to %.0f x %.0f)",
+                   log: logger, type: .debug,
+                   clampedSize.width, clampedSize.height,
+                   constrainedSize.width, constrainedSize.height)
+            self.preferredContentSize = NSSize(width: constrainedSize.width, height: constrainedSize.height)
+        } else {
+            os_log("🔵 Using default size (saved size was nil or too small)", log: logger, type: .debug)
+            self.preferredContentSize = NSSize(width: width, height: height)
+        }
+
+            logScreenEnvironment(context: "loadView-AFTER")
     }
 
     public override func viewDidLoad() {
@@ -199,6 +253,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         self.view.layer?.backgroundColor = NSColor.white.cgColor
         
         AppearancePreference.shared.apply(to: self.view)
+        
+        setupWindowResizeObservers()
         
         NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             os_log("🔵 Local event monitor triggered", log: self?.logger ?? .default, type: .debug)
@@ -288,16 +344,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         }
         
         self.currentSize = size
-        
-        saveSizeWorkItem?.cancel()
-        let item = DispatchWorkItem(block: { [weak self] in
-            guard let self = self else { return }
-            os_log("📊 [viewDidLayout-SAVE] Saving size: %.0fx%.0f", log: self.logger, type: .default, size.width, size.height)
-            self.logScreenEnvironment(context: "viewDidLayout-SAVE")
-            AppearancePreference.shared.quickLookSize = size
-        })
-        saveSizeWorkItem = item
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: item)
     }
     
     public override func viewWillAppear() {
@@ -319,19 +365,24 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     public override func viewWillDisappear() {
         super.viewWillDisappear()
         logScreenEnvironment(context: "viewWillDisappear")
-        
-        os_log("📊 [viewWillDisappear] trackingEnabled=%{public}@ currentSize=%{public}@",
+
+        os_log("📊 [viewWillDisappear] trackingEnabled=%{public}@ didUserResize=%{public}@ currentSize=%{public}@",
                log: logger, type: .default,
                isResizeTrackingEnabled ? "YES" : "NO",
+               didUserResizeSinceOpen ? "YES" : "NO",
                currentSize != nil ? "\(currentSize!.width)x\(currentSize!.height)" : "nil")
-        
-        if isResizeTrackingEnabled, let size = self.currentSize {
-            os_log("📊 [viewWillDisappear] Saving final size: %.0fx%.0f", log: logger, type: .default, size.width, size.height)
+
+        if didUserResizeSinceOpen, let size = self.currentSize, Self.isSizeValidForPersistence(size) {
+            os_log("📊 [viewWillDisappear] Saving final size after user resize: %.0fx%.0f", log: logger, type: .default, size.width, size.height)
             AppearancePreference.shared.quickLookSize = size
+        } else {
+            os_log("📊 [viewWillDisappear] Skipping save - no user resize detected or size too small", log: logger, type: .default)
         }
-        
+
         os_log("📊 [viewWillDisappear] Disabling tracking NOW", log: logger, type: .default)
         isResizeTrackingEnabled = false
+        didUserResizeSinceOpen = false
+        sawLiveResizeStartForWindow = nil
         saveSizeWorkItem?.cancel()
         saveSizeWorkItem = nil
         resizeTrackingWorkItem?.cancel()
@@ -502,13 +553,21 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             // This is necessary because when QuickLook switches displays or reuses the view controller,
             // transient layout passes with incorrect sizes may occur.
             self.startResizeTracking()
-            
-            if let savedSize = AppearancePreference.shared.quickLookSize {
+
+            if Self.shouldClearInvalidPersistedSize(AppearancePreference.shared.quickLookSize) {
+                os_log("🔵 Auto-clearing invalid persisted size: %.0f x %.0f",
+                       log: self.logger, type: .default,
+                       AppearancePreference.shared.quickLookSize?.width ?? 0,
+                       AppearancePreference.shared.quickLookSize?.height ?? 0)
+                AppearancePreference.shared.quickLookSize = nil
+            }
+
+            if let clampedSize = Self.clampPersistedSizeForRestore(AppearancePreference.shared.quickLookSize) {
                 let targetScreen = self.getTargetScreen()
-                let constrainedSize = self.constrainSizeToScreen(savedSize, screen: targetScreen)
+                let constrainedSize = self.constrainSizeToScreen(clampedSize, screen: targetScreen)
                 os_log("🔵 Re-applying saved size: %.0f x %.0f (constrained to %.0f x %.0f)",
                        log: self.logger, type: .debug,
-                       savedSize.width, savedSize.height,
+                       clampedSize.width, clampedSize.height,
                        constrainedSize.width, constrainedSize.height)
                 self.preferredContentSize = NSSize(width: constrainedSize.width, height: constrainedSize.height)
                 self.logScreenEnvironment(context: "preparePreviewOfFile-AFTER-SET-SIZE")
@@ -762,15 +821,120 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     private func startResizeTracking() {
         resizeTrackingWorkItem?.cancel()
         isResizeTrackingEnabled = false
-        
+        didUserResizeSinceOpen = false
+        sawLiveResizeStartForWindow = nil
+
         let item = DispatchWorkItem { [weak self] in
             self?.isResizeTrackingEnabled = true
             os_log("🔵 Resize tracking enabled", log: self?.logger ?? .default, type: .debug)
         }
-        
+
         resizeTrackingWorkItem = item
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: item)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: item)
     }
+    
+    private func setupWindowResizeObservers() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowWillStartLiveResize),
+            name: NSWindow.willStartLiveResizeNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidEndLiveResize),
+            name: NSWindow.didEndLiveResizeNotification,
+            object: nil
+        )
+
+        #if DEBUG
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidChangeScreen),
+            name: NSWindow.didChangeScreenNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidChangeBackingProperties),
+            name: NSWindow.didChangeBackingPropertiesNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(applicationDidChangeScreenParameters),
+            name: NSApplication.didChangeScreenParametersNotification,
+            object: nil
+        )
+        #endif
+    }
+
+    @objc private func windowDidEndLiveResize(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow, window == self.view.window else {
+            return
+        }
+
+        let windowId = ObjectIdentifier(window)
+
+        // Only save if we previously observed a matching start event for this window.
+        // This prevents saving sizes from programmatic/animated resizes.
+        guard sawLiveResizeStartForWindow == windowId else {
+            os_log("📊 [windowDidEndLiveResize] Skipping save - no matching start event for this window", log: logger, type: .default)
+            // Reset flag to prevent false positives from mismatched events
+            sawLiveResizeStartForWindow = nil
+            return
+        }
+
+        didUserResizeSinceOpen = true
+        if let size = self.currentSize, Self.isSizeValidForPersistence(size) {
+            os_log("📊 [windowDidEndLiveResize] Saving size: %.0fx%.0f", log: logger, type: .default, size.width, size.height)
+            AppearancePreference.shared.quickLookSize = size
+        } else {
+            os_log("📊 [windowDidEndLiveResize] Skipping save - size too small or nil", log: logger, type: .default)
+        }
+
+        // Reset flag after processing end event
+        sawLiveResizeStartForWindow = nil
+
+        #if DEBUG
+        logScreenEnvironment(context: "windowDidEndLiveResize")
+        #endif
+    }
+
+    @objc private func windowWillStartLiveResize(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow, window == self.view.window else {
+            return
+        }
+        sawLiveResizeStartForWindow = ObjectIdentifier(window)
+        os_log("📊 [windowWillStartLiveResize] Window starting live resize", log: logger, type: .default)
+
+        #if DEBUG
+        logScreenEnvironment(context: "windowWillStartLiveResize")
+        #endif
+    }
+
+    #if DEBUG
+    @objc private func windowDidChangeScreen(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow, window == self.view.window else {
+            return
+        }
+        os_log("📊 [windowDidChangeScreen] Window changed screen", log: logger, type: .default)
+        logScreenEnvironment(context: "windowDidChangeScreen")
+    }
+
+    @objc private func windowDidChangeBackingProperties(_ notification: Notification) {
+        guard let window = notification.object as? NSWindow, window == self.view.window else {
+            return
+        }
+        os_log("📊 [windowDidChangeBackingProperties] Window backing properties changed", log: logger, type: .default)
+        logScreenEnvironment(context: "windowDidChangeBackingProperties")
+    }
+
+    @objc private func applicationDidChangeScreenParameters(_ notification: Notification) {
+        os_log("📊 [applicationDidChangeScreenParameters] App-wide screen parameters changed", log: logger, type: .default)
+        logScreenEnvironment(context: "applicationDidChangeScreenParameters")
+    }
+    #endif
     
     private func constrainSizeToScreen(_ size: CGSize, screen: NSScreen?) -> CGSize {
         guard let screen = screen else { return size }
@@ -802,17 +966,11 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             return windowScreen
         }
         
-        let mouseLocation = NSEvent.mouseLocation
-        for screen in NSScreen.screens {
-            if screen.frame.contains(mouseLocation) {
-                return screen
-            }
-        }
-        
         return NSScreen.main ?? NSScreen.screens.first
     }
     
     deinit {
+        NotificationCenter.default.removeObserver(self)
         handshakeWorkItem?.cancel()
         saveSizeWorkItem?.cancel()
         resizeTrackingWorkItem?.cancel()
