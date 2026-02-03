@@ -7,6 +7,28 @@
         <language>zh-CN</language>
         
         <item>
+            <title>Version 1.6.96</title>
+            <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.6.96</link>
+            <sparkle:version>96</sparkle:version>
+            <sparkle:shortVersionString>1.6.96</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Wed, 04 Feb 2026 01:33:00 +0800</pubDate>
+            <enclosure 
+                url="https://github.com/xykong/markdown-quicklook/releases/download/v1.6.96/MarkdownPreviewEnhanced.dmg"
+                sparkle:edSignature="rt8MW/xG3PLHpxt2FcDnYu9M3qgPhBrtXhpczcYh9uiqt9EQNxLCNQSiH06egqkOWH+IxTzacVon/mZEOYv+BA=="
+                length="7289941"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>修复 / Fixed</h2>
+                <ul>
+                    <li><strong>自动更新</strong>: 修复安装新版本时报错 "An error occurred while launching the installer" 的问题</li>
+                    <li>添加沙盒权限例外，允许 Sparkle 安装器与主应用通信并写入 /Applications 目录</li>
+                    <li>启用 SUEnableInstallerLauncherService 支持沙盒应用的安装器启动服务</li>
+                </ul>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.6.93</title>
             <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.6.93</link>
             <sparkle:version>93</sparkle:version>
