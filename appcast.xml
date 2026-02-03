@@ -7,6 +7,28 @@
         <language>zh-CN</language>
         
         <item>
+            <title>Version 1.6.93</title>
+            <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.6.93</link>
+            <sparkle:version>93</sparkle:version>
+            <sparkle:shortVersionString>1.6.93</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Tue, 03 Feb 2026 17:00:16 +0000</pubDate>
+            <enclosure 
+                url="https://github.com/xykong/markdown-quicklook/releases/download/v1.6.93/MarkdownPreviewEnhanced.dmg"
+                sparkle:edSignature="hbNYXHeSGGbkfuXxPe2knjnqAxgwf4HiqrHCW/Rusf3qMcFwPfnYwIkqy0LNK4BV8GqLfXDwef1tTdLuS38LAQ=="
+                length="7289575"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>修复 / Fixed</h2>
+                <ul>
+                    <li><strong>自动更新</strong>: 修复手动检查更新无响应的问题</li>
+                    <li>使用 SPUStandardUpdaterController 替代手动组装，这是 Sparkle 2.x 推荐的 SwiftUI 集成方式</li>
+                    <li>使用 NSApp.sendAction() 正确触发更新检查的 AppKit action</li>
+                </ul>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.6.90</title>
             <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.6.90</link>
             <sparkle:version>90</sparkle:version>
