@@ -1,36 +1,42 @@
 # 自动更新系统使用指南
 
-本项目实现了混合更新策略，同时支持 Homebrew 用户和 DMG 手动安装用户。
+本项目使用 Sparkle 2.8.1 为所有用户（无论通过何种方式安装）提供统一的自动更新体验。
 
 ## 架构概览
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    启动时检测                            │
+│              启动时初始化 Sparkle                        │
 │                                                         │
-│    Homebrew 安装?                    DMG 安装?          │
-│         │                               │              │
-│         ▼                               ▼              │
-│  GitHub API 检查              Sparkle 自动更新          │
-│  提示用户运行 brew upgrade    后台检查 → 自动下载安装    │
+│   ✅ Homebrew 安装 → Sparkle 自动更新                    │
+│   ✅ DMG 手动安装  → Sparkle 自动更新                    │
+│                                                         │
+│   统一体验：后台检查 → 自动下载 → 提示安装               │
 └─────────────────────────────────────────────────────────┘
 ```
 
+## 设计理念
+
+遵循业界标准（iTerm2、Docker Desktop、VSCode 等主流应用）：
+- **统一体验**: 所有用户都通过 Sparkle 获得自动更新
+- **Homebrew 兼容**: Cask 中的 `auto_updates true` 告诉 Homebrew "让 app 自己管理更新"
+- **及时安全**: 用户立即获得安全更新，无需等待 Homebrew Cask 维护者
+
 ## 功能特性
 
-### 对于 Homebrew 用户
-
-- **智能检测**: 自动识别通过 `brew install --cask` 安装的应用
-- **温和提醒**: 发现新版本时，弹出提示建议运行 `brew upgrade`
-- **命令复制**: 一键复制更新命令到剪贴板
-- **定期检查**: 每周自动检查一次新版本
-
-### 对于 DMG 用户
+### 所有用户（Homebrew 和 DMG）
 
 - **Sparkle 自动更新**: 使用业界标准的 Sparkle 2.8.1 框架
 - **后台检查**: 每天自动检查更新（可配置）
 - **安全验证**: EdDSA 签名验证，确保更新来源可信
+- **手动检查**: 菜单栏 "检查更新..." (⌘U) 可随时主动检查
 - **无感安装**: 下载完成后一键安装，自动重启应用
+
+### Homebrew 注意事项
+
+- `brew upgrade` 会跳过此 app（因为 Cask 中有 `auto_updates true`）
+- 如需强制通过 Homebrew 更新，使用 `brew upgrade --greedy`
+- Sparkle 更新后，`brew list --versions` 显示的版本可能过时（这是正常行为）
 
 ## 开发者指南
 
@@ -184,24 +190,11 @@ Sparkle 需要访问 `appcast.xml` 来检查更新。推荐使用 GitHub Pages�
 3. **下载更新**: 显示下载进度条
 4. **安装更新**: 自动安装，提示重启应用
 
-### Homebrew 用户更新流程
+### 手动检查更新
 
-1. **检测到新版本**: 弹出提示对话框
-   ```
-   ┌─────────────────────────────────────┐
-   │  发现新版本 1.4.85                   │
-   │                                     │
-   │  您通过 Homebrew 安装了此应用。      │
-   │  请在终端运行以下命令更新：          │
-   │                                     │
-   │  brew upgrade markdown-preview-     │
-   │  enhanced                           │
-   │                                     │
-   │  [知道了]  [复制命令]                 │
-   └─────────────────────────────────────┘
-   ```
-2. **复制命令**: 点击"复制命令"后，命令自动复制到剪贴板
-3. **手动更新**: 在终端粘贴并执行命令
+无论安装方式，用户都可以：
+- 点击菜单栏 "检查更新..." 按钮
+- 或使用快捷键 ⌘U
 
 ## 配置选项
 
@@ -231,15 +224,8 @@ Sparkle 需要访问 `appcast.xml` 来检查更新。推荐使用 GitHub Pages�
 
 ### 自定义检查频率
 
-修改 `MarkdownApp.swift` 中的常量：
-
-```swift
-// Homebrew 用户检查间隔（秒）
-let oneWeekInSeconds: TimeInterval = 604800  // 7天
-
-// 首次启动后延迟检查（秒）
-let initialCheckDelay: TimeInterval = 10  // 10秒
-```
+Sparkle 的检查间隔在 `Info.plist` 中配置（见上方 `SUScheduledCheckInterval`）。
+默认为 86400 秒（24 小时）。
 
 ## 故障排查
 
@@ -271,18 +257,13 @@ log stream --predicate 'process == "Markdown Preview Enhanced"' --level debug
 ./scripts/generate-appcast.sh build/artifacts/MarkdownPreviewEnhanced.dmg
 ```
 
-### Homebrew 检测错误
+### Homebrew 用户注意事项
 
-**症状**: Homebrew 用户看到 Sparkle 更新对话框
+**现象**: 通过 Sparkle 更新后，`brew list --versions` 显示旧版本
 
-**检查：**
-```swift
-// MarkdownApp.swift
-let isHomebrewInstall = appPath.contains("/opt/homebrew/Caskroom/") ||
-                        appPath.contains("/usr/local/Caskroom/")
-```
+**说明**: 这是正常行为。Homebrew 的元数据不会自动更新，但应用本身是最新的。
 
-确保检测逻辑覆盖所有 Homebrew 安装路径。
+**如果想通过 Homebrew 更新**: 使用 `brew upgrade --greedy markdown-preview-enhanced`
 
 ## 参考资源
 
@@ -293,5 +274,6 @@ let isHomebrewInstall = appPath.contains("/opt/homebrew/Caskroom/") ||
 
 ## 版本历史
 
-- **1.4.82+**: 混合更新策略（Sparkle + Homebrew 检测）
+- **1.5.88+**: 统一更新策略（所有用户使用 Sparkle）- 遵循业界标准
+- **1.4.82-1.5.87**: 混合更新策略（Sparkle + Homebrew 检测）- 已废弃
 - **1.4.0-1.4.81**: 仅手动更新（GitHub Releases + Homebrew）
