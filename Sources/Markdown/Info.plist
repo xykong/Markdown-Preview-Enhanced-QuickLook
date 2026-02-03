@@ -68,6 +68,11 @@
 	<string>https://xykong.github.io/markdown-quicklook/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>BDhsLBTgtRax5K78RrmvkB2wCcLeKM7FxsuHu47soaU=</string>
+	<key>SUPublicEDKeyChain</key>
+	<array>
+		<string>6SVanhzrlDTTBpWI4kYycYh05QUI0lbkZg/LyOQCO8A=</string>
+		<string>BDhsLBTgtRax5K78RrmvkB2wCcLeKM7FxsuHu47soaU=</string>
+	</array>
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUScheduledCheckInterval</key>
