@@ -68,7 +68,7 @@ try {
     md = new MarkdownIt({
         html: true,
         breaks: true,
-        linkify: true,
+        linkify: false,
         typographer: true,
         highlight: function (str: string, lang: string): string {
             if (lang && hljs.getLanguage(lang)) {
@@ -82,6 +82,14 @@ try {
             return '<pre class="hljs"><code class="' + codeClass + '">' + md.utils.escapeHtml(str) + '</code></pre>';
         }
     });
+    
+    const originalValidateLink = md.validateLink.bind(md);
+    md.validateLink = function(url: string): boolean {
+        if (url.startsWith('data:')) {
+            return true;
+        }
+        return originalValidateLink(url);
+    };
 
     // Use plugins
     md.use(mk);
@@ -108,19 +116,26 @@ try {
             logToSwift(`[Image] Original src: "${originalSrc}"`);
             
             const isNetworkUrl = /^(http:\/\/|https:\/\/)/.test(originalSrc);
-            const isDataUrl = originalSrc.startsWith('data:');
+            const isEmbeddedBase64Image = originalSrc.startsWith('data:');
+            const isLocalFile = !isNetworkUrl && !isEmbeddedBase64Image;
             
-            logToSwift(`[Image] isNetworkUrl: ${isNetworkUrl}, isDataUrl: ${isDataUrl}, has imageData: ${!!env?.imageData}`);
+            logToSwift(`[Image] Type: ${isEmbeddedBase64Image ? 'embedded-base64' : isNetworkUrl ? 'network' : 'local-file'}, has imageData: ${!!env?.imageData}`);
             
-            if (!isNetworkUrl && !isDataUrl && env && env.imageData) {
-                const dataUrl = env.imageData[originalSrc];
-                if (dataUrl) {
-                    token.attrs[srcIndex][1] = dataUrl;
-                    logToSwift(`[Image] Using base64 data for: "${originalSrc}"`);
+            if (isEmbeddedBase64Image) {
+                logToSwift(`[Image] Keeping embedded base64: "${originalSrc.substring(0, 50)}..."`);
+            } else if (isLocalFile && env?.imageData) {
+                const base64DataUrl = env.imageData[originalSrc];
+                if (base64DataUrl) {
+                    token.attrs[srcIndex][1] = base64DataUrl;
+                    logToSwift(`[Image] Replaced with base64 data for: "${originalSrc}"`);
                 } else {
-                    logToSwift(`[Image] No data found for: "${originalSrc}"`);
-                    logToSwift(`[Image] Available keys: ${Object.keys(env.imageData).join(', ')}`);
+                    logToSwift(`[Image] No base64 data found for: "${originalSrc}"`);
+                    if (env.imageData) {
+                        logToSwift(`[Image] Available keys: ${Object.keys(env.imageData).join(', ')}`);
+                    }
                 }
+            } else if (isNetworkUrl) {
+                logToSwift(`[Image] Keeping network URL: "${originalSrc}"`);
             }
         }
         return defaultImageRender(tokens, idx, options, env, self);
@@ -176,8 +191,58 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
         }
 
         let html = md.render(text, { baseUrl: options.baseUrl, imageData: options.imageData });
+        
+        logToSwift(`[Render] Generated HTML length: ${html.length}`);
+        if (html.includes('data:image')) {
+            const snippet = html.match(/<img[^>]*data:image[^>]*>/g);
+            if (snippet) {
+                logToSwift(`[Render] Sample img tags with data:image: ${snippet.length} found`);
+                snippet.forEach((s, i) => logToSwift(`[Render]   ${i + 1}. ${s.substring(0, 120)}...`));
+            }
+        }
+        if (html.includes('data:image')) {
+            logToSwift('[Render] HTML contains Base64 images - converting to blob URLs');
+            const imgMatches = html.match(/<img[^>]+src="(data:image\/[^"]+)"/g);
+            if (imgMatches) {
+                logToSwift(`[Render] Found ${imgMatches.length} Base64 img tags`);
+                imgMatches.forEach((match, index) => {
+                    logToSwift(`[Render] Processing match ${index + 1}: ${match.substring(0, 100)}...`);
+                    const dataUrlMatch = match.match(/src="(data:image\/([^;]+);base64,([^"]+))"/);
+                    if (dataUrlMatch) {
+                        const [, dataUrl, mimeType, base64Data] = dataUrlMatch;
+                        logToSwift(`[Render] Extracted - MIME: ${mimeType}, Base64 length: ${base64Data.length}`);
+                        try {
+                            logToSwift(`[Render] Decoding Base64 (${base64Data.length} chars)...`);
+                            const binaryString = atob(base64Data);
+                            logToSwift(`[Render] Decoded to binary (${binaryString.length} bytes)`);
+                            const bytes = new Uint8Array(binaryString.length);
+                            for (let i = 0; i < binaryString.length; i++) {
+                                bytes[i] = binaryString.charCodeAt(i);
+                            }
+                            logToSwift(`[Render] Creating blob with MIME: image/${mimeType}`);
+                            const blob = new Blob([bytes], { type: `image/${mimeType}` });
+                            logToSwift(`[Render] Blob created: ${blob.size} bytes, type: ${blob.type}`);
+                            const blobUrl = URL.createObjectURL(blob);
+                            logToSwift(`[Render] Blob URL created: ${blobUrl}`);
+                            const beforeReplace = html.includes(dataUrl);
+                            html = html.replace(dataUrl, blobUrl);
+                            const afterReplace = html.includes(blobUrl);
+                            logToSwift(`[Render] Replacement: before=${beforeReplace}, after=${afterReplace}`);
+                            logToSwift(`[Render] ✅ Converted to blob: ${blobUrl}`);
+                        } catch (e) {
+                            logToSwift(`[Render] ❌ Conversion failed: ${e}`);
+                        }
+                    } else {
+                        logToSwift(`[Render] ❌ Regex didn't match for: ${match.substring(0, 100)}...`);
+                    }
+                });
+            } else {
+                logToSwift('[Render] ❌ No img tags found with regex');
+            }
+        } else {
+            logToSwift('[Render] No data:image URLs in HTML');
+        }
 
-        // 2. Render Mermaid diagrams
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
         

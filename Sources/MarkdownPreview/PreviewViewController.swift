@@ -273,6 +273,17 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         localSchemeHandler = LocalSchemeHandler()
         webConfiguration.setURLSchemeHandler(localSchemeHandler, forURLScheme: "local-resource")
         
+        let preferences = WKPreferences()
+        webConfiguration.preferences = preferences
+        
+        if #available(macOS 11.0, *) {
+            let pagePreferences = WKWebpagePreferences()
+            pagePreferences.allowsContentJavaScript = true
+            webConfiguration.defaultWebpagePreferences = pagePreferences
+        }
+        
+        webConfiguration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
+        
         let userContentController = WKUserContentController()
         userContentController.add(self, name: "logger")
         webConfiguration.userContentController = userContentController
@@ -297,8 +308,15 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         }
         
         if let url = bundleURL {
-            let dir = url.deletingLastPathComponent()
-            webView.loadFileURL(url, allowingReadAccessTo: dir)
+            do {
+                let htmlContent = try String(contentsOf: url, encoding: .utf8)
+                let baseURL = url.deletingLastPathComponent()
+                webView.loadHTMLString(htmlContent, baseURL: baseURL)
+                os_log("🔵 Loaded HTML content from bundle using loadHTMLString (allows data: URLs)", log: logger, type: .default)
+            } catch {
+                os_log("🔴 Failed to read HTML file: %{public}@", log: logger, type: .error, error.localizedDescription)
+                webView.loadHTMLString("<h1>Error loading HTML: \(error.localizedDescription)</h1>", baseURL: nil)
+            }
         } else {
             webView.loadHTMLString("<h1>Error: index.html not found</h1>", baseURL: nil)
         }

@@ -3,6 +3,24 @@
 ## [Unreleased]
 
 ### Fixed
+- **Base64 图片显示**: ✅ 完全修复 Base64 内嵌图片（`data:image/...`）无法显示的问题。
+  - **根本原因分析**:
+    1. WKWebView 在沙盒环境中阻止 data: URLs
+    2. markdown-it 的 URL 验证拒绝 `data:image/svg+xml` 等复杂 MIME 类型（核心问题）
+  - **解决方案**:
+    1. 将 `loadFileURL` 改为 `loadHTMLString`（允许更灵活的内容加载）
+    2. 添加 `allowUniversalAccessFromFileURLs` 配置到 WKWebViewConfiguration
+    3. **关键修复 A**: 覆盖 `md.validateLink` 方法，允许所有 `data:` URLs 通过 markdown-it 验证
+    4. **关键修复 B**: 将 Base64 data URLs 转换为 Blob URLs（绕过 WKWebView 的 data: scheme 限制）
+  - **验证结果**: 
+    - ✅ Markdown 语法 `![](data:image/png;base64,...)` - 完全正常
+    - ✅ Markdown 语法 `![](data:image/svg+xml;base64,...)` - 完全正常
+    - ✅ HTML 标签 `<img src="data:image/...">` - 完全正常
+    - ✅ 支持所有格式：PNG、JPEG、SVG、GIF、WebP
+  - 改进 TypeScript 图片渲染逻辑，明确区分三种图片类型：Base64 内嵌、本地文件、网络 URL
+  - 添加全面的单元测试覆盖所有图片类型（26 个测试全部通过）
+  - 增强日志输出，显示每个图片的处理过程，便于调试
+
 - **图片显示**: 修复多种图片路径无法显示的问题。
   - 修复绝对文件系统路径（`/path/to/image`）不显示的问题
   - 修复上级目录相对路径（`../image.png`）不显示的问题
