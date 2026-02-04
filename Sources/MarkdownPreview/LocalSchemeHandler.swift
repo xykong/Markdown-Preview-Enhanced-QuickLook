@@ -3,27 +3,61 @@ import os.log
 
 class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "LocalSchemeHandler")
+    var baseDirectory: URL?
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
         guard let url = urlSchemeTask.request.url else { return }
-        os_log("🔵 Start loading resource: %{public}@", log: logger, type: .debug, url.path)
-
-        // Convert local-resource://<path> to file URL
-        let fileUrl = URL(fileURLWithPath: url.path)
         
-        do {
-            // Attempt to read the file directly.
-            // Success depends on App Sandbox read permissions for the file location.
-            // QuickLook extensions typically have read access to the previewed file,
-            // but sibling access depends on OS policy.
-            let data = try Data(contentsOf: fileUrl)
+        var filePath: String
+        if let host = url.host, !host.isEmpty {
+            filePath = "/" + host + url.path
+        } else {
+            filePath = url.path
+        }
+        
+        os_log("🔵 Start loading resource: %{public}@", log: logger, type: .debug, filePath)
+
+        let fileUrl = URL(fileURLWithPath: filePath)
+        
+        guard let baseDir = baseDirectory else {
+            os_log("🔴 Base directory not set", log: logger, type: .error)
+            urlSchemeTask.didFailWithError(NSError(domain: "LocalSchemeHandler", code: -1, userInfo: [NSLocalizedDescriptionKey: "Base directory not set"]))
+            return
+        }
+        
+        var coordinatorError: NSError?
+        var resultData: Data?
+        var accessError: Error?
+        
+        let coordinator = NSFileCoordinator()
+        coordinator.coordinate(readingItemAt: fileUrl, options: [], error: &coordinatorError) { url in
+            baseDir.startAccessingSecurityScopedResource()
+            defer {
+                baseDir.stopAccessingSecurityScopedResource()
+            }
+            
+            do {
+                resultData = try Data(contentsOf: url)
+            } catch {
+                accessError = error
+            }
+        }
+        
+        if let error = coordinatorError ?? accessError {
+            os_log("🔴 Failed to load resource: %{public}@. Error: %{public}@", log: logger, type: .error, filePath, error.localizedDescription)
+            urlSchemeTask.didFailWithError(error)
+            return
+        }
+        
+        if let data = resultData {
             let response = URLResponse(url: url, mimeType: self.mimeType(for: url), expectedContentLength: data.count, textEncodingName: nil)
             urlSchemeTask.didReceive(response)
             urlSchemeTask.didReceive(data)
             urlSchemeTask.didFinish()
-            os_log("🟢 Successfully loaded: %{public}@", log: logger, type: .debug, url.path)
-        } catch {
-            os_log("🔴 Failed to load resource: %{public}@. Error: %{public}@", log: logger, type: .error, url.path, error.localizedDescription)
+            os_log("🟢 Successfully loaded: %{public}@", log: logger, type: .debug, filePath)
+        } else {
+            let error = NSError(domain: "LocalSchemeHandler", code: -2, userInfo: [NSLocalizedDescriptionKey: "No data"])
+            os_log("🔴 Failed to load resource: %{public}@. No data", log: logger, type: .error, filePath)
             urlSchemeTask.didFailWithError(error)
         }
     }

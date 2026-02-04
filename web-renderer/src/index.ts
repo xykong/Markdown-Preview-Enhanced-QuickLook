@@ -36,6 +36,7 @@ import 'github-markdown-css/github-markdown.css';
 import './styles/highlight-adaptive.css';
 import 'katex/dist/katex.min.css';
 import './styles/table-of-contents.css';
+import './styles/image-fallback.css';
 
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
@@ -103,16 +104,23 @@ try {
         const token = tokens[idx];
         const srcIndex = token.attrIndex('src');
         if (srcIndex >= 0) {
-            const src = token.attrs[srcIndex][1];
-            const isAbsolute = /^(http:\/\/|https:\/\/|file:\/\/|\/)/.test(src);
+            const originalSrc = token.attrs[srcIndex][1];
+            logToSwift(`[Image] Original src: "${originalSrc}"`);
             
-            if (!isAbsolute && env && env.baseUrl) {
-                 const base = env.baseUrl.endsWith('/') ? env.baseUrl : env.baseUrl + '/';
-                 let cleanSrc = src;
-                 if (cleanSrc.startsWith('./')) {
-                     cleanSrc = cleanSrc.substring(2);
-                 }
-                 token.attrs[srcIndex][1] = "local-resource://" + base + cleanSrc;
+            const isNetworkUrl = /^(http:\/\/|https:\/\/)/.test(originalSrc);
+            const isDataUrl = originalSrc.startsWith('data:');
+            
+            logToSwift(`[Image] isNetworkUrl: ${isNetworkUrl}, isDataUrl: ${isDataUrl}, has imageData: ${!!env?.imageData}`);
+            
+            if (!isNetworkUrl && !isDataUrl && env && env.imageData) {
+                const dataUrl = env.imageData[originalSrc];
+                if (dataUrl) {
+                    token.attrs[srcIndex][1] = dataUrl;
+                    logToSwift(`[Image] Using base64 data for: "${originalSrc}"`);
+                } else {
+                    logToSwift(`[Image] No data found for: "${originalSrc}"`);
+                    logToSwift(`[Image] Available keys: ${Object.keys(env.imageData).join(', ')}`);
+                }
             }
         }
         return defaultImageRender(tokens, idx, options, env, self);
@@ -126,13 +134,12 @@ let toc: TableOfContents | null = null;
 
 declare global {
     interface Window {
-        renderMarkdown: (text: string, options?: { baseUrl?: string, theme?: string }) => Promise<void>;
+        renderMarkdown: (text: string, options?: { baseUrl?: string, theme?: string, imageData?: Record<string, string> }) => Promise<void>;
         setZoomLevel: (level: number) => void;
     }
 }
 
-// Render function called by Swift
-window.renderMarkdown = async function (text: string, options: { baseUrl?: string, theme?: string } = {}) {
+window.renderMarkdown = async function (text: string, options: { baseUrl?: string, theme?: string, imageData?: Record<string, string> } = {}) {
     const outputDiv = document.getElementById('markdown-preview');
     const loadingDiv = document.getElementById('loading-status');
     
@@ -168,7 +175,7 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
             toc.render(outline);
         }
 
-        let html = md.render(text, { baseUrl: options.baseUrl });
+        let html = md.render(text, { baseUrl: options.baseUrl, imageData: options.imageData });
 
         // 2. Render Mermaid diagrams
         const tempDiv = document.createElement('div');

@@ -3,6 +3,15 @@
 ## [Unreleased]
 
 ### Fixed
+- **图片显示**: 修复多种图片路径无法显示的问题。
+  - 修复绝对文件系统路径（`/path/to/image`）不显示的问题
+  - 修复上级目录相对路径（`../image.png`）不显示的问题
+  - 修复图片带标题（`![alt](url "title")`）不显示的问题
+  - 修复特殊字符路径（`image%20(1).png`）不显示的问题
+  - 修复空格路径（`test images/test image.png`）不显示的问题
+  - 实现方式：Swift 端收集所有图片并转换为 base64 data URL，TypeScript 端使用 base64 替换原始路径
+
+### Fixed
 - **自动更新**: 修复安装新版本时报错 "An error occurred while running the updater" 的问题。
   - 使用正确的 Sparkle XPC 服务名称：`$(PRODUCT_BUNDLE_IDENTIFIER)-spks` 和 `$(PRODUCT_BUNDLE_IDENTIFIER)-spki`。
   - 之前使用的服务名 `com.xykong.Markdown.Installer` 不符合 Sparkle 规范，导致更新器无法正常运行。

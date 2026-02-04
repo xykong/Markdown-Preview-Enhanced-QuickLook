@@ -32,3 +32,9 @@ xcuserdata/
 /check-keyboard.html
 /test-*.md
 .sparkle-keys/
+
+# Ignore temporary test files in Tests/ directory
+Tests/check-logs.sh
+Tests/watch-console.sh
+Tests/test-*.md
+Tests/test-*.png

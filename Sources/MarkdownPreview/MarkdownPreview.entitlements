@@ -9,6 +9,16 @@
     <!-- Read-only access to the file the user selected in Finder -->
     <key>com.apple.security.files.user-selected.read-only</key>
     <true/>
+    
+    <!-- Allow reading files in the same directory as the previewed file -->
+    <key>com.apple.security.files.bookmarks.document-scope</key>
+    <true/>
+    
+    <!-- Temporary exception: allow reading all files (for images in markdown) -->
+    <key>com.apple.security.temporary-exception.files.absolute-path.read-only</key>
+    <array>
+        <string>/</string>
+    </array>
 
     <!-- Allow debugging in development builds -->
     <key>com.apple.security.get-task-allow</key>

@@ -66,6 +66,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     var currentURL: URL?
     var isWebViewLoaded = false
     var currentZoomLevel: Double = 1.0
+    var localSchemeHandler: LocalSchemeHandler!
 
     // MARK: - Size Persistence Constants
 
@@ -269,7 +270,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         os_log("🔵 configuring WebView...", log: logger, type: .default)
         
         let webConfiguration = WKWebViewConfiguration()
-        webConfiguration.setURLSchemeHandler(LocalSchemeHandler(), forURLScheme: "local-resource")
+        localSchemeHandler = LocalSchemeHandler()
+        webConfiguration.setURLSchemeHandler(localSchemeHandler, forURLScheme: "local-resource")
         
         let userContentController = WKUserContentController()
         userContentController.add(self, name: "logger")
@@ -550,6 +552,13 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         os_log("🔵 preparePreviewOfFile called for: %{public}@", log: logger, type: .default, url.path)
         self.currentURL = url
         
+        let baseDir = url.deletingLastPathComponent()
+        self.localSchemeHandler?.baseDirectory = baseDir
+        os_log("🔵 Set base directory: %{public}@", log: logger, type: .debug, baseDir.path)
+        
+        let accessGranted = url.startAccessingSecurityScopedResource()
+        os_log("🔵 Security-scoped resource access: %{public}@", log: logger, type: .debug, accessGranted ? "GRANTED" : "DENIED")
+        
         logScreenEnvironment(context: "preparePreviewOfFile-ENTRY")
         
         DispatchQueue.main.async {
@@ -616,6 +625,108 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         handler(nil)
     }
     
+    private func collectImageData(from markdownURL: URL, content: String) -> [String: String] {
+        var imageData: [String: String] = [:]
+        let baseDir = markdownURL.deletingLastPathComponent()
+        
+        let pattern = #"!\[[^\]]*\]\(([^)"]+(?:\s+"[^"]*")?)\)"#
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: []) else {
+            return imageData
+        }
+        
+        let nsContent = content as NSString
+        let matches = regex.matches(in: content, options: [], range: NSRange(location: 0, length: nsContent.length))
+        
+        for match in matches {
+            guard match.numberOfRanges >= 2 else { continue }
+            var imagePath = nsContent.substring(with: match.range(at: 1)).trimmingCharacters(in: .whitespaces)
+            
+            if let spaceIndex = imagePath.firstIndex(of: " "), imagePath[spaceIndex...].contains("\"") {
+                imagePath = String(imagePath[..<spaceIndex])
+            }
+            
+            // Skip network URLs and data URLs
+            if imagePath.starts(with: "http://") || imagePath.starts(with: "https://") || 
+               imagePath.starts(with: "data:") {
+                continue
+            }
+            
+            // Store the original path as key (before any transformations)
+            let originalPath = imagePath
+            var cleanPath = imagePath
+            var imageURL: URL
+            
+            // Handle file:// protocol
+            if imagePath.starts(with: "file://") {
+                cleanPath = String(imagePath.dropFirst("file://".count))
+                imageURL = URL(fileURLWithPath: cleanPath)
+            }
+            // Handle absolute filesystem paths
+            else if imagePath.starts(with: "/") {
+                imageURL = URL(fileURLWithPath: imagePath)
+                cleanPath = imagePath
+            }
+            // Handle relative paths
+            else {
+                if cleanPath.starts(with: "./") {
+                    cleanPath = String(cleanPath.dropFirst(2))
+                }
+                
+                imageURL = baseDir
+                for component in cleanPath.split(separator: "/") {
+                    let componentStr = String(component)
+                    
+                    if componentStr == ".." {
+                        imageURL.deleteLastPathComponent()
+                    } else {
+                        if let decoded = componentStr.removingPercentEncoding {
+                            imageURL.appendPathComponent(decoded)
+                        } else {
+                            imageURL.appendPathComponent(componentStr)
+                        }
+                    }
+                }
+            }
+            
+            os_log("🔵 Trying to load image: %{public}@ (original: %{public}@, cleanPath: %{public}@)", log: logger, type: .debug, imageURL.path, originalPath, cleanPath)
+            
+            do {
+                let data = try Data(contentsOf: imageURL)
+                let base64 = data.base64EncodedString()
+                let mimeType = mimeTypeForExtension(imageURL.pathExtension)
+                let dataURL = "data:\(mimeType);base64,\(base64)"
+                
+                // Store using the original path as key
+                imageData[originalPath] = dataURL
+                
+                os_log("🟢 Collected image: key='%{public}@' -> file='%{public}@' (%d bytes)", log: logger, type: .debug, originalPath, imageURL.path, data.count)
+            } catch {
+                os_log("🔴 Failed to load image: %{public}@ (original: %{public}@) - Error: %{public}@", log: logger, type: .error, imageURL.path, originalPath, error.localizedDescription)
+            }
+        }
+        
+        os_log("🔵 Collected %d images from %d references", log: logger, type: .debug, imageData.count, matches.count)
+        
+        for (key, _) in imageData {
+            os_log("🔵 ImageData key: '%{public}@'", log: logger, type: .debug, key)
+        }
+        
+        return imageData
+    }
+    
+    private func mimeTypeForExtension(_ ext: String) -> String {
+        switch ext.lowercased() {
+        case "png": return "image/png"
+        case "jpg", "jpeg": return "image/jpeg"
+        case "gif": return "image/gif"
+        case "svg": return "image/svg+xml"
+        case "webp": return "image/webp"
+        case "ico": return "image/x-icon"
+        case "bmp": return "image/bmp"
+        default: return "image/\(ext)"
+        }
+    }
+    
     private func renderPendingMarkdown() {
         guard let content = pendingMarkdown else {
             os_log("🟡 renderPendingMarkdown called but pendingMarkdown is nil", log: logger, type: .debug)
@@ -637,11 +748,13 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         let safeContentArg = String(contentJsonArray.dropFirst().dropLast())
         
-        var options: [String: String] = [:]
+        var options: [String: Any] = [:]
         
         if let url = self.currentURL {
             let dir = url.deletingLastPathComponent().path
             options["baseUrl"] = dir
+            
+            options["imageData"] = self.collectImageData(from: url, content: content)
         }
         
         let appearanceName = self.view.effectiveAppearance.name
