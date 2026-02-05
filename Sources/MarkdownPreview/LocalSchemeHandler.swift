@@ -31,7 +31,7 @@ class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
         
         let coordinator = NSFileCoordinator()
         coordinator.coordinate(readingItemAt: fileUrl, options: [], error: &coordinatorError) { url in
-            baseDir.startAccessingSecurityScopedResource()
+            let _ = baseDir.startAccessingSecurityScopedResource()
             defer {
                 baseDir.stopAccessingSecurityScopedResource()
             }

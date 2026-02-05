@@ -48,6 +48,7 @@ struct MarkdownWebView: NSViewRepresentable {
         let webView = ResizableWKWebView(frame: .zero, configuration: webConfiguration)
         webView.appearance = NSAppearance(named: .aqua)
         webView.navigationDelegate = coordinator
+        coordinator.currentWebView = webView
         
         var bundleURL: URL?
         if let url = Bundle.main.url(forResource: "index", withExtension: "html", subdirectory: "WebRenderer") {
@@ -84,6 +85,31 @@ struct MarkdownWebView: NSViewRepresentable {
         let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "MarkdownWebView")
         var isWebViewLoaded = false
         var pendingRender: (() -> Void)?
+        weak var currentWebView: WKWebView?
+        
+        override init() {
+            super.init()
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleToggleSearch),
+                name: .toggleSearch,
+                object: nil
+            )
+        }
+        
+        deinit {
+            NotificationCenter.default.removeObserver(self)
+        }
+        
+        @objc func handleToggleSearch() {
+            guard let webView = currentWebView else { return }
+            let js = "window.toggleSearch();"
+            webView.evaluateJavaScript(js) { [weak self] _, error in
+                if let error = error {
+                    os_log("Failed to toggle search: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
+                }
+            }
+        }
         
         private func mimeTypeForExtension(_ ext: String) -> String {
             switch ext.lowercased() {
@@ -306,6 +332,25 @@ class ResizableWKWebView: WKWebView {
     private var hasSetInitialSize = false
     private var currentZoomLevel: Double = 1.0
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "ResizableWKWebView")
+    
+    override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        super.willOpenMenu(menu, with: event)
+        
+        let findMenuItem = NSMenuItem(
+            title: NSLocalizedString("Find...", comment: "Context menu search item"),
+            action: #selector(triggerSearch),
+            keyEquivalent: "f"
+        )
+        findMenuItem.keyEquivalentModifierMask = .command
+        findMenuItem.target = self
+        
+        menu.insertItem(findMenuItem, at: 0)
+        menu.insertItem(NSMenuItem.separator(), at: 1)
+    }
+    
+    @objc func triggerSearch() {
+        NotificationCenter.default.post(name: .toggleSearch, object: nil)
+    }
     
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()

@@ -1,0 +1,238 @@
+#search-container {
+    position: fixed;
+    top: 10px;
+    right: 60px;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background-color: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    padding: 6px 8px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+.search-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    border: 1px solid #d0d7de;
+    border-radius: 4px;
+    padding: 4px 60px 4px 8px;
+    font-size: 13px;
+    width: 220px;
+    outline: none;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+.search-input:focus {
+    border-color: #0969da;
+    box-shadow: 0 0 0 3px rgba(9, 105, 218, 0.1);
+}
+
+.search-input-error {
+    border-color: #cf222e;
+}
+
+.search-input-error:focus {
+    border-color: #cf222e;
+    box-shadow: 0 0 0 3px rgba(207, 34, 46, 0.1);
+}
+
+.search-match-counter {
+    position: absolute;
+    right: 8px;
+    color: #57606a;
+    font-size: 11px;
+    font-weight: 500;
+    user-select: none;
+    pointer-events: none;
+}
+
+.search-button {
+    border: 1px solid transparent;
+    background: transparent;
+    border-radius: 4px;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #57606a;
+    line-height: 1;
+    transition: background-color 0.1s ease;
+}
+
+.search-button:hover:not(:disabled) {
+    background-color: #f3f4f6;
+}
+
+.search-button:active:not(:disabled) {
+    background-color: #e1e4e8;
+}
+
+.search-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.search-button-prev,
+.search-button-next {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.search-button-close {
+    font-size: 20px;
+    margin-left: 4px;
+}
+
+.search-options {
+    display: flex;
+    gap: 4px;
+    margin-left: 4px;
+    padding-left: 8px;
+    border-left: 1px solid #d0d7de;
+}
+
+.search-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.1s ease;
+}
+
+.search-checkbox-label:hover {
+    background-color: #f3f4f6;
+}
+
+.search-checkbox {
+    margin: 0;
+    cursor: pointer;
+}
+
+.search-checkbox-label span {
+    font-size: 12px;
+    font-weight: 500;
+    color: #57606a;
+}
+
+.search-error {
+    background-color: #fff5f5;
+    color: #cf222e;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #ffdddd;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.search-highlight {
+    background-color: #fff59d;
+    border-radius: 2px;
+}
+
+.search-highlight-active {
+    background-color: #ff9800;
+    color: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+    .search-toolbar {
+        background-color: #1c1f24;
+        border-color: #30363d;
+    }
+
+    .search-input {
+        background-color: #0d1117;
+        color: #e6edf3;
+        border-color: #30363d;
+    }
+
+    .search-input:focus {
+        border-color: #1f6feb;
+        box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.15);
+    }
+
+    .search-input-error {
+        border-color: #da3633;
+    }
+
+    .search-input-error:focus {
+        border-color: #da3633;
+        box-shadow: 0 0 0 3px rgba(218, 54, 51, 0.15);
+    }
+
+    .search-match-counter {
+        color: #8b949e;
+    }
+
+    .search-button {
+        color: #8b949e;
+    }
+
+    .search-button:hover:not(:disabled) {
+        background-color: #21262d;
+    }
+
+    .search-button:active:not(:disabled) {
+        background-color: #30363d;
+    }
+
+    .search-options {
+        border-left-color: #30363d;
+    }
+
+    .search-checkbox-label:hover {
+        background-color: #21262d;
+    }
+
+    .search-checkbox-label span {
+        color: #8b949e;
+    }
+
+    .search-error {
+        background-color: #2d1117;
+        color: #ff7b72;
+        border-color: #da3633;
+    }
+
+    .search-highlight {
+        background-color: #6e4c00;
+        color: #e6edf3;
+    }
+
+    .search-highlight-active {
+        background-color: #bb6d00;
+        color: #ffffff;
+    }
+}
+
+#search-container {
+    animation: searchSlideIn 0.15s ease-out;
+}
+
+@keyframes searchSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

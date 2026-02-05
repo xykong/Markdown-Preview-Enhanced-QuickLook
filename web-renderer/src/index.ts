@@ -37,6 +37,7 @@ import './styles/highlight-adaptive.css';
 import 'katex/dist/katex.min.css';
 import './styles/table-of-contents.css';
 import './styles/image-fallback.css';
+import './styles/search.css';
 
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js';
@@ -61,6 +62,8 @@ import anchor from 'markdown-it-anchor';
 
 import { extractOutline } from './outline';
 import { TableOfContents } from './table-of-contents';
+import { SearchEngine } from './search';
+import { SearchUI } from './search-ui';
 
 // Configure MarkdownIt
 let md: MarkdownIt;
@@ -146,11 +149,16 @@ try {
 }
 
 let toc: TableOfContents | null = null;
+let searchEngine: SearchEngine | null = null;
+let searchUI: SearchUI | null = null;
 
 declare global {
     interface Window {
         renderMarkdown: (text: string, options?: { baseUrl?: string, theme?: string, imageData?: Record<string, string> }) => Promise<void>;
         setZoomLevel: (level: number) => void;
+        showSearch: () => void;
+        hideSearch: () => void;
+        toggleSearch: () => void;
     }
 }
 
@@ -182,6 +190,15 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
                 toc = new TableOfContents('toc-container');
             } catch (e) {
                 logToSwift("JS Warning: TOC initialization failed: " + e);
+            }
+        }
+
+        if (!searchEngine || !searchUI) {
+            try {
+                searchEngine = new SearchEngine();
+                searchUI = new SearchUI('search-container', searchEngine);
+            } catch (e) {
+                logToSwift("JS Warning: Search initialization failed: " + e);
             }
         }
 
@@ -416,7 +433,11 @@ function applyZoomLevel(level: number) {
 
 document.addEventListener('keydown', (e: KeyboardEvent) => {
     if (e.metaKey || e.ctrlKey) {
-        if (e.key === '+' || e.key === '=') {
+        if (e.key === 'f') {
+            e.preventDefault();
+            window.toggleSearch();
+            logToSwift('Search toggled via Cmd+F');
+        } else if (e.key === '+' || e.key === '=') {
             e.preventDefault();
             applyZoomLevel(currentZoomLevel + 0.1);
             logToSwift(`Zoom in: ${currentZoomLevel}`);
@@ -431,5 +452,25 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
         }
     }
 });
+
+window.showSearch = function() {
+    if (searchUI) {
+        searchUI.show();
+    } else {
+        logToSwift("JS Warning: Search UI not initialized");
+    }
+};
+
+window.hideSearch = function() {
+    if (searchUI) {
+        searchUI.hide();
+    }
+};
+
+window.toggleSearch = function() {
+    if (searchUI) {
+        searchUI.toggle();
+    }
+};
 
 logToSwift("rendererReady");

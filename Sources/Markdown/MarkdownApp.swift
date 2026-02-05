@@ -49,6 +49,15 @@ struct MarkdownApp: App {
             }
             
             CommandMenu("View") {
+                Button(action: {
+                    NotificationCenter.default.post(name: .toggleSearch, object: nil)
+                }) {
+                    Text(NSLocalizedString("Find...", comment: "Search menu item"))
+                }
+                .keyboardShortcut("f", modifiers: .command)
+                
+                Divider()
+                
                 Menu("Appearance") {
                     ForEach(AppearanceMode.allCases) { mode in
                         Button(action: {
