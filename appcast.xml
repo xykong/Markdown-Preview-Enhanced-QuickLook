@@ -7,6 +7,42 @@
         <language>zh-CN</language>
         
         <item>
+            <title>Version 1.8.114</title>
+            <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.8.114</link>
+            <sparkle:version>114</sparkle:version>
+            <sparkle:shortVersionString>1.8.114</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 05 Feb 2026 06:23:51 +0000</pubDate>
+            <enclosure 
+                url="https://github.com/xykong/markdown-quicklook/releases/download/v1.8.114/MarkdownPreviewEnhanced.dmg"
+                sparkle:edSignature="5VxgworFFL4pMFZN4y1WK2RAy9MOheAzf9aFYWoIQaPMvIjWaywSYfXK2EhGf7ZZnLDmqWl74WNDxU+p/FACBA=="
+                length="7338577"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>新增 / Added</h2>
+                <ul>
+                    <li><strong>页内搜索功能</strong>: 为主应用添加完整的页内搜索功能</li>
+                    <li>✅ 浏览器风格的搜索工具栏 (Cmd+F 触发)</li>
+                    <li>✅ 实时高亮所有匹配项 (黄色背景)</li>
+                    <li>✅ 当前匹配项特殊高亮 (橙色背景)</li>
+                    <li>✅ 匹配计数显示 (如 "3/15")</li>
+                    <li>✅ 上一个/下一个匹配导航</li>
+                    <li>✅ 支持多种搜索模式: 普通搜索、大小写敏感、全字匹配、正则表达式</li>
+                    <li>✅ View 菜单和右键菜单集成</li>
+                    <li>✅ 国际化支持 (英文/简体中文)</li>
+                    <li>✅ 自动适配亮色/深色主题</li>
+                </ul>
+                
+                <h2>修复 / Fixed</h2>
+                <ul>
+                    <li><strong>Swift 编译警告</strong>: 修复 startAccessingSecurityScopedResource() 返回值未使用的警告</li>
+                </ul>
+                
+                <p><strong>注意</strong>: QuickLook 预览模式暂不支持搜索功能</p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.6.102</title>
             <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.6.102</link>
             <sparkle:version>102</sparkle:version>
