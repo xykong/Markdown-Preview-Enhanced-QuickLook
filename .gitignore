@@ -41,3 +41,8 @@ Tests/test-*.png
 
 # Temporary test files
 test-base64.html
+
+# Skills directory
+.agents/.DS_Store
+.agents/skills/.DS_Store
+.agents/skills/*/.DS_Store
