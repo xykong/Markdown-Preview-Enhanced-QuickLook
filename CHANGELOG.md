@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.9.118] - 2026-02-09
 
 ### Fixed
 - **WKWebView 进程泄漏**: 修复 QuickLook 扩展中 WKWebView 进程累积导致严重内存占用问题。
