@@ -7,6 +7,43 @@
         <language>zh-CN</language>
         
         <item>
+            <title>Version 1.10.124</title>
+            <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.10.124</link>
+            <sparkle:version>124</sparkle:version>
+            <sparkle:shortVersionString>1.10.124</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 09 Feb 2026 13:11:00 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/markdown-quicklook/releases/download/v1.10.124/MarkdownPreviewEnhanced.dmg"
+                sparkle:edSignature="1jwS+0KXQWR318HC8K8RkMeWVz7ezl0waKQqIb6KH9fD7oIgIdNye2ShrKsqtxE5Xg1ozK7hhid5jZB7V+dCAw=="
+                length="7342465"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>安全性改进 / Security</h2>
+                <ul>
+                    <li><strong>沙盒权限优化</strong>: 将 QuickLook 扩展的文件访问权限从整个文件系统 (/) 缩小到仅用户主目录 ($HOME/)</li>
+                    <li><strong>权限对话框改进</strong>: 文案从"访问所有数据"改为更友好的"访问您的主文件夹"</li>
+                    <li><strong>安全性提升</strong>: 无法访问系统目录、其他用户数据和应用程序数据</li>
+                    <li><strong>用户体验</strong>: 权限对话框更清晰易懂，仅需授权一次</li>
+                    <li><strong>功能影响</strong>: 覆盖 99% 的真实使用场景（相对路径和用户主目录内的绝对路径仍可正常工作）</li>
+                </ul>
+
+                <h2>修复 / Fixed</h2>
+                <ul>
+                    <li><strong>WKWebView 进程泄漏</strong>: 修复 QuickLook 扩展中 WKWebView 进程累积导致严重内存占用问题</li>
+                    <li><strong>修复效果</strong>: Web Content 进程数量从 30+ 降低到 1-2 个，总内存占用从 2GB+ 降低到 100-200MB</li>
+                </ul>
+
+                <h2>文档 / Docs</h2>
+                <ul>
+                    <li>添加首次使用权限请求说明</li>
+                    <li>添加完整的 Troubleshooting 章节</li>
+                    <li>更新技术文档说明新的安全限制</li>
+                </ul>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.10.119</title>
             <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.10.119</link>
             <sparkle:version>119</sparkle:version>
