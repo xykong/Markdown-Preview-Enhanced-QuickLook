@@ -66,7 +66,14 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     var currentURL: URL?
     var isWebViewLoaded = false
     var currentZoomLevel: Double = 1.0
-    var localSchemeHandler: LocalSchemeHandler!
+    
+    // MARK: - Process Pool Management
+    
+    /// Shared process pool for all WKWebView instances to reduce memory footprint.
+    /// Without this, each WKWebView creates its own Web Content process, leading to
+    /// 30+ processes (60-80MB each) when previewing multiple markdown files.
+    /// With a shared pool, all WebViews share 1-2 Web Content processes (~100-200MB total).
+    private static let sharedProcessPool = WKProcessPool()
 
     // MARK: - Size Persistence Constants
 
@@ -270,8 +277,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         os_log("🔵 configuring WebView...", log: logger, type: .default)
         
         let webConfiguration = WKWebViewConfiguration()
-        localSchemeHandler = LocalSchemeHandler()
-        webConfiguration.setURLSchemeHandler(localSchemeHandler, forURLScheme: "local-resource")
+        webConfiguration.processPool = PreviewViewController.sharedProcessPool
         
         let preferences = WKPreferences()
         webConfiguration.preferences = preferences
@@ -413,6 +419,40 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         saveSizeWorkItem = nil
         resizeTrackingWorkItem?.cancel()
         resizeTrackingWorkItem = nil
+        
+        cleanupWebView()
+    }
+    
+    private func cleanupWebView() {
+        guard let webView = webView else { return }
+        
+        os_log("🔵 Cleaning up WKWebView (PID: %d, WebView: %p)", log: logger, type: .default, getpid(), webView)
+        
+        cancelHandshakeTimeout()
+        
+        webView.stopLoading()
+        webView.navigationDelegate = nil
+        webView.configuration.userContentController.removeScriptMessageHandler(forName: "logger")
+        
+        for recognizer in webView.gestureRecognizers {
+            webView.removeGestureRecognizer(recognizer)
+        }
+        
+        webView.removeFromSuperview()
+        
+        self.webView = nil
+        
+        os_log("🔵 WKWebView cleanup complete", log: logger, type: .default)
+    }
+    
+    deinit {
+        os_log("🔵 PreviewViewController DEINIT called (PID: %d)", log: logger, type: .default, getpid())
+        cleanupWebView()
+        stopFileMonitoring()
+        NotificationCenter.default.removeObserver(self)
+        handshakeWorkItem?.cancel()
+        saveSizeWorkItem?.cancel()
+        resizeTrackingWorkItem?.cancel()
     }
     
 
@@ -569,10 +609,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     public func preparePreviewOfFile(at url: URL, completionHandler handler: @escaping (Error?) -> Void) {
         os_log("🔵 preparePreviewOfFile called for: %{public}@", log: logger, type: .default, url.path)
         self.currentURL = url
-        
-        let baseDir = url.deletingLastPathComponent()
-        self.localSchemeHandler?.baseDirectory = baseDir
-        os_log("🔵 Set base directory: %{public}@", log: logger, type: .debug, baseDir.path)
         
         let accessGranted = url.startAccessingSecurityScopedResource()
         os_log("🔵 Security-scoped resource access: %{public}@", log: logger, type: .debug, accessGranted ? "GRANTED" : "DENIED")
@@ -1195,13 +1231,5 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         } catch {
             os_log("🔴 Failed to reload file: %{public}@", log: logger, type: .error, error.localizedDescription)
         }
-    }
-    
-    deinit {
-        stopFileMonitoring()
-        NotificationCenter.default.removeObserver(self)
-        handshakeWorkItem?.cancel()
-        saveSizeWorkItem?.cancel()
-        resizeTrackingWorkItem?.cancel()
     }
 }

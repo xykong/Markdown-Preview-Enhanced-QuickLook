@@ -8,6 +8,8 @@ struct MarkdownWebView: NSViewRepresentable {
     var fileURL: URL?
     var appearanceMode: AppearanceMode = .light
     
+    private static let sharedProcessPool = WKProcessPool()
+    
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
@@ -16,6 +18,7 @@ struct MarkdownWebView: NSViewRepresentable {
         let coordinator = context.coordinator
         
         let webConfiguration = WKWebViewConfiguration()
+        webConfiguration.processPool = MarkdownWebView.sharedProcessPool
         let userContentController = WKUserContentController()
         userContentController.add(coordinator, name: "logger")
         

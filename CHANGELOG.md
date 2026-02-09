@@ -1,7 +1,29 @@
 # Changelog
 
 ## [Unreleased]
-_无待发布的变更_
+
+### Fixed
+- **WKWebView 进程泄漏**: 修复 QuickLook 扩展中 WKWebView 进程累积导致严重内存占用问题。
+  - **问题表现**: 预览多个 Markdown 文件时，会累积创建 30+ 个 "Web Content" 进程，每个进程占用 60-80MB，总内存占用达 2GB+。
+  - **根本原因**:
+    1. 缺少 `WKProcessPool` 共享机制
+    2. 自定义 URL scheme handler (`local-resource://`) 阻止了进程共享（WebKit 安全设计）
+    3. WKWebView 没有被正确清理，导致 retain cycle 无法打破
+  - **解决方案**:
+    1. 添加共享的 `WKProcessPool` 用于所有 WKWebView 实例
+    2. 移除不必要的 `local-resource://` 自定义 scheme handler（图片已通过 data URL 传递）
+    3. 在 `viewWillDisappear` 和 `deinit` 中添加完整的 WKWebView 清理逻辑：
+       - `stopLoading()` 停止所有加载
+       - 移除 `navigationDelegate` 和 `messageHandler` 引用，打破 retain cycle
+       - 清理手势识别器
+       - 从视图层级移除并释放引用
+  - **修复效果**:
+    - Web Content 进程数量从 30+ 降低到 1-2 个
+    - 总内存占用从 2GB+ 降低到 100-200MB
+    - 进程和内存占用保持稳定，不再累积
+  - **影响范围**:
+    - QuickLook 扩展 (`PreviewViewController.swift`)
+    - 主应用 (`MarkdownWebView.swift`) - 为一致性也添加了共享 process pool
 
 ## [1.8.114] - 2026-02-05
 
