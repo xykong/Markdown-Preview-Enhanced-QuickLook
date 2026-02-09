@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.10.119] - 2026-02-09
 
 ### Security
 - **沙盒权限优化**: 将 QuickLook 扩展的文件访问权限从整个文件系统 (`/`) 缩小到仅用户主目录 (`$HOME/`),大幅提升安全性。
@@ -22,13 +25,6 @@
     - 权限对话框更清晰易懂
     - 仅需授权一次,之后不再弹窗
     - 提供完整的故障排查指南
-
-### Docs
-- 添加首次使用权限请求说明,解释为什么需要权限以及如何处理
-- 添加完整的 Troubleshooting 章节,涵盖权限管理、图片显示、QuickLook 预览等常见问题
-- 更新技术文档 `docs/ABSOLUTE_PATH_SUPPORT.md`,说明新的安全限制和权限范围
-
-## [1.10.119] - 2026-02-09
 
 ### Fixed
 - **WKWebView 进程泄漏**: 修复 QuickLook 扩展中 WKWebView 进程累积导致严重内存占用问题。
@@ -52,6 +48,11 @@
   - **影响范围**:
     - QuickLook 扩展 (`PreviewViewController.swift`)
     - 主应用 (`MarkdownWebView.swift`) - 为一致性也添加了共享 process pool
+
+### Docs
+- 添加首次使用权限请求说明,解释为什么需要权限以及如何处理
+- 添加完整的 Troubleshooting 章节,涵盖权限管理、图片显示、QuickLook 预览等常见问题
+- 更新技术文档 `docs/ABSOLUTE_PATH_SUPPORT.md`,说明新的安全限制和权限范围
 
 ## [1.9.118] - 2026-02-09
 
