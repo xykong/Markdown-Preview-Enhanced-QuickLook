@@ -46,3 +46,6 @@ test-base64.html
 .agents/.DS_Store
 .agents/skills/.DS_Store
 .agents/skills/*/.DS_Store
+
+# OpenCode directory
+.opencode/

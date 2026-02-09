@@ -7,6 +7,32 @@
         <language>zh-CN</language>
         
         <item>
+            <title>Version 1.10.119</title>
+            <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.10.119</link>
+            <sparkle:version>119</sparkle:version>
+            <sparkle:shortVersionString>1.10.119</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sun, 09 Feb 2026 03:51:37 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/markdown-quicklook/releases/download/v1.10.119/MarkdownPreviewEnhanced.dmg"
+                sparkle:edSignature="7zs5iZ6fXSrWGaEHmLr5YbHsGy/fUS9oPLjd0KHkelhXB/3qOJFgWMxah1zhQwGtL4+Nti+VZgW/Vhkn88ACDw=="
+                length="7340051"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>修复 / Fixed</h2>
+                <ul>
+                    <li><strong>WKWebView 进程泄漏</strong>: 修复 QuickLook 扩展中 WKWebView 进程累积导致严重内存占用问题</li>
+                    <li><strong>问题表现</strong>: 预览多个 Markdown 文件时，会累积创建 30+ 个 "Web Content" 进程，每个进程占用 60-80MB，总内存占用达 2GB+</li>
+                    <li><strong>根本原因</strong>: 缺少 WKProcessPool 共享机制、自定义 URL scheme handler 阻止进程共享、WKWebView 没有被正确清理</li>
+                    <li><strong>解决方案</strong>: 添加共享 WKProcessPool、移除不必要的 custom scheme handler、在 viewWillDisappear 和 deinit 中添加完整清理逻辑</li>
+                    <li><strong>修复效果</strong>: Web Content 进程数量从 30+ 降低到 1-2 个，总内存占用从 2GB+ 降低到 100-200MB</li>
+                </ul>
+
+                <p><strong>相关 Issue</strong>: <a href="https://github.com/xykong/markdown-quicklook/issues/6">#6</a></p>
+            ]]></description>
+        </item>
+
+        <item>
             <title>Version 1.8.114</title>
             <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.8.114</link>
             <sparkle:version>114</sparkle:version>
