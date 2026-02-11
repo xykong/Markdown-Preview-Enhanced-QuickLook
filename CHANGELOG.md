@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.12.136] - 2026-02-11
+
 ### Added
 - **双模式显示 (Preview/Source Toggle)**: 实现预览模式与源码模式的快速切换功能。
   - **QuickLook 预览**:
@@ -21,7 +25,6 @@
     - 新增 `ViewMode` 枚举管理当前显示模式
     - 新增 `window.renderSource()` 函数渲染带语法高亮的源码
     - 新增 `source-view.css` 样式文件
-
 
 ## [1.11.130] - 2026-02-11
 
