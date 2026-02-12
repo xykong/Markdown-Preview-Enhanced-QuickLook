@@ -7,6 +7,7 @@ A macOS QuickLook extension to beautifully preview Markdown files with full rend
 **Inspired by and partially based on [markdown-preview-enhanced](https://github.com/shd101wyy/markdown-preview-enhanced).**
 
 ## Features
+- **Update Restoration**: Automatically reopens the last viewed Markdown file after an app update, providing a seamless user experience
 
 - **Markdown**: CommonMark + GFM (Tables, Task Lists, Strikethrough)
 - **Math**: KaTeX support for mathematical expressions (`$E=mc^2$`)
@@ -18,6 +19,7 @@ A macOS QuickLook extension to beautifully preview Markdown files with full rend
 - **Theme**: Configurable appearance (Light, Dark, or System). Defaults to Light mode for better readability.
 - **Zoom**: Keyboard shortcuts (`Cmd +/-/0`), scroll wheel zoom (hold `Cmd` and scroll), and pinch gesture (two-finger pinch) with persistence
 - **Scroll Position Memory**: Automatically remembers scroll position for eachMarkdown file and restores it on next preview
+- **Update Restoration**: Automatically reopens the last viewed Markdown file after an app update, providing a seamless user experience
 
 ## Quick Start
 

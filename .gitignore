@@ -55,3 +55,10 @@ test-base64.html
 
 # Backup files
 *.backup
+
+
+# Additional build artifacts
+.build/
+
+# Backup files (Swift backup)
+*.bak
