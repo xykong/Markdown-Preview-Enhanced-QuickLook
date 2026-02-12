@@ -1,7 +1,15 @@
 # Changelog
 
 ## [Unreleased]
-_无待发布的变更_
+
+### Fixed
+- **国际化支持 (i18n)**: 修复"检查更新"菜单项和 QuickLook 预览中的 Toast 消息在英文系统中显示中文的问题
+  - 将硬编码的中文文本替换为 `NSLocalizedString` 调用
+  - 在 `en.lproj/Localizable.strings` 和 `zh-Hans.lproj/Localizable.strings` 中添加对应的翻译
+  - 修复的字符串包括：
+    - "Check for Updates..." (检查更新...)
+    - "QuickLook preview does not support link navigation" (QuickLook 预览模式不支持链接跳转)
+    - "Double-click .md file to open in main app for full functionality" (请双击 .md 文件用主应用打开以使用完整功能)
 
 ## [1.13.141] - 2026-02-13
 

@@ -6,3 +6,10 @@
 
 /* Search UI */
 "Search menu item" = "查找...";
+
+/* Updater */
+"Check for Updates..." = "检查更新...";
+
+/* Toast Messages */
+"QuickLook preview does not support link navigation" = "QuickLook 预览模式不支持链接跳转";
+"Double-click .md file to open in main app for full functionality" = "请双击 .md 文件用主应用打开以使用完整功能";

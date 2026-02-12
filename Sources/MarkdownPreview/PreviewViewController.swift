@@ -1151,12 +1151,12 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             iconImageView.contentTintColor = .white
             iconImageView.translatesAutoresizingMaskIntoConstraints = false
             
-            let messageLabel = NSTextField(labelWithString: "QuickLook 预览模式不支持链接跳转")
+            let messageLabel = NSTextField(labelWithString: NSLocalizedString("QuickLook preview does not support link navigation", comment: "Toast message when link clicked in QuickLook"))
             messageLabel.textColor = .white
             messageLabel.font = .systemFont(ofSize: 13, weight: .medium)
             messageLabel.translatesAutoresizingMaskIntoConstraints = false
             
-            let hintLabel = NSTextField(labelWithString: "请双击 .md 文件用主应用打开以使用完整功能")
+            let hintLabel = NSTextField(labelWithString: NSLocalizedString("Double-click .md file to open in main app for full functionality", comment: "Toast hint message"))
             hintLabel.textColor = NSColor.white.withAlphaComponent(0.9)
             hintLabel.font = .systemFont(ofSize: 11)
             hintLabel.translatesAutoresizingMaskIntoConstraints = false

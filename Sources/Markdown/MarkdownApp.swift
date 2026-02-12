@@ -157,7 +157,7 @@ struct CheckForUpdatesView: View {
     let updaterController: SPUStandardUpdaterController
     
     var body: some View {
-        Button("检查更新...") {
+        Button(NSLocalizedString("Check for Updates...", comment: "Check for updates menu item")) {
             print("🔍 [DEBUG] Triggering update check...")
             NSApp.sendAction(#selector(SPUStandardUpdaterController.checkForUpdates(_:)), to: updaterController, from: nil)
         }

@@ -6,3 +6,10 @@
 
 /* Search UI */
 "Search menu item" = "Find...";
+
+/* Updater */
+"Check for Updates..." = "Check for Updates...";
+
+/* Toast Messages */
+"QuickLook preview does not support link navigation" = "QuickLook preview does not support link navigation";
+"Double-click .md file to open in main app for full functionality" = "Double-click .md file to open in main app for full functionality";
