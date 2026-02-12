@@ -227,7 +227,9 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
             const snippet = html.match(/<img[^>]*data:image[^>]*>/g);
             if (snippet) {
                 logToSwift(`[Render] Sample img tags with data:image: ${snippet.length} found`);
-                snippet.forEach((s, i) => logToSwift(`[Render]   ${i + 1}. ${s.substring(0, 120)}...`));
+                snippet.forEach((s, i) => {
+                    logToSwift(`[Render]   ${i + 1}. ${s.substring(0, 120)}...`);
+                });
             }
         }
         if (html.includes('data:image')) {
@@ -435,6 +437,39 @@ window.renderSource = function(text: string, theme: string) {
     }
 };
 
+function compressMultipleHyphens(text: string): string {
+    return text.replace(/-+/g, '-');
+}
+
+function unifyUnderscoreAndHyphen(text: string): string {
+    return text.replace(/[_-]/g, '~');
+}
+
+function findElementByAnchor(anchorId: string): HTMLElement | null {
+    const allElementsWithId = document.querySelectorAll('[id]');
+    
+    const exactMatch = document.getElementById(anchorId);
+    if (exactMatch) return exactMatch;
+    
+    const level2NormalizedTarget = compressMultipleHyphens(anchorId);
+    for (const element of allElementsWithId) {
+        const elementId = element.getAttribute('id');
+        if (elementId && compressMultipleHyphens(elementId) === level2NormalizedTarget) {
+            return element as HTMLElement;
+        }
+    }
+    
+    const level3NormalizedTarget = unifyUnderscoreAndHyphen(compressMultipleHyphens(anchorId));
+    for (const element of allElementsWithId) {
+        const elementId = element.getAttribute('id');
+        if (elementId && unifyUnderscoreAndHyphen(compressMultipleHyphens(elementId)) === level3NormalizedTarget) {
+            return element as HTMLElement;
+        }
+    }
+    
+    return null;
+}
+
 function handleAnchorClick(e: Event) {
     const target = e.target as HTMLElement;
     const anchor = target.closest('a');
@@ -449,11 +484,13 @@ function handleAnchorClick(e: Event) {
         e.preventDefault();
         e.stopPropagation();
         const targetId = decodeURIComponent(href.substring(1));
-        const targetElement = document.getElementById(targetId);
+        const targetElement = findElementByAnchor(targetId);
         if (targetElement) {
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            logToSwift(`[Click] Scrolled to anchor: #${targetId}`);
+        } else {
+            logToSwift(`[Click] Anchor not found: #${targetId}`);
         }
-        logToSwift(`[Click] Scrolled to anchor: #${targetId}`);
         return;
     }
     

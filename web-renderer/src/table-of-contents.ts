@@ -1,5 +1,38 @@
 import type { HeadingNode } from './outline';
 
+function compressMultipleHyphens(text: string): string {
+    return text.replace(/-+/g, '-');
+}
+
+function unifyUnderscoreAndHyphen(text: string): string {
+    return text.replace(/[_-]/g, '~');
+}
+
+function findElementByAnchor(anchorId: string): HTMLElement | null {
+    const allElementsWithId = document.querySelectorAll('[id]');
+    
+    const exactMatch = document.getElementById(anchorId);
+    if (exactMatch) return exactMatch;
+    
+    const level2NormalizedTarget = compressMultipleHyphens(anchorId);
+    for (const element of allElementsWithId) {
+        const elementId = element.getAttribute('id');
+        if (elementId && compressMultipleHyphens(elementId) === level2NormalizedTarget) {
+            return element as HTMLElement;
+        }
+    }
+    
+    const level3NormalizedTarget = unifyUnderscoreAndHyphen(compressMultipleHyphens(anchorId));
+    for (const element of allElementsWithId) {
+        const elementId = element.getAttribute('id');
+        if (elementId && unifyUnderscoreAndHyphen(compressMultipleHyphens(elementId)) === level3NormalizedTarget) {
+            return element as HTMLElement;
+        }
+    }
+    
+    return null;
+}
+
 export class TableOfContents {
     private container: HTMLElement;
     private isVisible: boolean = false;
@@ -44,7 +77,9 @@ export class TableOfContents {
 
         const observeHeadings = () => {
             const headings = document.querySelectorAll('h1[id], h2[id], h3[id], h4[id], h5[id], h6[id]');
-            headings.forEach(heading => observer.observe(heading));
+            headings.forEach(heading => {
+                observer.observe(heading);
+            });
         };
 
         setTimeout(observeHeadings, 100);
@@ -128,10 +163,13 @@ export class TableOfContents {
                 const href = (e.target as HTMLAnchorElement).getAttribute('href');
                 if (href) {
                     const targetId = href.substring(1);
-                    const targetElement = document.getElementById(targetId);
+                    const targetElement = findElementByAnchor(targetId);
                     if (targetElement) {
                         targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                        this.setActiveItem(targetId);
+                        const actualId = targetElement.getAttribute('id');
+                        if (actualId) {
+                            this.setActiveItem(actualId);
+                        }
                     }
                 }
             });
