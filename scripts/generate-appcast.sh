@@ -91,7 +91,7 @@ RELEASE_URL="https://github.com/xykong/markdown-quicklook/releases/tag/v$FULL_VE
 CHANGELOG_FILE="$PROJECT_ROOT/CHANGELOG.md"
 if [ -f "$CHANGELOG_FILE" ]; then
     # Extract content between [FULL_VERSION] and next version heading
-    CHANGELOG_ENTRY=$(awk "/## \[$FULL_VERSION\]/,/## \[/" "$CHANGELOG_FILE" | grep -v "^## \[" | sed 's/^### //' | head -50)
+    CHANGELOG_ENTRY=$(sed -n "/## \[$FULL_VERSION\]/,/^## \[/p" "$CHANGELOG_FILE" | grep -v "^## \[" | sed 's/^### //' | head -50)
 else
     CHANGELOG_ENTRY="Update to version $FULL_VERSION"
 fi
