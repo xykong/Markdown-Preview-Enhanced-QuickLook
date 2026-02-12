@@ -1,16 +1,16 @@
 #!/bin/bash
 set -e
 
-VERSION=$1
+VERSION_FILE=".version"
 DMG_PATH="build/artifacts/MarkdownPreviewEnhanced.dmg"
 CASK_FILE="../homebrew-tap/Casks/markdown-preview-enhanced.rb"
 
-if [ -z "$VERSION" ]; then
-    echo "❌ Error: Version not provided"
-    echo "Usage: $0 <VERSION>"
-    echo "Example: $0 1.3.73"
+if [ ! -f "$VERSION_FILE" ]; then
+    echo "❌ Error: Version file not found: $VERSION_FILE"
     exit 1
 fi
+
+VERSION=$(cat "$VERSION_FILE")
 
 if [ ! -f "$DMG_PATH" ]; then
     echo "❌ Error: DMG not found at $DMG_PATH"
@@ -22,7 +22,6 @@ if [ ! -f "$CASK_FILE" ]; then
     echo "❌ Error: Homebrew Cask file not found at $CASK_FILE"
     echo "Please ensure homebrew-tap repository is cloned at ../homebrew-tap"
     exit 1
-fi
 
 echo "🍺 Updating Homebrew Cask for v$VERSION..."
 echo ""

@@ -10,13 +10,14 @@ generate: build_renderer
 		echo "Error: xcodegen is not installed. Please install it with 'brew install xcodegen'"; \
 		exit 1; \
 	fi
-	@if [ ! -f .version ]; then echo "1.0" > .version; fi
-	@base_v=$$(cat .version); \
-	commit_count=$$(git rev-list --count HEAD); \
-	full_v="$$base_v.$$commit_count"; \
-	echo "Generating Project with Version: $$full_v (Build $$commit_count)"; \
+	@if [ ! -f .version ]; then echo "1.0.0" > .version; fi
+	@full_v=$$(cat .version); \
+	major=$$(echo $$full_v | cut -d'.' -f1); \
+	minor=$$(echo $$full_v | cut -d'.' -f2); \
+	build=$$(echo $$full_v | cut -d'.' -f3); \
+	echo "Generating Project with Version: $$full_v (Major: $$major, Minor: $$minor, Build: $$build)"; \
 	rm -rf MarkdownPreviewEnhanced.xcodeproj; \
-	MARKETING_VERSION=$$full_v CURRENT_PROJECT_VERSION=$$commit_count xcodegen generate --quiet
+	MARKETING_VERSION=$$full_v CURRENT_PROJECT_VERSION=$$build xcodegen generate --quiet
 
 app: generate
 	@echo "🔨 Building application in $(or $(CONFIGURATION),Release) configuration..."

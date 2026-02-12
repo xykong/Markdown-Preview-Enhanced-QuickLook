@@ -22,31 +22,31 @@ if [[ "$BUMP_TYPE" != "major" && "$BUMP_TYPE" != "minor" && "$BUMP_TYPE" != "pat
 fi
 
 if [ ! -f "$VERSION_FILE" ]; then
-    echo "1.0" > "$VERSION_FILE"
+    echo "1.0.0" > "$VERSION_FILE"
 fi
 
-BASE_VERSION=$(cat "$VERSION_FILE")
-IFS='.' read -r major minor <<< "$BASE_VERSION"
+CURRENT_FULL_VERSION=$(cat "$VERSION_FILE")
+IFS='.' read -r major minor build <<< "$CURRENT_FULL_VERSION"
 
 if [[ "$BUMP_TYPE" == "major" ]]; then
     major=$((major + 1))
     minor=0
-    echo "🚀 Bumping Major Version: $BASE_VERSION -> $major.$minor"
-    echo "$major.$minor" > "$VERSION_FILE"
+    build=$((build + 1))
+    echo "🚀 Bumping Major Version: $CURRENT_FULL_VERSION -> $major.$minor.$build"
 elif [[ "$BUMP_TYPE" == "minor" ]]; then
     minor=$((minor + 1))
-    echo "🚀 Bumping Minor Version: $BASE_VERSION -> $major.$minor"
-    echo "$major.$minor" > "$VERSION_FILE"
+    build=$((build + 1))
+    echo "🚀 Bumping Minor Version: $CURRENT_FULL_VERSION -> $major.$minor.$build"
 elif [[ "$BUMP_TYPE" == "patch" ]]; then
-    echo "🚀 Patch release: Base version ($BASE_VERSION) unchanged. Commit count will increment."
+    build=$((build + 1))
+    echo "🚀 Patch Version: $CURRENT_FULL_VERSION -> $major.$minor.$build"
 fi
 
-COMMIT_COUNT=$(git rev-list --count HEAD)
-NEXT_COMMIT_COUNT=$((COMMIT_COUNT + 1))
-NEW_BASE_VERSION=$(cat "$VERSION_FILE")
-FULL_VERSION="$NEW_BASE_VERSION.$NEXT_COMMIT_COUNT"
+NEW_FULL_VERSION="$major.$minor.$build"
 
-echo "🎯 Target Version: $FULL_VERSION"
+echo "🎯 Target Version: $NEW_FULL_VERSION"
+
+echo "$NEW_FULL_VERSION" > "$VERSION_FILE"
 
 echo "📝 Extracting user-facing release notes..."
 RELEASE_NOTES_FILE="release_notes_tmp.md"
@@ -106,7 +106,7 @@ TEMP_CHANGELOG=$(mktemp)
 sed "s/^## \[Unreleased\]$/## [Unreleased]\\
 _无待发布的变更_\\
 \\
-## [$FULL_VERSION] - $DATE_STR/" "$CHANGELOG_FILE" > "$TEMP_CHANGELOG"
+## [$NEW_FULL_VERSION] - $DATE_STR/" "$CHANGELOG_FILE" > "$TEMP_CHANGELOG"
 mv "$TEMP_CHANGELOG" "$CHANGELOG_FILE"
 
 echo "💾 Committing changes..."
@@ -118,12 +118,12 @@ if git ls-files --error-unmatch scripts/increment_version.sh >/dev/null 2>&1; th
     git rm scripts/increment_version.sh
 fi
 
-git commit -m "chore(release): bump version to $FULL_VERSION"
-git tag "v$FULL_VERSION"
+git commit -m "chore(release): bump version to $NEW_FULL_VERSION"
+git tag "v$NEW_FULL_VERSION"
 
 echo "☁️ Pushing to remote..."
 git push origin master
-git push origin "v$FULL_VERSION"
+git push origin "v$NEW_FULL_VERSION"
 
 echo "🔨 Building project and DMG..."
 make dmg
@@ -133,9 +133,9 @@ if [ ! -f "$DMG_PATH" ]; then
     exit 1
 fi
 
-echo "📦 Creating GitHub Release v$FULL_VERSION..."
-gh release create "v$FULL_VERSION" "$DMG_PATH" \
-    --title "v$FULL_VERSION" \
+echo "📦 Creating GitHub Release v$NEW_FULL_VERSION..."
+gh release create "v$NEW_FULL_VERSION" "$DMG_PATH" \
+    --title "v$NEW_FULL_VERSION" \
     --notes-file "$RELEASE_NOTES_FILE" \
     --draft=false \
     --prerelease=false
@@ -149,7 +149,7 @@ if [ -f "./scripts/generate-appcast.sh" ] && [ -f ".sparkle-keys/sparkle_private
     
     if [ -f "appcast.xml" ]; then
         git add appcast.xml
-        git commit -m "chore(sparkle): update appcast for v$FULL_VERSION" || true
+        git commit -m "chore(sparkle): update appcast for v$NEW_FULL_VERSION" || true
         git push origin master || true
         echo "✅ Appcast updated and committed"
     fi
@@ -161,13 +161,13 @@ fi
 echo ""
 echo "🍺 Updating Homebrew Cask..."
 if [ -f "./scripts/update-homebrew-cask.sh" ]; then
-    ./scripts/update-homebrew-cask.sh "$FULL_VERSION" || echo "⚠️  Homebrew update failed (non-fatal)"
+    ./scripts/update-homebrew-cask.sh "$NEW_FULL_VERSION" || echo "⚠️  Homebrew update failed (non-fatal)"
 else
     echo "⚠️  Skipping Homebrew update (script not found)"
 fi
 
 echo ""
-echo "🎉 Successfully released v$FULL_VERSION!"
+echo "🎉 Successfully released v$NEW_FULL_VERSION!"
 echo ""
 echo "📋 Post-release checklist:"
 echo "   ✅ GitHub Release created"
@@ -175,4 +175,4 @@ echo "   ✅ DMG uploaded"
 echo "   ✅ Sparkle appcast updated (if configured)"
 echo "   ✅ Homebrew Cask updated (if configured)"
 echo ""
-echo "🌐 Release URL: https://github.com/xykong/markdown-quicklook/releases/tag/v$FULL_VERSION"
+echo "🌐 Release URL: https://github.com/xykong/markdown-quicklook/releases/tag/v$NEW_FULL_VERSION"

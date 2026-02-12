@@ -45,9 +45,8 @@ if [ ! -f "$VERSION_FILE" ]; then
     exit 1
 fi
 
-BASE_VERSION=$(cat "$VERSION_FILE")
-COMMIT_COUNT=$(git -C "$PROJECT_ROOT" rev-list --count HEAD 2>/dev/null || echo "0")
-FULL_VERSION="$BASE_VERSION.$COMMIT_COUNT"
+FULL_VERSION=$(cat "$VERSION_FILE")
+BUILD_NUMBER=$(echo "$FULL_VERSION" | cut -d'.' -f3)
 
 echo "📝 Generating Sparkle signature for v$FULL_VERSION..."
 echo "   Using: $SIGN_UPDATE"
@@ -79,7 +78,7 @@ PUB_DATE=$(date -u +"%a, %d %b %Y %H:%M:%S +0000")
 echo ""
 echo "📦 Release Info:"
 echo "   Version: $FULL_VERSION"
-echo "   Build:   $COMMIT_COUNT"
+echo "   Build:   $BUILD_NUMBER"
 echo "   Size:    $FILE_SIZE bytes"
 echo "   Date:    $PUB_DATE"
 echo "   Signature: ${ED_SIGNATURE:0:50}..."
@@ -104,7 +103,7 @@ TEMP_ITEM=$(cat <<EOF
         <item>
             <title>Version $FULL_VERSION</title>
             <link>$RELEASE_URL</link>
-            <sparkle:version>$COMMIT_COUNT</sparkle:version>
+            <sparkle:version>$BUILD_NUMBER</sparkle:version>
             <sparkle:shortVersionString>$FULL_VERSION</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
             <pubDate>$PUB_DATE</pubDate>
