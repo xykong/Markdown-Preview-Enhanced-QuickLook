@@ -7,6 +7,31 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.13.150</title>
+            <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.13.150</link>
+            <sparkle:version>150</sparkle:version>
+            <sparkle:shortVersionString>1.13.150</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 12 Feb 2026 17:26:39 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/markdown-quicklook/releases/download/v1.13.150/MarkdownPreviewEnhanced.dmg"
+                sparkle:edSignature="d5y3bDHmhRDkLVNZkOvRBG+3y+ZgBttdnG9qhoIITxC02Hgs63AIoWW3waRfV9q0RChKKYUmbWEO9L+LCRWvDg=="
+                length="7493643"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><pre>
+Added
+- **更新后自动恢复文件**: 更新后自动打开上次查看的 Markdown 文件
+  - 在主应用打开文件时自动保存文件路径
+  - 通过 Sparkle 更新器检测更新安装事件
+  - 更新完成后应用重启时自动恢复上次打开的文件
+  - 使用 App Groups (group.com.xykong.Markdown) 实现跨进程持久化存储
+  - 如果用户之前查看的文件已被删除，会优雅地处理失败情况
+  - 只在更新后触发恢复，正常启动不会影响用户体验</pre><p><a href="https://github.com/xykong/markdown-quicklook/releases/tag/v1.13.150">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.13.149</title>
             <link>https://github.com/xykong/markdown-quicklook/releases/tag/v1.13.149</link>
             <sparkle:version>149</sparkle:version>
