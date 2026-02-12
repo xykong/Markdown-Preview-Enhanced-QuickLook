@@ -114,26 +114,26 @@ struct MarkdownApp: App {
             CommandGroup(after: .appInfo) {
                 CheckForUpdatesView(updaterController: appDelegate.updaterController)
             }
-            
-            CommandMenu("View") {
+
+            CommandGroup(after: .windowArrangement) {
                 Button(action: {
                     viewMode = (viewMode == .preview) ? .source : .preview
                 }) {
                     Text(viewMode == .source ? "Show Preview" : "Show Source")
                 }
                 .keyboardShortcut("m", modifiers: [.command, .shift])
-                
+
                 Divider()
-                
+
                 Button(action: {
                     NotificationCenter.default.post(name: .toggleSearch, object: nil)
                 }) {
                     Text(NSLocalizedString("Find...", comment: "Search menu item"))
                 }
-                .keyboardShortcut("f", modifiers: .command)
-                
+                .keyboardShortcut("f", modifiers: [.command])
+
                 Divider()
-                
+
                 Menu("Appearance") {
                     ForEach(AppearanceMode.allCases) { mode in
                         Button(action: {

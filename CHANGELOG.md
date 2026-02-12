@@ -3,6 +3,9 @@
 ## [Unreleased]
 
 ### Fixed
+- **菜单重复问题**: 修复主应用菜单栏中出现两个 "View" 菜单的问题
+  - 将 `CommandMenu("View")` 改为 `CommandGroup(after: .windowArrangement)`
+  - 菜单项现在正确添加到系统默认的 View 菜单中，而不是创建新的独立菜单
 - **国际化支持 (i18n)**: 修复"检查更新"菜单项和 QuickLook 预览中的 Toast 消息在英文系统中显示中文的问题
   - 将硬编码的中文文本替换为 `NSLocalizedString` 调用
   - 在 `en.lproj/Localizable.strings` 和 `zh-Hans.lproj/Localizable.strings` 中添加对应的翻译
