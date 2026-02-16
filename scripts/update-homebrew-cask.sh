@@ -76,20 +76,28 @@ if ! git diff --quiet Casks/flux-markdown.rb; then
     git diff Casks/flux-markdown.rb
     echo ""
     
-    read -p "👉 Commit and push changes? (y/n) " -n 1 -r
-    echo ""
-    
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        git add Casks/flux-markdown.rb
-        git commit -m "chore(cask): update flux-markdown to v$VERSION"
-        git push origin master
-        echo "✅ Changes committed and pushed to homebrew-tap"
-    else
-        echo "⚠️  Changes not committed. Please commit manually:"
+    if [ -n "${CI:-}" ] || [ ! -t 0 ]; then
+        echo "⚠️  Non-interactive mode: skipping commit/push. Please commit manually:"
         echo "   cd $(pwd)"
         echo "   git add Casks/flux-markdown.rb"
         echo "   git commit -m 'chore(cask): update flux-markdown to v$VERSION'"
         echo "   git push origin master"
+    else
+        read -p "👉 Commit and push changes? (y/n) " -n 1 -r
+        echo ""
+
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            git add Casks/flux-markdown.rb
+            git commit -m "chore(cask): update flux-markdown to v$VERSION"
+            git push origin master
+            echo "✅ Changes committed and pushed to homebrew-tap"
+        else
+            echo "⚠️  Changes not committed. Please commit manually:"
+            echo "   cd $(pwd)"
+            echo "   git add Casks/flux-markdown.rb"
+            echo "   git commit -m 'chore(cask): update flux-markdown to v$VERSION'"
+            echo "   git push origin master"
+        fi
     fi
 else
     echo "ℹ️  No changes detected in Cask file"

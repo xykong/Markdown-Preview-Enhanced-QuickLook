@@ -62,3 +62,6 @@ test-base64.html
 
 # Backup files (Swift backup)
 *.bak
+
+# Release temp files
+release_notes_tmp.md

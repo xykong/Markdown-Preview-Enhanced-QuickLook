@@ -16,12 +16,12 @@ generate: build_renderer
 	minor=$$(echo $$full_v | cut -d'.' -f2); \
 	build=$$(echo $$full_v | cut -d'.' -f3); \
 	echo "Generating Project with Version: $$full_v (Major: $$major, Minor: $$minor, Build: $$build)"; \
-	rm -rf MarkdownPreviewEnhanced.xcodeproj; \
+	rm -rf FluxMarkdown.xcodeproj; \
 	MARKETING_VERSION=$$full_v CURRENT_PROJECT_VERSION=$$build xcodegen generate --quiet
 
 app: generate
 	@echo "🔨 Building application in $(or $(CONFIGURATION),Release) configuration..."
-	xcodebuild -project MarkdownPreviewEnhanced.xcodeproj -scheme Markdown -configuration $(or $(CONFIGURATION),Release) -destination 'platform=macOS,arch=arm64' clean build -quiet
+	xcodebuild -project FluxMarkdown.xcodeproj -scheme Markdown -configuration $(or $(CONFIGURATION),Release) -destination 'platform=macOS,arch=arm64' clean build -quiet
 	@echo "✅ Build completed: $(or $(CONFIGURATION),Release) configuration"
 
 install:
