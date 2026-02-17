@@ -1,22 +1,49 @@
 # FluxMarkdown
 
-[中文 README](README_ZH.md)
+<p align="center">
+  <em>Beautiful Markdown previews in macOS Finder QuickLook</em><br>
+  Mermaid • KaTeX • GFM • TOC • Code Highlighting
+</p>
 
-Beautiful Markdown previews in macOS QuickLook (Mermaid, KaTeX, GFM, TOC).
+<p align="center">
+  <a href="https://github.com/xykong/flux-markdown/stargazers">
+    <img src="https://img.shields.io/github/stars/xykong/flux-markdown?style=social" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/xykong/flux-markdown/releases">
+    <img src="https://img.shields.io/github/v/release/xykong/flux-markdown?style=flat-square" alt="Latest release">
+  </a>
+  <a href="https://github.com/xykong/flux-markdown/releases">
+    <img src="https://img.shields.io/github/downloads/xykong/flux-markdown/total?style=flat-square" alt="Downloads">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/xykong/flux-markdown?style=flat-square" alt="License">
+  </a>
+</p>
 
-> Inspired by and partially based on [markdown-preview-enhanced](https://github.com/shd101wyy/markdown-preview-enhanced).
+<p align="center">
+  <a href="README_ZH.md">中文文档</a> •
+  <a href="#-quick-install-30-seconds">Install</a> •
+  <a href="#-troubleshooting">Troubleshooting</a>
+</p>
 
 ---
 
-## Demo
-
-> TODO: record `docs/assets/demo.gif` (10 15s). See `docs/assets/README.md`.
+## ✨ Demo
 
 ![FluxMarkdown Demo](docs/assets/demo.gif)
 
+<p align="center">
+  <strong>Press <code>Space</code> in Finder → Instant preview with diagrams, math, and more.</strong>
+</p>
+
+<p align="center">
+  <em>👋 If FluxMarkdown helps you, consider giving it a</em>
+  <a href="https://github.com/xykong/flux-markdown/stargazers">⭐ star on GitHub</a>!
+</p>
+
 ---
 
-## Install (30 seconds)
+## 🚀 Quick Install (30 seconds)
 
 ### Homebrew (Recommended)
 
@@ -33,34 +60,50 @@ brew install --cask flux-markdown
 
 ---
 
-## Why FluxMarkdown
+## 💡 Why FluxMarkdown?
 
-- **GFM**: tables, task lists, strikethrough
-- **Mermaid** diagrams
-- **KaTeX** math
-- **Code highlighting**
-- **TOC panel** with section tracking
-- **Zoom** (Cmd +/-/0, Cmd+scroll, pinch)
-- **Scroll position memory** per file
-- **Links**: full navigation in the main app; QuickLook shows a toast due to sandbox limitations
+| Feature | Description |
+|---------|-------------|
+| 📊 **Mermaid Diagrams** | Architecture diagrams, flowcharts, sequence diagrams |
+| 🧮 **KaTeX Math** | Inline and block mathematical expressions |
+| 📝 **GFM Support** | Tables, task lists, strikethrough, and more |
+| 🎨 **Code Highlighting** | Multi-language syntax highlighting |
+| 📑 **TOC Panel** | Interactive table of contents with section tracking |
+| 🔍 **Zoom & Pan** | Cmd +/-/0, Cmd+scroll, pinch gestures |
+| 💾 **Position Memory** | Remembers scroll position per file |
+| 🌓 **Themes** | Light, Dark, and System-synchronized modes |
 
 ---
 
-## Troubleshooting
+## 🛠️ Troubleshooting
 
-### "App is damaged" / "Unidentified developer"
+<details>
+<summary><strong>"App is damaged" / "Unidentified developer"</strong></summary>
 
+Run this in Terminal:
 ```bash
 xattr -cr "/Applications/FluxMarkdown.app"
 ```
+</details>
 
-### QuickLook not refreshing
+<details>
+<summary><strong>QuickLook not showing updates</strong></summary>
 
+Reset QuickLook cache:
 ```bash
 qlmanage -r
 ```
+</details>
 
-More: see `docs/` (start with `docs/TROUBLESHOOTING.md` and `docs/AUTO_UPDATE.md`).
+<details>
+<summary><strong>Preview not working at all</strong></summary>
+
+1. Check if the app is in `/Applications/`
+2. Try restarting Finder: `killall Finder`
+3. Check `pluginkit -m -v` for active QuickLook extensions
+</details>
+
+**📚 More help:** See [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) and [`docs/AUTO_UPDATE.md`](docs/AUTO_UPDATE.md)
 
 ---
 
@@ -91,6 +134,12 @@ cd flux-markdown
 make install
 ```
 
-## License
+## 📄 License
 
-See `LICENSE`.
+See [`LICENSE`](LICENSE).
+
+---
+
+<p align="center">
+  <sub>Inspired by and partially based on <a href="https://github.com/shd101wyy/markdown-preview-enhanced">markdown-preview-enhanced</a></sub>
+</p>

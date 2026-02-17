@@ -1,7 +1,15 @@
 # Changelog
 
 ## [Unreleased]
-_无待发布的变更_
+
+### Added
+- **README 首屏优化**: 改进项目首页的视觉呈现和用户体验
+  - 添加演示 GIF (`docs/assets/demo.gif`)，展示 Mermaid、KaTeX、代码高亮、TOC 等核心功能
+  - 添加 GitHub badges（Stars、Release、Downloads、License）以增强信任度
+  - 添加快速导航链接（中文文档、安装、常见问题）
+  - 添加显式 Star CTA（Call-to-Action）以提升 Star 转化率
+  - 改进 Troubleshooting 部分使用折叠式 `<details>`，降低视觉噪音
+  - 同步更新中英文 README（README.md 和 README_ZH.md）
 
 ## [1.13.158] - 2026-02-16
 _无待发布的变更_

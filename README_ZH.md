@@ -1,22 +1,49 @@
 # FluxMarkdown
 
-[English README](README.md)
+<p align="center">
+  <em>在 macOS Finder 中按空格即可预览精美的 Markdown</em><br>
+  Mermaid • KaTeX • GFM • 目录 • 代码高亮
+</p>
 
-在 macOS Finder 里按空格（QuickLook）即可高质量预览 Markdown：支持 Mermaid / KaTeX / GFM / 目录（TOC）。
+<p align="center">
+  <a href="https://github.com/xykong/flux-markdown/stargazers">
+    <img src="https://img.shields.io/github/stars/xykong/flux-markdown?style=social" alt="GitHub stars">
+  </a>
+  <a href="https://github.com/xykong/flux-markdown/releases">
+    <img src="https://img.shields.io/github/v/release/xykong/flux-markdown?style=flat-square" alt="最新版本">
+  </a>
+  <a href="https://github.com/xykong/flux-markdown/releases">
+    <img src="https://img.shields.io/github/downloads/xykong/flux-markdown/total?style=flat-square" alt="下载量">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/xykong/flux-markdown?style=flat-square" alt="开源协议">
+  </a>
+</p>
 
-> 本项目受 [markdown-preview-enhanced](https://github.com/shd101wyy/markdown-preview-enhanced) 启发，并使用了其部分内容。
+<p align="center">
+  <a href="README.md">English</a> •
+  <a href="#-快速安装30-秒">安装</a> •
+  <a href="#️-常见问题">常见问题</a>
+</p>
 
 ---
 
-## 演示
-
-> TODO：录制 `docs/assets/demo.gif`（10-15 秒）。参考 `docs/assets/README.md`。
+## ✨ 演示
 
 ![FluxMarkdown 演示](docs/assets/demo.gif)
 
+<p align="center">
+  <strong>在 Finder 中选中文件按 <code>空格</code> → 立即预览图表、公式等内容。</strong>
+</p>
+
+<p align="center">
+  <em>👋 如果 FluxMarkdown 对你有帮助，请考虑给它一个</em>
+  <a href="https://github.com/xykong/flux-markdown/stargazers">⭐ GitHub Star</a>！
+</p>
+
 ---
 
-## 30 秒安装
+## 🚀 快速安装（30 秒）
 
 ### Homebrew（推荐）
 
@@ -33,34 +60,50 @@ brew install --cask flux-markdown
 
 ---
 
-## 为什么选择 FluxMarkdown
+## 💡 为什么选择 FluxMarkdown？
 
-- **GFM**：表格、任务列表、删除线
-- **Mermaid**：流程图、时序图等
-- **KaTeX**：数学公式
-- **代码高亮**
-- **目录（TOC）面板**：自动生成，跟随高亮
-- **缩放**：Cmd +/-/0、Cmd+滚轮、触控板捏合
-- **滚动位置记忆**：按文件记忆并恢复
-- **链接**：主应用支持完整跳转；QuickLook 由于沙盒限制会弹 toast 提示
+| 功能 | 说明 |
+|------|------|
+| 📊 **Mermaid 图表** | 架构图、流程图、时序图等 |
+| 🧮 **KaTeX 数学公式** | 行内和块级数学表达式 |
+| 📝 **GFM 支持** | 表格、任务列表、删除线等 |
+| 🎨 **代码高亮** | 多语言语法高亮 |
+| 📑 **目录面板** | 交互式目录，自动跟踪当前章节 |
+| 🔍 **缩放与平移** | Cmd +/-/0、Cmd+滚轮、触控板捏合 |
+| 💾 **位置记忆** | 按文件记忆滚动位置 |
+| 🌓 **主题** | 亮色、暗色、跟随系统 |
 
 ---
 
-## 常见问题
+## 🛠️ 常见问题
 
-### “应用已损坏” / “无法验证开发者”
+<details>
+<summary><strong>"应用已损坏" / "无法验证开发者"</strong></summary>
 
+在终端运行：
 ```bash
 xattr -cr "/Applications/FluxMarkdown.app"
 ```
+</details>
 
-### QuickLook 不刷新
+<details>
+<summary><strong>QuickLook 不显示更新</strong></summary>
 
+重置 QuickLook 缓存：
 ```bash
 qlmanage -r
 ```
+</details>
 
-更多：见 `docs/`（从 `docs/TROUBLESHOOTING.md`、`docs/AUTO_UPDATE.md` 开始）。
+<details>
+<summary><strong>预览完全不工作</strong></summary>
+
+1. 检查应用是否在 `/Applications/` 目录
+2. 尝试重启 Finder：`killall Finder`
+3. 检查 `pluginkit -m -v` 查看活动的 QuickLook 扩展
+</details>
+
+**📚 更多帮助：** 参见 [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) 和 [`docs/AUTO_UPDATE.md`](docs/AUTO_UPDATE.md)
 
 ---
 
@@ -89,6 +132,12 @@ cd flux-markdown
 make install
 ```
 
-## License
+## 📄 License
 
-见 `LICENSE`。
+见 [`LICENSE`](LICENSE)。
+
+---
+
+<p align="center">
+  <sub>本项目受 <a href="https://github.com/shd101wyy/markdown-preview-enhanced">markdown-preview-enhanced</a> 启发，并使用了其部分内容</sub>
+</p>
