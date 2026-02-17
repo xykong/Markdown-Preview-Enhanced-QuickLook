@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Changed
+- **⚠️ LICENSE 变更为双许可证模式（重大变更）**:
+  - **开源许可证**: 从 Non-Commercial 改为 **GPL-3.0**
+    - ✅ 个人、教育、开源项目可免费使用
+    - ✅ 任何修改必须以 GPL-3.0 开源
+    - ✅ 满足 Homebrew 官方 cask 提交要求
+  - **商业许可证**: 为闭源商业使用提供选项
+    - 📧 联系 xy.kong@gmail.com 咨询商业授权
+    - 📜 详情见 `LICENSE.COMMERCIAL`
+  - **影响**: 
+    - ✅ 移除了商业使用的硬性限制
+    - ✅ 允许提交到 Homebrew 官方仓库
+    - ✅ 允许企业和开源项目自由采用
+    - ⚠️ 如需闭源商业化，需购买商业许可证
+
 ### Added
 - **README 首屏优化**: 改进项目首页的视觉呈现和用户体验
   - 添加演示 GIF (`docs/assets/demo.gif`)，展示 Mermaid、KaTeX、代码高亮、TOC 等核心功能

@@ -1,0 +1,59 @@
+# Commercial License for FluxMarkdown
+
+## Dual Licensing
+
+FluxMarkdown is available under two licenses:
+
+1. **GNU General Public License v3.0 (GPL-3.0)** - For open source use
+2. **Commercial License** - For closed-source or proprietary use
+
+---
+
+## When Do You Need a Commercial License?
+
+You need a commercial license if you want to:
+
+- Use FluxMarkdown in a closed-source/proprietary product
+- Distribute FluxMarkdown as part of a commercial product without open-sourcing your entire codebase
+- Modify FluxMarkdown without releasing your changes under GPL-3.0
+- Integrate FluxMarkdown into your commercial software without GPL obligations
+
+---
+
+## What's Included in the Commercial License?
+
+- Permission to use, modify, and distribute FluxMarkdown in closed-source products
+- No requirement to open-source your derivative works
+- Priority support (optional)
+- Custom development and integration assistance (optional)
+
+---
+
+## Pricing & Contact
+
+For commercial licensing inquiries, please contact:
+
+**Email:** xy.kong@gmail.com  
+**GitHub:** [@xykong](https://github.com/xykong)
+
+We offer flexible licensing options based on your use case:
+- Individual developer licenses
+- Team/organization licenses
+- Enterprise licenses with support
+
+---
+
+## FAQ
+
+**Q: Can I use FluxMarkdown for free in my company?**  
+A: Yes, as long as you comply with GPL-3.0 requirements (i.e., release your modifications as open source under GPL-3.0).
+
+**Q: I'm building a commercial product. Do I need a commercial license?**  
+A: Only if you want to keep your derivative work closed-source. If you're willing to open-source your modifications under GPL-3.0, you can use the free license.
+
+**Q: What if I'm just using FluxMarkdown internally without distribution?**  
+A: Internal use without distribution is generally covered under GPL-3.0. Contact us if you have specific concerns.
+
+---
+
+Copyright (c) 2024-2026 xykong. All rights reserved.

@@ -132,9 +132,22 @@ cd flux-markdown
 make install
 ```
 
-## 📄 License
+## 📄 开源协议
 
-见 [`LICENSE`](LICENSE)。
+**FluxMarkdown 采用双许可证模式：**
+
+### 开源许可证：GPL-3.0
+- ✅ **免费**用于个人、教育和开源项目
+- ✅ 任何修改必须以 GPL-3.0 开源
+- 📜 完整条款见 [`LICENSE`](LICENSE)
+
+### 商业许可证
+- 💼 **闭源**或商业产品需要商业许可证
+- 💼 允许分发而无需开源您的修改
+- 📧 联系方式：**xy.kong@gmail.com** 咨询商业授权
+- 📜 详情见 [`LICENSE.COMMERCIAL`](LICENSE.COMMERCIAL)
+
+**为什么采用双许可证？** 这确保了 FluxMarkdown 对社区保持免费和开源，同时也为需要闭源使用的商业用户提供了选择。
 
 ---
 

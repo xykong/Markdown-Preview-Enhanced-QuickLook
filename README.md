@@ -136,7 +136,20 @@ make install
 
 ## 📄 License
 
-See [`LICENSE`](LICENSE).
+**FluxMarkdown is dual-licensed:**
+
+### Open Source License: GPL-3.0
+- ✅ **Free** for personal, educational, and open-source use
+- ✅ Any modifications must also be open-sourced under GPL-3.0
+- 📜 See [`LICENSE`](LICENSE) for full terms
+
+### Commercial License
+- 💼 Required for **closed-source** or proprietary products
+- 💼 Allows distribution without open-sourcing your modifications
+- 📧 Contact: **xy.kong@gmail.com** for licensing inquiries
+- 📜 See [`LICENSE.COMMERCIAL`](LICENSE.COMMERCIAL) for details
+
+**Why dual licensing?** This ensures FluxMarkdown remains free and open for the community while allowing commercial use without GPL obligations for those who need it.
 
 ---
 
