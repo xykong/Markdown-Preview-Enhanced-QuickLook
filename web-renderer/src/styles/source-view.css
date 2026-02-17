@@ -18,24 +18,25 @@
 
 .source-view .source-pre {
     margin: 0;
-    padding: 6px;
+    padding: 0;
     border-radius: 0;
-    font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     font-size: 13px;
-    line-height: 1.6;
+    line-height: 1.5;
     overflow-x: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
+    tab-size: 4;
 }
 
 .source-view-light .source-pre {
-    background-color: #f6f8fa;
-    border: 1px solid #d0d7de;
+    background-color: transparent;
+    border: none;
 }
 
 .source-view-dark .source-pre {
-    background-color: #161b22;
-    border: 1px solid #30363d;
+    background-color: transparent;
+    border: none;
 }
 
 .source-view .source-pre code {
