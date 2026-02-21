@@ -276,7 +276,10 @@ async function main() {
 
   console.log(`  Fixtures to run: ${fixtures.map(f => f.name).join(', ')}`);
 
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--allow-file-access-from-files', '--disable-web-security'],
+  });
   const results = [];
 
   try {
