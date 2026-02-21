@@ -1,16 +1,20 @@
 import { defineConfig } from 'vite';
-import { viteSingleFile } from 'vite-plugin-singlefile';
 import path from 'path';
 
 export default defineConfig({
-  plugins: [viteSingleFile()],
-  base: './', // Use relative paths for assets
+  base: './',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
     sourcemap: false,
     emptyOutDir: true,
-    assetsInlineLimit: 100000000,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          mermaid: ['mermaid'],
+        },
+      },
+    },
   },
   resolve: {
     alias: {
@@ -18,7 +22,6 @@ export default defineConfig({
     },
   },
   define: {
-    // Polyfill process.env for dependencies that might expect it
     'process.env': {},
   },
 });

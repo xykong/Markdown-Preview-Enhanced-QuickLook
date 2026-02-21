@@ -323,15 +323,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         }
         
         if let url = bundleURL {
-            do {
-                let htmlContent = try String(contentsOf: url, encoding: .utf8)
-                let baseURL = url.deletingLastPathComponent()
-                webView.loadHTMLString(htmlContent, baseURL: baseURL)
-                os_log("🔵 Loaded HTML content from bundle using loadHTMLString (allows data: URLs)", log: logger, type: .default)
-            } catch {
-                os_log("🔴 Failed to read HTML file: %{public}@", log: logger, type: .error, error.localizedDescription)
-                webView.loadHTMLString("<h1>Error loading HTML: \(error.localizedDescription)</h1>", baseURL: nil)
-            }
+            let distDir = url.deletingLastPathComponent()
+            webView.loadFileURL(url, allowingReadAccessTo: distDir)
+            os_log("🔵 Loaded HTML via loadFileURL: %{public}@", log: logger, type: .default, url.path)
         } else {
             webView.loadHTMLString("<h1>Error: index.html not found</h1>", baseURL: nil)
         }
