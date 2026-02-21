@@ -41,7 +41,60 @@ import './styles/search.css';
 import './styles/source-view.css';
 
 import MarkdownIt from 'markdown-it';
-import hljs from 'highlight.js';
+import hljs from 'highlight.js/lib/core';
+
+// Tree-shaking: only register languages that cover ~95% of real-world usage.
+// Unregistered languages fall back to an unhighlighted code block gracefully.
+import langJavascript from 'highlight.js/lib/languages/javascript';
+import langTypescript from 'highlight.js/lib/languages/typescript';
+import langPython from 'highlight.js/lib/languages/python';
+import langBash from 'highlight.js/lib/languages/bash';
+import langShell from 'highlight.js/lib/languages/shell';
+import langSql from 'highlight.js/lib/languages/sql';
+import langJson from 'highlight.js/lib/languages/json';
+import langYaml from 'highlight.js/lib/languages/yaml';
+import langMarkdown from 'highlight.js/lib/languages/markdown';
+import langCss from 'highlight.js/lib/languages/css';
+import langXml from 'highlight.js/lib/languages/xml';
+import langGo from 'highlight.js/lib/languages/go';
+import langRust from 'highlight.js/lib/languages/rust';
+import langJava from 'highlight.js/lib/languages/java';
+import langC from 'highlight.js/lib/languages/c';
+import langCpp from 'highlight.js/lib/languages/cpp';
+import langSwift from 'highlight.js/lib/languages/swift';
+import langKotlin from 'highlight.js/lib/languages/kotlin';
+import langRuby from 'highlight.js/lib/languages/ruby';
+import langPhp from 'highlight.js/lib/languages/php';
+import langCsharp from 'highlight.js/lib/languages/csharp';
+import langDiff from 'highlight.js/lib/languages/diff';
+import langDockerfile from 'highlight.js/lib/languages/dockerfile';
+import langNginx from 'highlight.js/lib/languages/nginx';
+
+hljs.registerLanguage('javascript', langJavascript);
+hljs.registerLanguage('typescript', langTypescript);
+hljs.registerLanguage('python', langPython);
+hljs.registerLanguage('bash', langBash);
+hljs.registerLanguage('shell', langShell);
+hljs.registerLanguage('sql', langSql);
+hljs.registerLanguage('json', langJson);
+hljs.registerLanguage('yaml', langYaml);
+hljs.registerLanguage('markdown', langMarkdown);
+hljs.registerLanguage('css', langCss);
+hljs.registerLanguage('xml', langXml);
+hljs.registerLanguage('html', langXml); // html uses xml grammar
+hljs.registerLanguage('go', langGo);
+hljs.registerLanguage('rust', langRust);
+hljs.registerLanguage('java', langJava);
+hljs.registerLanguage('c', langC);
+hljs.registerLanguage('cpp', langCpp);
+hljs.registerLanguage('swift', langSwift);
+hljs.registerLanguage('kotlin', langKotlin);
+hljs.registerLanguage('ruby', langRuby);
+hljs.registerLanguage('php', langPhp);
+hljs.registerLanguage('csharp', langCsharp);
+hljs.registerLanguage('diff', langDiff);
+hljs.registerLanguage('dockerfile', langDockerfile);
+hljs.registerLanguage('nginx', langNginx);
 
 // Import MarkdownIt plugins
 // @ts-ignore
@@ -152,6 +205,8 @@ try {
 let toc: TableOfContents | null = null;
 let searchEngine: SearchEngine | null = null;
 let searchUI: SearchUI | null = null;
+let mermaidInstance: typeof import('mermaid')['default'] | null = null;
+let mermaidCurrentTheme: string | null = null;
 
 declare global {
     interface Window {
@@ -295,13 +350,19 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
         // 3. Trigger Mermaid rendering if needed
         if (mermaidBlocks.length > 0) {
             try {
-                const mermaidModule = await import('mermaid');
-                const mermaid = mermaidModule.default;
-                mermaid.initialize({
-                    startOnLoad: false,
-                    theme: mermaidTheme as any,
-                    suppressErrorRendering: true
-                });
+                if (!mermaidInstance) {
+                    const mermaidModule = await import('mermaid');
+                    mermaidInstance = mermaidModule.default;
+                }
+                const mermaid = mermaidInstance;
+                if (mermaidCurrentTheme !== mermaidTheme) {
+                    mermaid.initialize({
+                        startOnLoad: false,
+                        theme: mermaidTheme as any,
+                        suppressErrorRendering: true
+                    });
+                    mermaidCurrentTheme = mermaidTheme;
+                }
                 
                 // Render each mermaid block individually to capture per-block errors
                 const mermaidDivs = outputDiv.querySelectorAll('.mermaid');

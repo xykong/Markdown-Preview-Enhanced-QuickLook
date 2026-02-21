@@ -827,7 +827,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         handler(nil)
     }
     
-    private func collectImageData(from markdownURL: URL, content: String) -> [String: String] {
+    nonisolated private func collectImageData(from markdownURL: URL, content: String) -> [String: String] {
         var imageData: [String: String] = [:]
         let baseDir = markdownURL.deletingLastPathComponent()
         
@@ -916,7 +916,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         return imageData
     }
     
-    private func mimeTypeForExtension(_ ext: String) -> String {
+    nonisolated private func mimeTypeForExtension(_ ext: String) -> String {
         switch ext.lowercased() {
         case "png": return "image/png"
         case "jpg", "jpeg": return "image/jpeg"
@@ -950,15 +950,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         let safeContentArg = String(contentJsonArray.dropFirst().dropLast())
         
-        var options: [String: Any] = [:]
-        
-        if let url = self.currentURL {
-            let dir = url.deletingLastPathComponent().path
-            options["baseUrl"] = dir
-            
-            options["imageData"] = self.collectImageData(from: url, content: content)
-        }
-        
         let appearanceName = self.view.effectiveAppearance.name
         var theme = "system"
         if appearanceName == .darkAqua || appearanceName == .vibrantDark || appearanceName == .accessibilityHighContrastDarkAqua || appearanceName == .accessibilityHighContrastVibrantDark {
@@ -966,45 +957,60 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         } else if appearanceName == .aqua || appearanceName == .vibrantLight || appearanceName == .accessibilityHighContrastAqua || appearanceName == .accessibilityHighContrastVibrantLight {
             theme = "light"
         }
-        options["theme"] = theme
         
-        guard let optionsData = try? JSONSerialization.data(withJSONObject: options, options: []),
-              let optionsJson = String(data: optionsData, encoding: .utf8) else {
-            os_log("🔴 Failed to encode options to JSON", log: self.logger, type: .error)
-            return
-        }
+        let capturedURL = self.currentURL
         
-        let callJs = """
-        try {
-            window.renderMarkdown(\(safeContentArg), \(optionsJson));
-            "success"
-        } catch(e) {
-            "error: " + e.toString()
-        }
-        """
-        
-        self.webView.evaluateJavaScript(callJs) { (innerResult, innerError) in
-            if let innerError = innerError {
-                os_log("🔴 JS Execution Error: %{public}@", log: self.logger, type: .error, innerError.localizedDescription)
-            } else if let res = innerResult as? String {
-                os_log("🔵 JS Execution Result: %{public}@", log: self.logger, type: .debug, res)
+        Task.detached(priority: .userInitiated) { [weak self] in
+            guard let self = self else { return }
+            
+            var options: [String: Any] = ["theme": theme]
+            if let url = capturedURL {
+                options["baseUrl"] = url.deletingLastPathComponent().path
+                options["imageData"] = self.collectImageData(from: url, content: content)
             }
             
-            self.applyZoom()
+            guard let optionsData = try? JSONSerialization.data(withJSONObject: options, options: []),
+                  let optionsJson = String(data: optionsData, encoding: .utf8) else {
+                await MainActor.run {
+                    os_log("🔴 Failed to encode options to JSON", log: self.logger, type: .error)
+                }
+                return
+            }
             
-            if let url = self.currentURL,
-               let savedScrollY = AppearancePreference.shared.getScrollPosition(for: url.path),
-               savedScrollY > 0 {
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    let scrollJS = "window.scrollTo({ top: \(savedScrollY), behavior: 'auto' });"
-                    self.webView.evaluateJavaScript(scrollJS) { _, error in
-                        if error == nil {
-                            os_log("📊 [renderPendingMarkdown] Restored scroll position: %.0f for %{public}@",
-                                   log: self.logger, type: .default, savedScrollY, url.lastPathComponent)
-                        } else {
-                            os_log("🔴 [renderPendingMarkdown] Failed to restore scroll position: %{public}@",
-                                   log: self.logger, type: .error, error!.localizedDescription)
+            let callJs = """
+            try {
+                window.renderMarkdown(\(safeContentArg), \(optionsJson));
+                "success"
+            } catch(e) {
+                "error: " + e.toString()
+            }
+            """
+            
+            await MainActor.run {
+                self.webView.evaluateJavaScript(callJs) { (innerResult, innerError) in
+                    if let innerError = innerError {
+                        os_log("🔴 JS Execution Error: %{public}@", log: self.logger, type: .error, innerError.localizedDescription)
+                    } else if let res = innerResult as? String {
+                        os_log("🔵 JS Execution Result: %{public}@", log: self.logger, type: .debug, res)
+                    }
+                    
+                    self.applyZoom()
+                    
+                    if let url = self.currentURL,
+                       let savedScrollY = AppearancePreference.shared.getScrollPosition(for: url.path),
+                       savedScrollY > 0 {
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            let scrollJS = "window.scrollTo({ top: \(savedScrollY), behavior: 'auto' });"
+                            self.webView.evaluateJavaScript(scrollJS) { _, error in
+                                if error == nil {
+                                    os_log("📊 [renderPendingMarkdown] Restored scroll position: %.0f for %{public}@",
+                                           log: self.logger, type: .default, savedScrollY, url.lastPathComponent)
+                                } else {
+                                    os_log("🔴 [renderPendingMarkdown] Failed to restore scroll position: %{public}@",
+                                           log: self.logger, type: .error, error!.localizedDescription)
+                                }
+                            }
                         }
                     }
                 }
