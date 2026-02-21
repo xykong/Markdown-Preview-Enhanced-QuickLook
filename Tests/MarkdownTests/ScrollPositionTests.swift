@@ -1,5 +1,4 @@
 import XCTest
-@testable import MarkdownPreview
 
 final class ScrollPositionTests: XCTestCase {
     

@@ -60,6 +60,10 @@ targets:
       - Sources/Markdown/ResourceLoader.swift
       - Sources/MarkdownPreview
       - Sources/Shared
+      - benchmark/swift-bench/RenderBenchmarkTests.swift
+      - path: web-renderer/dist
+        name: WebRenderer
+        type: folder
     settings:
       GENERATE_INFOPLIST_FILE: YES
       PRODUCT_BUNDLE_IDENTIFIER: com.xykong.Markdown.Tests

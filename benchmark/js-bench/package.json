@@ -1,0 +1,14 @@
+{
+  "name": "flux-markdown-js-bench",
+  "version": "1.0.0",
+  "description": "JS rendering layer benchmark for flux-markdown",
+  "type": "module",
+  "scripts": {
+    "bench": "node bench.mjs",
+    "bench:quick": "node bench.mjs --iterations 5",
+    "bench:full": "node bench.mjs --iterations 20 --warmup 3"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

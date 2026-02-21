@@ -1,7 +1,18 @@
 # Changelog
 
 ## [Unreleased]
-_无待发布的变更_
+
+### Added
+- **性能基线测试基础设施**:
+  - 新增三层性能测试框架 (JS 引擎层 / Swift-WKWebView 层 / QuickLook 系统层)
+  - 新增 7 个标准 Markdown fixture 文件用于可重复性测试
+  - 新增 `benchmark/js-bench/` - Playwright 驱动的 JS 渲染基准测试
+  - 新增 `benchmark/swift-bench/` - XCTest 驱动的 WKWebView 桥接层测试
+  - 新增 `benchmark/ql-bench/` - qlmanage 端到端系统层测试
+  - 新增 `benchmark/compare.py` - 优化前后对比脚本
+  - 新增 `benchmark/run-all.sh` - 一键运行全部测试
+  - 新增 `docs/BENCHMARK_BASELINE.md` - 完整基线测试报告文档
+  - 记录了优化前的性能基线数据，为后续优化提供量化对比基准
 
 ## [1.14.164] - 2026-02-18
 
