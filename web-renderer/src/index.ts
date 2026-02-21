@@ -97,8 +97,7 @@ hljs.registerLanguage('dockerfile', langDockerfile);
 hljs.registerLanguage('nginx', langNginx);
 
 // Import MarkdownIt plugins
-// @ts-ignore
-import mk from '@iktakahiro/markdown-it-katex';
+
 // @ts-ignore
 import emoji from 'markdown-it-emoji';
 // @ts-ignore
@@ -148,8 +147,6 @@ try {
         return originalValidateLink(url);
     };
 
-    // Use plugins
-    md.use(mk);
     md.use(emoji);
     md.use(footnote);
     md.use(taskLists);
@@ -195,6 +192,7 @@ let searchEngine: SearchEngine | null = null;
 let searchUI: SearchUI | null = null;
 let mermaidInstance: typeof import('mermaid')['default'] | null = null;
 let mermaidCurrentTheme: string | null = null;
+let katexPlugin: ((md: MarkdownIt) => void) | null = null;
 
 declare global {
     interface Window {
@@ -256,6 +254,14 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
             } catch (e) {
                 logToSwift("JS Warning: Search initialization failed: " + e);
             }
+        }
+
+        if (/\$[\s\S]+?\$|\$\$[\s\S]+?\$\$/.test(text)) {
+            if (!katexPlugin) {
+                const m = await import('@iktakahiro/markdown-it-katex');
+                katexPlugin = (m as any).default ?? m;
+            }
+            md.use(katexPlugin as (md: MarkdownIt) => void);
         }
 
         const outline = extractOutline(md, text);
@@ -387,7 +393,13 @@ window.renderMarkdown = async function (text: string, options: { baseUrl?: strin
                  logToSwift("JS Error loading/running mermaid: " + err);
             }
         }
-        
+
+        setTimeout(() => {
+            if (!mermaidInstance) {
+                import('mermaid').then(m => { mermaidInstance = m.default; });
+            }
+        }, 0);
+
     } catch (e) {
         logToSwift("JS Error during render: " + e);
         if (outputDiv) {
