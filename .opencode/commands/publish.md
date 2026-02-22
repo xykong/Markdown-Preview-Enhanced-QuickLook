@@ -1,12 +1,12 @@
 ---
 name: publish
-description: Markdown Preview Enhanced 完整发布工作流。用于发布新版本、版本升级或更新分发渠道（GitHub、Sparkle、Homebrew）。触发词包括 "release", "publish", "bump version", "make release", "create release" 或任何涉及版本管理和分发更新的请求。
+description: FluxMarkdown 完整发布工作流。用于发布新版本、版本升级或更新分发渠道（GitHub、Sparkle、Homebrew）。触发词包括 "release", "publish", "bump version", "make release", "create release" 或任何涉及版本管理和分发更新的请求。
 model: animal-gateway/glm-4.7
 ---
 
 # Publish 命令 - 发布工作流
 
-你是 Markdown Preview Enhanced macOS 应用的发布自动化专家。你的职责是协调从版本升级到分发更新的完整发布流程。
+你是 FluxMarkdown macOS 应用的发布自动化专家。你的职责是协调从版本升级到分发更新的完整发布流程。
 
 ## 执行模式
 
@@ -58,7 +58,7 @@ model: animal-gateway/glm-4.7
 
 1. **GitHub Releases**: 主要分发渠道，包含 DMG 安装包
 2. **Sparkle Auto-Update**: appcast.xml 用于应用内自动更新
-3. **Homebrew Cask**: `../homebrew-tap/Casks/markdown-preview-enhanced.rb`
+3. **Homebrew Cask**: `../homebrew-tap/Casks/flux-markdown.rb`
 
 ## 命令调用方式
 
@@ -131,7 +131,7 @@ git push origin "v{FULL_VERSION}"
 
 **操作：**
 1. 运行：`make dmg`
-2. 验证 DMG 存在于：`build/artifacts/MarkdownPreviewEnhanced.dmg`
+2. 验证 DMG 存在于：`build/artifacts/FluxMarkdown.dmg`
 3. 记录 DMG 大小并计算 SHA256
 
 **错误处理：**
@@ -148,7 +148,7 @@ git push origin "v{FULL_VERSION}"
 **命令结构：**
 ```bash
 gh release create "v{FULL_VERSION}" \
-  build/artifacts/MarkdownPreviewEnhanced.dmg \
+  build/artifacts/FluxMarkdown.dmg \
   --title "v{FULL_VERSION}" \
   --notes "{FILTERED_CHANGELOG_CONTENT}" \
   --draft=false \
@@ -166,7 +166,7 @@ gh release view "v{FULL_VERSION}" --json assets -q '.assets[].name'
 **要求：**
 - 使用 `sign_update` 工具为 DMG 生成 Sparkle EdDSA 签名
 - 在 RSS feed 顶部插入新的 `<item>` 条目
-- 调用包装脚本：`./scripts/generate-appcast.sh build/artifacts/MarkdownPreviewEnhanced.dmg`
+- 调用包装脚本：`./scripts/generate-appcast.sh build/artifacts/FluxMarkdown.dmg`
 - **还不要提交** - 将在步骤 7 中一起提交
 
 **实现：**
@@ -177,9 +177,9 @@ gh release view "v{FULL_VERSION}" --json assets -q '.assets[].name'
 - **必须使用** Sparkle 的 `sign_update` 工具，它从 macOS Keychain 读取密钥
 
 **步骤：**
-1. 调用：`./scripts/generate-appcast.sh build/artifacts/MarkdownPreviewEnhanced.dmg`
+1. 调用：`./scripts/generate-appcast.sh build/artifacts/FluxMarkdown.dmg`
    - 脚本自动在 DerivedData 中找到 `sign_update` 工具
-   - `sign_update` 从 Keychain 读取私钥（账户：`markdown-quicklook`）
+   - `sign_update` 从 Keychain 读取私钥（账户：`flux-markdown`）
    - 解析输出：`sparkle:edSignature="..." length="..."`
    - 用新条目更新 `appcast.xml`
 2. **还不要提交** - 将在步骤 7 中一起提交
@@ -188,13 +188,13 @@ gh release view "v{FULL_VERSION}" --json assets -q '.assets[].name'
 ```xml
 <item>
     <title>Version {FULL_VERSION}</title>
-    <link>https://github.com/xykong/markdown-quicklook/releases/tag/v{FULL_VERSION}</link>
+    <link>https://github.com/xykong/flux-markdown/releases/tag/v{FULL_VERSION}</link>
     <sparkle:version>{BUILD_NUMBER}</sparkle:version>
     <sparkle:shortVersionString>{FULL_VERSION}</sparkle:shortVersionString>
     <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
     <pubDate>{RFC822_DATE}</pubDate>
     <enclosure
-        url="https://github.com/xykong/markdown-quicklook/releases/download/v{FULL_VERSION}/MarkdownPreviewEnhanced.dmg"
+        url="https://github.com/xykong/flux-markdown/releases/download/v{FULL_VERSION}/FluxMarkdown.dmg"
         sparkle:edSignature="{GENERATED_SIGNATURE}"
         length="{DMG_SIZE}"
         type="application/octet-stream" />
@@ -220,7 +220,7 @@ git push origin master
 ### 步骤 8：更新 Homebrew Cask
 
 **要求：**
-- 更新 `../homebrew-tap/Casks/markdown-preview-enhanced.rb` 中的版本和 SHA256
+- 更新 `../homebrew-tap/Casks/flux-markdown.rb` 中的版本和 SHA256
 - 调用现有脚本：`./scripts/update-homebrew-cask.sh`
 - 脚本自动从 `.version` 读取版本号
 
@@ -237,18 +237,18 @@ git push origin master
 
 **Homebrew Cask 格式：**
 ```ruby
-cask 'markdown-preview-enhanced' do
+cask 'flux-markdown' do
   version '{FULL_VERSION}'
   sha256 '{CALCULATED_SHA256}'
 
-  url "https://github.com/xykong/markdown-quicklook/releases/download/v#{version}/MarkdownPreviewEnhanced.dmg"
+  url "https://github.com/xykong/flux-markdown/releases/download/v#{version}/FluxMarkdown.dmg"
 end
 ```
 
 **验证：**
 ```bash
 brew update
-brew reinstall markdown-preview-enhanced
+brew reinstall flux-markdown
 ```
 
 ## 安全检查和确认流程
@@ -344,11 +344,11 @@ brew reinstall markdown-preview-enhanced
    • Homebrew Cask: {FULL_VERSION} ✅
    • DMG Bundle Version: {FULL_VERSION} ✅
 
-🌐 Release URL: https://github.com/xykong/markdown-quicklook/releases/tag/v{FULL_VERSION}
+🌐 Release URL: https://github.com/xykong/flux-markdown/releases/tag/v{FULL_VERSION}
 
 📦 用户可以通过以下方式安装/更新：
    brew update
-   brew upgrade markdown-preview-enhanced
+   brew upgrade flux-markdown
 
 📲 现有用户将通过 Sparkle 收到自动更新通知
 ```
@@ -500,12 +500,12 @@ make release [major|minor|patch]
 - `.version` - 完整版本号（major.minor.build）
 - `CHANGELOG.md` - 面向用户的变更日志
 - `appcast.xml` - Sparkle RSS feed
-- `../homebrew-tap/Casks/markdown-preview-enhanced.rb` - Homebrew Cask
+- `../homebrew-tap/Casks/flux-markdown.rb` - Homebrew Cask
 - `scripts/release.sh` - 完整的发布脚本（推荐直接使用 `make release`）
 - `docs/RELEASE_PROCESS.md` - 详细的发布流程文档
 
 **密钥存储：**
-- Sparkle EdDSA 私钥存储在 **macOS Keychain** 中（账户：`markdown-quicklook`）
+- Sparkle EdDSA 私钥存储在 **macOS Keychain** 中（账户：`flux-markdown`）
 
 ---
 
