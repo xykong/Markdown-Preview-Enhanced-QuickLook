@@ -13,6 +13,11 @@ struct MarkdownWebView: NSViewRepresentable {
     var fileURL: URL?
     var appearanceMode: AppearanceMode = .light
     var viewMode: ViewMode = .preview
+    var baseFontSize: Double = 16
+    var enableMermaid: Bool = true
+    var enableKatex: Bool = true
+    var enableEmoji: Bool = true
+    var codeHighlightTheme: String = "default"
     
     private static let sharedProcessPool = WKProcessPool()
     
@@ -49,7 +54,8 @@ struct MarkdownWebView: NSViewRepresentable {
         userContentController.addUserScript(userScript)
         
         webConfiguration.userContentController = userContentController
-        
+
+        webConfiguration.setValue(true, forKey: "allowUniversalAccessFromFileURLs")
 
         #if DEBUG
         webConfiguration.preferences.setValue(true, forKey: "developerExtrasEnabled")
@@ -87,8 +93,8 @@ struct MarkdownWebView: NSViewRepresentable {
         } else {
             webView.appearance = nil
         }
-        
-        context.coordinator.render(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode)
+
+        context.coordinator.render(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme)
     }
 
     class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
@@ -106,6 +112,18 @@ struct MarkdownWebView: NSViewRepresentable {
                 name: .toggleSearch,
                 object: nil
             )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleExportHTML),
+                name: .exportHTML,
+                object: nil
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleExportPDF),
+                name: .exportPDF,
+                object: nil
+            )
         }
         
         deinit {
@@ -120,6 +138,59 @@ struct MarkdownWebView: NSViewRepresentable {
                     os_log("Failed to toggle search: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
                 }
             }
+        }
+        
+        @objc func handleExportHTML() {
+            guard let webView = currentWebView else { return }
+            exportHTML(webView: webView) { [weak self] htmlString in
+                DispatchQueue.main.async {
+                    guard let htmlString = htmlString else {
+                        os_log("exportHTML: received nil HTML", log: self?.logger ?? .default, type: .error)
+                        return
+                    }
+                    let panel = NSSavePanel()
+                    panel.allowedContentTypes = [.html]
+                    panel.nameFieldStringValue = self?.defaultExportFilename(extension: "html") ?? "export.html"
+                    panel.begin { response in
+                        guard response == .OK, let url = panel.url else { return }
+                        do {
+                            try htmlString.write(to: url, atomically: true, encoding: .utf8)
+                            os_log("Exported HTML to: %{public}@", log: self?.logger ?? .default, type: .default, url.path)
+                        } catch {
+                            os_log("Failed to write HTML: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
+                        }
+                    }
+                }
+            }
+        }
+        
+        @objc func handleExportPDF() {
+            guard let webView = currentWebView else { return }
+            exportPDF(webView: webView) { [weak self] pdfData in
+                DispatchQueue.main.async {
+                    guard let pdfData = pdfData else {
+                        os_log("exportPDF: received nil data", log: self?.logger ?? .default, type: .error)
+                        return
+                    }
+                    let panel = NSSavePanel()
+                    panel.allowedContentTypes = [.pdf]
+                    panel.nameFieldStringValue = self?.defaultExportFilename(extension: "pdf") ?? "export.pdf"
+                    panel.begin { response in
+                        guard response == .OK, let url = panel.url else { return }
+                        do {
+                            try pdfData.write(to: url, options: .atomic)
+                            os_log("Exported PDF to: %{public}@", log: self?.logger ?? .default, type: .default, url.path)
+                        } catch {
+                            os_log("Failed to write PDF: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
+                        }
+                    }
+                }
+            }
+        }
+        
+        private func defaultExportFilename(extension ext: String) -> String {
+            guard let fileURL = currentFileURL else { return "export.\(ext)" }
+            return fileURL.deletingPathExtension().lastPathComponent + ".\(ext)"
         }
         
         private func mimeTypeForExtension(_ ext: String) -> String {
@@ -225,13 +296,13 @@ struct MarkdownWebView: NSViewRepresentable {
             return imageData
         }
         
-        func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode) {
+        func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String) {
             currentFileURL = fileURL
-            
+
             pendingRender = { [weak self] in
-                self?.executeRender(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode)
+                self?.executeRender(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme)
             }
-            
+
             if isWebViewLoaded {
                 pendingRender?()
                 pendingRender = nil
@@ -239,26 +310,25 @@ struct MarkdownWebView: NSViewRepresentable {
                 os_log("Coordinator: WebView not ready, queuing render", log: logger, type: .debug)
             }
         }
-        
-        private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode) {
+
+        private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String) {
             guard let contentData = try? JSONSerialization.data(withJSONObject: [content], options: []),
                   let contentJsonArray = String(data: contentData, encoding: .utf8) else {
                 os_log("Failed to encode content", log: logger, type: .error)
                 return
             }
-            
 
             let safeContentArg = String(contentJsonArray.dropFirst().dropLast())
-            
+
             var options: [String: Any] = [:]
-            
+
             if let url = fileURL {
                 let baseUrlString = url.deletingLastPathComponent().path
                 options["baseUrl"] = baseUrlString
-                
+
                 options["imageData"] = self.collectImageData(from: url, content: content)
             }
-            
+
             let appearanceName = webView.effectiveAppearance.name
             var theme = "system"
             if appearanceName == .darkAqua || appearanceName == .vibrantDark || appearanceName == .accessibilityHighContrastDarkAqua || appearanceName == .accessibilityHighContrastVibrantDark {
@@ -267,6 +337,12 @@ struct MarkdownWebView: NSViewRepresentable {
                 theme = "light"
             }
             options["theme"] = theme
+
+            options["fontSize"] = baseFontSize
+            options["codeHighlightTheme"] = codeHighlightTheme
+            options["enableMermaid"] = enableMermaid
+            options["enableKatex"] = enableKatex
+            options["enableEmoji"] = enableEmoji
             
             guard let optionsData = try? JSONSerialization.data(withJSONObject: options, options: []),
                   let optionsJson = String(data: optionsData, encoding: .utf8) else {
@@ -330,6 +406,31 @@ struct MarkdownWebView: NSViewRepresentable {
             } else if message.name == "linkClicked", let href = message.body as? String {
                 os_log("🔵 Link clicked from JS: %{public}@", log: logger, type: .default, href)
                 handleLinkClick(href: href)
+            }
+        }
+        
+        func exportHTML(webView: WKWebView, completion: @escaping (String?) -> Void) {
+            webView.evaluateJavaScript("window.exportHTML()") { result, error in
+                if let error = error {
+                    os_log("exportHTML JS error: %{public}@", log: self.logger, type: .error, error.localizedDescription)
+                    completion(nil)
+                } else {
+                    completion(result as? String)
+                }
+            }
+        }
+        
+        func exportPDF(webView: WKWebView, completion: @escaping (Data?) -> Void) {
+            let config = WKPDFConfiguration()
+            config.rect = CGRect(x: 0, y: 0, width: webView.bounds.width, height: webView.bounds.height)
+            webView.createPDF(configuration: config) { result in
+                switch result {
+                case .success(let data):
+                    completion(data)
+                case .failure(let error):
+                    os_log("exportPDF error: %{public}@", log: self.logger, type: .error, error.localizedDescription)
+                    completion(nil)
+                }
             }
         }
         

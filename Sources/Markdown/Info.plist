@@ -34,6 +34,10 @@
 			<array>
 				<string>net.daringfireball.markdown</string>
 				<string>public.markdown</string>
+				<string>com.fluxmarkdown.mdx</string>
+				<string>com.fluxmarkdown.rmd</string>
+				<string>com.fluxmarkdown.qmd</string>
+				<string>com.fluxmarkdown.mdoc</string>
 			</array>
 		</dict>
 	</array>
@@ -71,6 +75,77 @@
 					<string>md</string>
 					<string>markdown</string>
 					<string>mdown</string>
+					<string>mkd</string>
+					<string>mkdn</string>
+					<string>mkdown</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>MDX Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.fluxmarkdown.mdx</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mdx</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>R Markdown Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.fluxmarkdown.rmd</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>rmd</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Quarto Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.fluxmarkdown.qmd</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>qmd</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.plain-text</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Markdoc Document</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.fluxmarkdown.mdoc</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>mdoc</string>
 				</array>
 			</dict>
 		</dict>

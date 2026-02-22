@@ -106,6 +106,64 @@ public class AppearancePreference: ObservableObject {
         }
     }
     
+    private let baseFontSizeKey = "baseFontSize"
+    private let codeHighlightThemeKey = "codeHighlightTheme"
+    private let enableMermaidKey = "enableMermaid"
+    private let enableKatexKey = "enableKatex"
+    private let enableEmojiKey = "enableEmoji"
+
+    public var baseFontSize: Double {
+        get {
+            let v = store.double(forKey: baseFontSizeKey)
+            return v == 0 ? 16 : v
+        }
+        set {
+            objectWillChange.send()
+            store.set(newValue, forKey: baseFontSizeKey)
+        }
+    }
+
+    public var codeHighlightTheme: String {
+        get { store.string(forKey: codeHighlightThemeKey) ?? "default" }
+        set {
+            objectWillChange.send()
+            store.set(newValue, forKey: codeHighlightThemeKey)
+        }
+    }
+
+    public var enableMermaid: Bool {
+        get {
+            guard store.object(forKey: enableMermaidKey) != nil else { return true }
+            return store.bool(forKey: enableMermaidKey)
+        }
+        set {
+            objectWillChange.send()
+            store.set(newValue, forKey: enableMermaidKey)
+        }
+    }
+
+    public var enableKatex: Bool {
+        get {
+            guard store.object(forKey: enableKatexKey) != nil else { return true }
+            return store.bool(forKey: enableKatexKey)
+        }
+        set {
+            objectWillChange.send()
+            store.set(newValue, forKey: enableKatexKey)
+        }
+    }
+
+    public var enableEmoji: Bool {
+        get {
+            guard store.object(forKey: enableEmojiKey) != nil else { return true }
+            return store.bool(forKey: enableEmojiKey)
+        }
+        set {
+            objectWillChange.send()
+            store.set(newValue, forKey: enableEmojiKey)
+        }
+    }
+
     private let store: UserDefaults
     
     public init() {

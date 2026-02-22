@@ -64,13 +64,22 @@ struct MarkdownApp: App {
     @State private var viewMode: ViewMode = .preview
 
     var body: some Scene {
+        Settings {
+            SettingsView()
+        }
+        
         DocumentGroup(newDocument: MarkdownDocument()) { file in
             ZStack(alignment: .topTrailing) {
                 MarkdownWebView(
                     content: file.document.text,
                     fileURL: file.fileURL,
                     appearanceMode: preference.currentMode,
-                    viewMode: viewMode
+                    viewMode: viewMode,
+                    baseFontSize: preference.baseFontSize,
+                    enableMermaid: preference.enableMermaid,
+                    enableKatex: preference.enableKatex,
+                    enableEmoji: preference.enableEmoji,
+                    codeHighlightTheme: preference.codeHighlightTheme
                 )
 
                 HStack(spacing: 8) {
@@ -112,6 +121,23 @@ struct MarkdownApp: App {
             .background(WindowAccessor())
         }
         .commands {
+            CommandGroup(after: .saveItem) {
+                Divider()
+                Button(action: {
+                    NotificationCenter.default.post(name: .exportHTML, object: nil)
+                }) {
+                    Text(NSLocalizedString("Export as HTML…", comment: "Export HTML menu item"))
+                }
+                .keyboardShortcut("e", modifiers: [.command, .shift])
+                
+                Button(action: {
+                    NotificationCenter.default.post(name: .exportPDF, object: nil)
+                }) {
+                    Text(NSLocalizedString("Export as PDF…", comment: "Export PDF menu item"))
+                }
+                .keyboardShortcut("p", modifiers: [.command, .shift])
+            }
+            
             CommandGroup(after: .appInfo) {
                 CheckForUpdatesView(updaterController: appDelegate.updaterController)
             }

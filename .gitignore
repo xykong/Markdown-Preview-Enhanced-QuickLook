@@ -45,6 +45,7 @@ Tests/check-logs.sh
 Tests/watch-console.sh
 Tests/test-*.md
 Tests/test-*.png
+Tests/screenshots/
 
 # Temporary test files
 test-base64.html

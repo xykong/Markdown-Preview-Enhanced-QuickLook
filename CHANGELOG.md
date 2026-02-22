@@ -3,6 +3,29 @@
 ## [Unreleased]
 _无待发布的变更_
 
+## [1.16.166] - 2026-02-23
+
+### Added
+- **YAML Frontmatter 支持**: 自动解析文档头部的 YAML 元数据，以表格形式美观展示
+- **GitHub Alerts 支持**: 渲染 `> [!NOTE]`、`> [!WARNING]` 等 GitHub 风格提示框
+- **扩展代码高亮**: 新增 20+ 种语言支持（Scala、Perl、R、Dart、Lua、Haskell、Elixir、Groovy、Verilog、VHDL、Makefile、TOML、Protobuf、GraphQL、PowerShell、Objective-C 等）
+- **Vega/Vega-Lite 图表**: 支持 `vega` 和 `vega-lite` 代码块渲染为交互式 SVG 图表
+- **Graphviz 图表**: 支持 `dot`/`graphviz` 代码块渲染为 SVG 图
+- **导出功能**: 新增「导出为 HTML」和「导出为 PDF」菜单项（Cmd+Shift+E / Cmd+Shift+P）
+- **Settings 界面**: 全新设计的偏好设置窗口（Cmd+,），支持：
+  - Appearance: Light / Dark / System 主题切换
+  - Rendering: Mermaid / KaTeX / Emoji 开关
+  - Editor: 字体大小调整、代码高亮主题选择（Default / GitHub / Monokai / Atom One Dark）
+- **文件格式支持**: 新增 `.mdx`、`.rmd`、`.qmd`、`.mdoc`、`.mkd`、`.mkdn`、`.mkdown` 扩展名
+
+### Fixed
+- **Host App Loading 卡死**: 修复 Host App 打开文档后一直显示 "Loading renderer..." 的问题（添加 `allowUniversalAccessFromFileURLs` 配置）
+- **Settings 主题按钮点击失效**: 修复 Appearance 界面 Light/Dark/System 按钮随机无法点击的问题（ZStack 重构 hit-test 层级）
+- **字体大小设置不生效**: 修复 Editor 中调整字体大小后文档无变化的问题
+- **代码高亮主题不生效**: 修复 Editor 中切换代码主题后文档无变化的问题
+- **KaTeX 开关不生效**: 修复 Rendering 中关闭 KaTeX 后公式仍然渲染的问题（动态重建 MarkdownIt 实例）
+- **Emoji 开关不生效**: 修复 Rendering 中关闭 Emoji 后 `:name:` 格式仍然转换为图标的问题
+
 ## [1.15.165] - 2026-02-22
 
 ### Added
