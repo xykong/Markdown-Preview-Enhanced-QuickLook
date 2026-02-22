@@ -7,6 +7,52 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.15.165</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.15.165</link>
+            <sparkle:version>165</sparkle:version>
+            <sparkle:shortVersionString>1.15.165</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sun, 22 Feb 2026 05:50:25 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.15.165/FluxMarkdown.dmg"
+                sparkle:edSignature="uirFmADAJ3+CmhPvACaT1qLU1217A66Y7iTQDEz3W0BJBkU1cRAfTAC/0p9fcHWh5k/1grHysMgLriOufhCkAA=="
+                length="7494934"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><pre>
+Added
+- **性能基线测试基础设施**:
+  - 新增三层性能测试框架 (JS 引擎层 / Swift-WKWebView 层 / QuickLook 系统层)
+  - 新增 7 个标准 Markdown fixture 文件用于可重复性测试
+  - 新增 `benchmark/js-bench/` - Playwright 驱动的 JS 渲染基准测试
+  - 新增 `benchmark/swift-bench/` - XCTest 驱动的 WKWebView 桥接层测试
+  - 新增 `benchmark/ql-bench/` - qlmanage 端到端系统层测试
+  - 新增 `benchmark/compare.py` - 优化前后对比脚本
+  - 新增 `benchmark/run-all.sh` - 一键运行全部测试
+  - 新增 `docs/BENCHMARK_BASELINE.md` - 完整基线测试报告文档
+  - 记录了优化前的性能基线数据，为后续优化提供量化对比基准
+
+Changed
+- **重大性能优化 (7项)**:
+  - **P0 Bundle 拆分**: 移除 `vite-plugin-singlefile`，改用标准多文件输出 + `loadFileURL`
+    - `index.html` 从 5.5 MB 降至 1.84 KB (-99.97%)
+    - Swift 侧从 `loadHTMLString()` 改为 `loadFileURL(_:allowingReadAccessTo:)`
+  - **P1-A highlight.js Tree-shaking**: 全量导入改为 `highlight.js/core` + 按需注册 24 种语言
+    - hljs 贡献从 ~400 KB 降至 ~80 KB (-80%)
+  - **P1-B Mermaid 单例化**: `mermaid.initialize()` 改为仅主题变化时调用
+    - mermaid 热渲染从 ~186ms 降至 ~46ms (-75%)
+  - **P2-A 图片 I/O 异步化**: `collectImageData()` 移至后台 `Task.detached`
+    - 消除主线程图片 I/O 阻塞
+  - **P2-B LocalSchemeHandler 启用**: 注册已实现未启用的 `local-md://` scheme handler
+    - 删除 ~50 行 base64→Blob 转换代码，图片改为按需加载
+  - **KaTeX 懒加载**: 改为按需动态 import，仅含公式文档加载
+    - `index.js` 从 554 KB 降至 317 KB (-43%)
+  - **Mermaid 预热**: 渲染后空闲时刻预热 mermaid chunk
+    - 同会话二次打开 mermaid 文档从 ~380ms 降至 ~20ms</pre><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.15.165">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.14.164</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.14.164</link>
             <sparkle:version>164</sparkle:version>
