@@ -2,7 +2,7 @@
 
 <p align="center">
   <em>Beautiful Markdown previews in macOS Finder QuickLook</em><br>
-  Mermaid • KaTeX • GFM • TOC • Code Highlighting
+  Mermaid • KaTeX • GFM • TOC • Charts • Export
 </p>
 
 <p align="center">
@@ -65,12 +65,38 @@ brew install --cask xykong/tap/flux-markdown
 |---------|-------------|
 | 📊 **Mermaid Diagrams** | Architecture diagrams, flowcharts, sequence diagrams |
 | 🧮 **KaTeX Math** | Inline and block mathematical expressions |
-| 📝 **GFM Support** | Tables, task lists, strikethrough, and more |
-| 🎨 **Code Highlighting** | Multi-language syntax highlighting |
+| 📝 **GFM Support** | Tables, task lists, strikethrough, and GitHub Alerts |
+| 🎨 **Code Highlighting** | Syntax highlighting for 40+ languages |
+| 📊 **Charts & Graphs** | Vega, Vega-Lite, and Graphviz (DOT) support |
 | 📑 **TOC Panel** | Interactive table of contents with section tracking |
+| 📄 **YAML Metadata** | Auto-parses frontmatter into a clean table |
+| 📤 **Export Options** | Export as PDF (Cmd+Shift+P) or HTML (Cmd+Shift+E) |
 | 🔍 **Zoom & Pan** | Cmd +/-/0, Cmd+scroll, pinch gestures |
-| 💾 **Position Memory** | Remembers scroll position per file |
+| 💾 **Position Memory** | Remembers scroll position and last-viewed file |
 | 🌓 **Themes** | Light, Dark, and System-synchronized modes |
+| 📂 **File Formats** | Supports .md, .mdx, .rmd, .qmd, .mdoc, .mkd, .mkdn, .mkdown |
+
+---
+
+## ⚙️ Settings (Cmd+,)
+
+FluxMarkdown includes a dedicated Settings window to customize your experience:
+
+- **Appearance**: Switch between Light, Dark, or System themes.
+- **Rendering**: Toggle Mermaid, KaTeX, or Emoji support.
+- **Editor**: Adjust base font size and choose code highlighting themes (GitHub, Monokai, Atom One Dark, etc.).
+
+---
+
+## ⌨️ Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Space` | Open QuickLook preview (Finder) |
+| `Cmd` + `+` / `-` / `0` | Zoom in / out / reset |
+| `Cmd` + `Shift` + `E` | Export as HTML |
+| `Cmd` + `Shift` + `P` | Export as PDF |
+| `Cmd` + `,` | Open Settings |
 
 ---
 
@@ -113,8 +139,11 @@ qlmanage -r
 | Install | brew cask / DMG | brew cask / DMG | manual | App Store / DMG |
 | Mermaid | Yes | Yes ([ref](https://github.com/sbarex/QLMarkdown/blob/main/README.md#mermaid-diagrams)) | Not mentioned | Not mentioned |
 | KaTeX / Math | Yes | Yes ([ref](https://github.com/sbarex/QLMarkdown/blob/main/README.md#mathematical-expressions)) | Not mentioned | Not mentioned |
-| GFM | Yes | Yes (cmark-gfm; [ref](https://github.com/sbarex/QLMarkdown/releases/tag/1.0.18)) | Partial (Discount; [ref](https://github.com/whomwah/qlmarkdown#introduction)) | Not mentioned |
+| GFM / Alerts | Yes | Yes (cmark-gfm; [ref](https://github.com/sbarex/QLMarkdown/releases/tag/1.0.18)) | Partial (Discount; [ref](https://github.com/whomwah/qlmarkdown#introduction)) | Not mentioned |
 | TOC panel | Yes | Not mentioned | No | Not mentioned |
+| Charts (Vega/DOT) | Yes | Not mentioned | No | No |
+| Export (PDF/HTML) | Yes | No | No | No |
+| YAML Frontmatter | Yes | Yes | No | No |
 | Themes | Light/Dark/System | CSS-based ([ref](https://github.com/sbarex/QLMarkdown/blob/main/README.md#extensions)) | Not mentioned | Basic controls ([ref](https://github.com/smittytone/PreviewMarkdown#adjusting-the-preview)) |
 | Zoom | Yes | Not mentioned | No | Not mentioned |
 | Scroll restore | Yes | Not mentioned | No | Not mentioned |

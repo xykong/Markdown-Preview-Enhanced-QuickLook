@@ -2,7 +2,7 @@
 
 <p align="center">
   <em>在 macOS Finder 中按空格即可预览精美的 Markdown</em><br>
-  Mermaid • KaTeX • GFM • 目录 • 代码高亮
+  Mermaid • KaTeX • GFM • 目录 • 图表 • 导出
 </p>
 
 <p align="center">
@@ -65,12 +65,38 @@ brew install --cask xykong/tap/flux-markdown
 |------|------|
 | 📊 **Mermaid 图表** | 架构图、流程图、时序图等 |
 | 🧮 **KaTeX 数学公式** | 行内和块级数学表达式 |
-| 📝 **GFM 支持** | 表格、任务列表、删除线等 |
-| 🎨 **代码高亮** | 多语言语法高亮 |
+| 📝 **GFM 支持** | 表格、任务列表、删除线及 GitHub 警示 |
+| 🎨 **Code 高亮** | 支持 40 多种语言的语法高亮 |
+| 📊 **图表与图形** | 支持 Vega, Vega-Lite 和 Graphviz (DOT) |
 | 📑 **目录面板** | 交互式目录，自动跟踪当前章节 |
+| 📄 **YAML 元数据** | 自动解析 Frontmatter 并以表格展示 |
+| 📤 **导出选项** | 支持导出为 PDF (Cmd+Shift+P) 或 HTML (Cmd+Shift+E) |
 | 🔍 **缩放与平移** | Cmd +/-/0、Cmd+滚轮、触控板捏合 |
-| 💾 **位置记忆** | 按文件记忆滚动位置 |
+| 💾 **位置记忆** | 记忆每个文件的滚动位置及最后查看的文件 |
 | 🌓 **主题** | 亮色、暗色、跟随系统 |
+| 📂 **文件格式** | 支持 .md, .mdx, .rmd, .qmd, .mdoc, .mkd, .mkdn, .mkdown |
+
+---
+
+## ⚙️ 设置 (Cmd+,)
+
+FluxMarkdown 提供专用的设置窗口，方便你自定义预览体验：
+
+- **外观**: 在亮色、暗色或跟随系统主题之间切换。
+- **渲染**: 开启或关闭 Mermaid、KaTeX 或 Emoji 支持。
+- **编辑器**: 调节基础字体大小，并选择不同的代码高亮主题（GitHub, Monokai, Atom One Dark 等）。
+
+---
+
+## ⌨️ 快捷键
+
+| 快捷键 | 动作 |
+|--------|------|
+| `Space` | 在 Finder 中打开 QuickLook 预览 |
+| `Cmd` + `+` / `-` / `0` | 放大 / 缩小 / 重置缩放 |
+| `Cmd` + `Shift` + `E` | 导出为 HTML |
+| `Cmd` + `Shift` + `P` | 导出为 PDF |
+| `Cmd` + `,` | 打开设置 |
 
 ---
 
@@ -113,8 +139,11 @@ qlmanage -r
 | 安装方式 | brew cask / DMG | brew cask / DMG | 手动安装 | App Store / DMG |
 | Mermaid | 支持 | 支持（[来源](https://github.com/sbarex/QLMarkdown/blob/main/README.md#mermaid-diagrams)） | 未提及 | 未提及 |
 | KaTeX/数学公式 | 支持 | 支持（[来源](https://github.com/sbarex/QLMarkdown/blob/main/README.md#mathematical-expressions)） | 未提及 | 未提及 |
-| GFM | 支持 | 支持（cmark-gfm；[来源](https://github.com/sbarex/QLMarkdown/releases/tag/1.0.18)） | 部分支持（Discount；[来源](https://github.com/whomwah/qlmarkdown#introduction)） | 未提及 |
+| GFM / 警示 | 支持 | 支持（cmark-gfm；[来源](https://github.com/sbarex/QLMarkdown/releases/tag/1.0.18)） | 部分支持（Discount；[来源](https://github.com/whomwah/qlmarkdown#introduction)） | 未提及 |
 | 目录（TOC） | 支持 | 未提及 | 不支持 | 未提及 |
+| 图表 (Vega / DOT) | 支持 | 未提及 | 不支持 | 不支持 |
+| 导出 (PDF / HTML) | 支持 | 不支持 | 不支持 | 不支持 |
+| YAML 元数据 | 支持 | 支持 | 不支持 | 不支持 |
 | 主题 | 亮/暗/跟随系统 | CSS（[来源](https://github.com/sbarex/QLMarkdown/blob/main/README.md#extensions)） | 未提及 | 基础调节（[来源](https://github.com/smittytone/PreviewMarkdown#adjusting-the-preview)） |
 | 缩放 | 支持 | 未提及 | 不支持 | 未提及 |
 | 滚动位置记忆 | 支持 | 未提及 | 不支持 | 未提及 |
