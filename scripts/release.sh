@@ -147,18 +147,29 @@ rm "$RELEASE_NOTES_FILE"
 
 echo ""
 echo "✨ Updating Sparkle appcast..."
-if [ -f "./scripts/generate-appcast.sh" ] && [ -f ".sparkle-keys/sparkle_private_key.pem" ]; then
+# Find sign_update tool (keys are stored in Keychain, not as files)
+SIGN_UPDATE_BIN=$(find ~/Library/Developer/Xcode/DerivedData -name "sign_update" -type f -perm +111 2>/dev/null | grep "Sparkle/bin/sign_update" | head -1)
+if [ -z "$SIGN_UPDATE_BIN" ] && [ -x "./sign_update" ]; then
+    SIGN_UPDATE_BIN="./sign_update"
+fi
+
+if [ -f "./scripts/generate-appcast.sh" ] && [ -x "$SIGN_UPDATE_BIN" ]; then
     ./scripts/generate-appcast.sh "$DMG_PATH"
     
     if [ -f "appcast.xml" ]; then
         git add appcast.xml
-        git commit -m "chore(sparkle): update appcast for v$NEW_FULL_VERSION" || true
+        git commit -m "chore(sparkle): update appcast.xml for v$NEW_FULL_VERSION" || true
         git push origin master || true
         echo "✅ Appcast updated and committed"
     fi
 else
-    echo "⚠️  Skipping appcast update (missing keys or script)"
-    echo "   Generate keys with: ./scripts/generate-sparkle-keys.sh"
+    echo "⚠️  Skipping appcast update"
+    if [ ! -f "./scripts/generate-appcast.sh" ]; then
+        echo "   Missing: ./scripts/generate-appcast.sh"
+    fi
+    if [ -z "$SIGN_UPDATE_BIN" ]; then
+        echo "   Missing: sign_update tool (build the project once to download Sparkle via SPM)"
+    fi
 fi
 
 echo ""
