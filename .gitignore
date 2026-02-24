@@ -73,3 +73,8 @@ test-base64.html
 
 # Release temp files
 release_notes_tmp.md
+
+# Competitive analysis research files (reference only, not part of project)
+*_README.md
+!README.md
+!README_ZH.md
