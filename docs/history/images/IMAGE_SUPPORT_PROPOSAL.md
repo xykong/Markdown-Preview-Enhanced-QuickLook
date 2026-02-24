@@ -67,12 +67,12 @@
 **步骤：**
 1. 打开终端，运行调试脚本：
    ```bash
-   ./tests/scripts/debug-extension.sh
+    log stream --predicate 'subsystem == "com.markdownquicklook.app"' --level debug
    ```
 
 2. 在 Finder 中打开测试文件：
    ```bash
-   open tests/fixtures/images-test.md
+    open Tests/fixtures/images-test.md
    ```
 
 3. 按空格键触发 QuickLook 预览
@@ -253,7 +253,7 @@ private func mimeType(for url: URL) -> String {
 ## 📝 实施计划
 
 ### 阶段 1：诊断（立即执行）
-1. ✅ 创建测试文档 `tests/fixtures/images-test.md`
+1. ✅ 创建测试文档 `Tests/fixtures/images-test.md`
 2. ✅ 创建测试图片资源
 3. ⏳ 运行诊断脚本，收集日志
 4. ⏳ 分析日志，确定具体问题
@@ -277,10 +277,10 @@ private func mimeType(for url: URL) -> String {
 
 ```bash
 # 终端 1：启动日志监控
-./tests/scripts/debug-extension.sh
+log stream --predicate 'subsystem == "com.markdownquicklook.app"' --level debug
 
 # 终端 2：打开测试文档
-open tests/fixtures/images-test.md
+open Tests/fixtures/images-test.md
 # 然后在 Finder 中按空格预览
 ```
 

@@ -128,7 +128,9 @@ qlmanage -r
 3. Check `pluginkit -m -v` for active QuickLook extensions
 </details>
 
-**📚 More help:** See [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) and [`docs/AUTO_UPDATE.md`](docs/AUTO_UPDATE.md)
+**📚 More help:** See [`docs/user/TROUBLESHOOTING.md`](docs/user/TROUBLESHOOTING.md) and [`docs/user/AUTO_UPDATE.md`](docs/user/AUTO_UPDATE.md)
+
+**📖 Documentation index:** [`docs/README.md`](docs/README.md)
 
 ---
 

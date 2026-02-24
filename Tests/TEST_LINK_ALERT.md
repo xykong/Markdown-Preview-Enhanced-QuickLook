@@ -19,7 +19,7 @@
 
 1. **打开 QuickLook 预览**
    ```bash
-   qlmanage -p tests/test-link-navigation.md
+    qlmanage -p Tests/test-link-navigation.md
    ```
 
 2. **点击任意链接**（如 `test-title.md`）
@@ -45,7 +45,7 @@
 
 1. **直接用主 APP 打开**
    ```bash
-open -a "FluxMarkdown" tests/test-link-navigation.md
+open -a "FluxMarkdown" Tests/test-link-navigation.md
    ```
 
 2. **点击各种链接**：
@@ -65,7 +65,7 @@ open -a "FluxMarkdown" tests/test-link-navigation.md
 可以手动测试 URL Scheme：
 
 ```bash
-open "markdownpreview://open?path=/Users/xykong/workspace/xykong/quicklook-project/markdown-quicklook/tests/test-link-navigation.md"
+open "markdownpreview://open?path=/absolute/path/to/your/repo/flux-markdown/Tests/test-link-navigation.md"
 ```
 
 **期望结果**：

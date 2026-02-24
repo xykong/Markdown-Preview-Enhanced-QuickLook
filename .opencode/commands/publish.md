@@ -509,7 +509,7 @@ make release [major|minor|patch]
 - `appcast.xml` - Sparkle RSS feed
 - `../homebrew-tap/Casks/flux-markdown.rb` - Homebrew Cask
 - `scripts/release.sh` - 完整的发布脚本（推荐直接使用 `make release`）
-- `docs/RELEASE_PROCESS.md` - 详细的发布流程文档
+- `docs/release/RELEASE_PROCESS.md` - 详细的发布流程文档
 
 **密钥存储：**
 - Sparkle EdDSA 私钥存储在 **macOS Keychain** 中（账户：`flux-markdown`）

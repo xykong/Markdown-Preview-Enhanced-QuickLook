@@ -145,18 +145,17 @@ Multiple event capture mechanisms ensure reliability:
 ### Quick Test
 
 ```bash
-cd /Users/xykong/workspace/xykong/quicklook-project/markdown-quicklook
-open -a Finder tests/fixtures/test-zoom.md
+open -a Finder Tests/fixtures/zoom-test.md
 # Select file and press Space
-# Try: Hold CMD + Scroll, or CMD + '+'
+# Try: Hold CMD + Scroll, Pinch, or CMD + '+'
 ```
 
 ### Debug Mode
 
-Run the debug script to see real-time logs:
+Stream logs to see real-time output:
 
 ```bash
-./tests/scripts/debug-zoom.sh
+log stream --predicate 'subsystem == "com.markdownquicklook.app"' --level debug
 ```
 
 This will:
@@ -201,9 +200,10 @@ Look for these log messages:
 
 ### Still not working?
 
-Run debug script to see logs:
+Stream logs to see details:
+
 ```bash
-./tests/scripts/debug-zoom.sh
+log stream --predicate 'subsystem == "com.markdownquicklook.app"' --level debug
 ```
 
 ## Technical Notes

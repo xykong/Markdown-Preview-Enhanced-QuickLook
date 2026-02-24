@@ -1,4 +1,7 @@
-# Project Reorganization Summary
+# Project Reorganization Summary (Archived)
+
+> Note: This document describes an earlier reorganization and used a `tests/` folder naming in examples.
+> Current convention: use `Tests/` (capital T).
 
 **Date:** 2026-01-31
 
@@ -24,26 +27,26 @@ Reorganized project directory structure to separate documentation and test files
   - Result: Complete testing guide with all test scenarios
 
 #### Moved Files
-- `THIRD_PARTY_LICENSES.md` → `docs/THIRD_PARTY_LICENSES.md`
+- `THIRD_PARTY_LICENSES.md` → `docs/licenses/THIRD_PARTY_LICENSES.md`
 
 ### 2. Test Organization
 
 #### Created New Structure
-- `tests/fixtures/` - Test markdown files and HTML fixtures
-- `tests/scripts/` - Test and debug scripts
+- `Tests/fixtures/` - Test markdown files and HTML fixtures
+- `Tests/scripts/` - Test and debug scripts
 
 #### Moved Files
 **Test Fixtures:**
-- `test-sample.md` → `tests/fixtures/test-sample.md`
-- `test-zoom.md` → `tests/fixtures/test-zoom.md`
-- `test-auto-refresh.md` → `tests/fixtures/test-auto-refresh.md`
-- `check-keyboard.html` → `tests/fixtures/check-keyboard.html`
+- `test-sample.md` → `Tests/fixtures/feature-validation.md`
+- `test-zoom.md` → `Tests/fixtures/zoom-test.md`
+- `test-auto-refresh.md` → (removed)
+- `check-keyboard.html` → (removed)
 
 **Test Scripts:**
-- `debug-extension.sh` → `tests/scripts/debug-extension.sh`
-- `debug-zoom.sh` → `tests/scripts/debug-zoom.sh`
-- `test-zoom.sh` → `tests/scripts/test-zoom.sh`
-- `verify-extension.sh` → `tests/scripts/verify-extension.sh`
+- `debug-extension.sh` → (removed)
+- `debug-zoom.sh` → (removed)
+- `test-zoom.sh` → (removed)
+- `verify-extension.sh` → (removed)
 
 ### 3. Updated References
 
@@ -51,10 +54,8 @@ Updated file paths in the following files:
 - `AGENTS.md` - Updated debug script path
 - `README.md` - Updated test file path
 - `README_ZH.md` - Updated test file path
-- `docs/TROUBLESHOOTING.md` - Updated test file paths
-- `docs/DEBUG_KATEX_RENDERING.md` - Updated test file path
-- `tests/scripts/debug-zoom.sh` - Updated test file path
-- `tests/scripts/test-zoom.sh` - Updated test file path
+- `docs/user/TROUBLESHOOTING.md` - Updated test file paths
+- `docs/debug/DEBUG_KATEX_RENDERING.md` - Updated test file path
 
 ## Root Directory (Clean State)
 
@@ -69,7 +70,7 @@ Essential project files only:
 
 ### Directories in Root
 - `docs/` - All documentation
-- `tests/` - All test files and scripts
+- `Tests/` - All test files and scripts
 - `scripts/` - Build and release scripts (kept separate from test scripts)
 - `Sources/` - Swift source code
 - `web-renderer/` - TypeScript rendering engine
@@ -92,20 +93,16 @@ Essential project files only:
 │   ├── RENDERER_MARKDOWN_IT_PLUGIN_ROADMAP.md
 │   ├── THIRD_PARTY_LICENSES.md
 │   └── TROUBLESHOOTING.md
-├── tests/
+├── Tests/
 │   ├── fixtures/
-│   │   ├── check-keyboard.html
-│   │   ├── test-auto-refresh.md
-│   │   ├── test-sample.md
-│   │   └── test-zoom.md
+│   │   ├── feature-validation.md
+│   │   ├── images-test.md
+│   │   └── zoom-test.md
 │   ├── MarkdownTests/
 │   │   ├── ResourceLoadingTests.swift
 │   │   └── WindowSizePersistenceTests.swift
 │   └── scripts/
-│       ├── debug-extension.sh
-│       ├── debug-zoom.sh
-│       ├── test-zoom.sh
-│       └── verify-extension.sh
+│       └── watch-link-clicks.sh
 ├── scripts/
 │   ├── analyze-pr.sh
 │   ├── create_dmg.sh

@@ -105,4 +105,3 @@ graph TD
 - **Auto-Refresh**: Watch file for changes.
 - **Scroll Sync**: Bi-directional scrolling.
 - **Dark Mode Sync**: Real-time theme switching.
-

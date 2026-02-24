@@ -4,11 +4,11 @@
 
 ### 1. 启动日志监控
 ```bash
-./tests/scripts/debug-extension.sh
+./Tests/watch-console.sh
 ```
 
 ### 2. 预览测试文档
-在 Finder 中打开 `tests/fixtures/images-test.md`，按空格键预览
+在 Finder 中打开 `Tests/fixtures/images-test.md`，按空格键预览
 
 ### 3. 观察结果
 - 查看哪些图片能正常显示

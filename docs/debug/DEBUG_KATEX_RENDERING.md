@@ -1,7 +1,7 @@
 # Debug: KaTeX Rendering Issue
 
 ## Issue Description
-Formulas in `tests/fixtures/test-sample.md` are rendering incorrectly. Characters are overlapping and positioning is off, as seen in the provided screenshot. The quadratic formula block is severely garbled.
+Formulas in `Tests/fixtures/feature-validation.md` are rendering incorrectly. Characters are overlapping and positioning is off, as seen in the provided screenshot. The quadratic formula block is severely garbled.
 
 ## Investigation Log
 ### 1. Initial Analysis

@@ -66,7 +66,7 @@ Added
   - 新增 `benchmark/ql-bench/` - qlmanage 端到端系统层测试
   - 新增 `benchmark/compare.py` - 优化前后对比脚本
   - 新增 `benchmark/run-all.sh` - 一键运行全部测试
-  - 新增 `docs/BENCHMARK_BASELINE.md` - 完整基线测试报告文档
+- 新增 `docs/history/performance/BENCHMARK_BASELINE.md` - 完整基线测试报告文档
   - 记录了优化前的性能基线数据，为后续优化提供量化对比基准
 
 Changed

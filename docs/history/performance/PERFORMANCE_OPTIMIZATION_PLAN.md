@@ -2,7 +2,7 @@
 
 **状态** ：待实施
 **创建日期** ：2026-02-21
-**基线参考** ：[`docs/BENCHMARK_BASELINE.md`](./BENCHMARK_BASELINE.md)
+**基线参考** ：[`docs/history/performance/BENCHMARK_BASELINE.md`](./BENCHMARK_BASELINE.md)
 
 ---
 

@@ -128,7 +128,9 @@ qlmanage -r
 3. 检查 `pluginkit -m -v` 查看活动的 QuickLook 扩展
 </details>
 
-**📚 更多帮助：** 参见 [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) 和 [`docs/AUTO_UPDATE.md`](docs/AUTO_UPDATE.md)
+**📚 更多帮助：** 参见 [`docs/user/TROUBLESHOOTING.md`](docs/user/TROUBLESHOOTING.md) 和 [`docs/user/AUTO_UPDATE.md`](docs/user/AUTO_UPDATE.md)
+
+**📖 文档索引：** [`docs/README.md`](docs/README.md)
 
 ---
 

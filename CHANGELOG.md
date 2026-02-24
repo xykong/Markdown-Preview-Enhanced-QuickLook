@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Changed
+- **文档结构重组**: 按主题分层重构 `docs/` 目录结构，提升文档可维护性和可发现性
+  - 新增 `docs/README.md` 作为文档总索引
+  - 按主题分层：`docs/{user,dev,release,design,debug,testing,performance,research,licenses,history}/`
+  - 合并图片相关文档到 `docs/features/IMAGES.md`，原始详细文档归档至 `docs/history/images/`
+  - 合并性能相关文档到 `docs/performance/PERFORMANCE.md`，原始详细文档归档至 `docs/history/performance/`
+  - 统一测试路径引用：`tests/` → `Tests/`
+  - 删除根目录竞品 README 副本，仅保留 `docs/research/COMPETITIVE_ANALYSIS.md` 中的分析
+  - 清理所有 `.DS_Store` 文件
+
 ### Added
 - **脚注支持（Footnotes）**: 使用 `[^1]` 语法添加脚注，脚注内容自动渲染在文档底部
 - **上标 / 下标**: 支持 `H~2~O`（下标）和 `x^2^`（上标）语法，适用于化学式和数学表达式
@@ -43,7 +53,7 @@
   - 新增 `benchmark/ql-bench/` - qlmanage 端到端系统层测试
   - 新增 `benchmark/compare.py` - 优化前后对比脚本
   - 新增 `benchmark/run-all.sh` - 一键运行全部测试
-  - 新增 `docs/BENCHMARK_BASELINE.md` - 完整基线测试报告文档
+- 新增 `docs/history/performance/BENCHMARK_BASELINE.md` - 完整基线测试报告文档
   - 记录了优化前的性能基线数据，为后续优化提供量化对比基准
 
 ### Changed

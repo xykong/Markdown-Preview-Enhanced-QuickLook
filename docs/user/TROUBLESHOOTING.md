@@ -92,13 +92,13 @@ qlmanage -r cache
 killall Finder
 
 # 5. 测试
-#    在 Finder 中选中 tests/fixtures/test-sample.md，按空格
+#    在 Finder 中选中 Tests/fixtures/feature-validation.md，按空格
 ```
 
 #### 方法 2: 使用 qlmanage 命令行测试
 ```bash
 # 直接通过 qlmanage 调用扩展（绕过注册机制）
-qlmanage -p tests/fixtures/test-sample.md
+qlmanage -p Tests/fixtures/feature-validation.md
 ```
 
 ### Additional Checks
@@ -199,7 +199,7 @@ Quick Look 在预览 `.md` 文件时能实际使用我们的 Preview Extension�
    ```
 
 5. **再次测试 `.md` 预览**：
-   - 在 Finder 中选中 `tests/fixtures/test-sample.md`（见 `docs/testing/TESTING.md` 中的示例）
+    - 在 Finder 中选中 `Tests/fixtures/feature-validation.md`（见 `docs/testing/TESTING.md` 中的示例）
    - 按空格触发 Quick Look
    - 预期行为：
      - 标题、副标题、代码块、数学公式、Mermaid 图表、任务列表都以富文本形式渲染

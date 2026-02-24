@@ -36,8 +36,8 @@ qlmanage -r cache
 
 ## Test Cases
 
-### Test File: `tests/fixtures/test-sample.md`
-This file verifies all core features:
+### Test File: `Tests/fixtures/feature-validation.md`
+This file validates a broad set of features (YAML front matter, alerts/callouts, code highlighting, charts/diagrams, export shortcuts, settings hints, etc.).
 
 ```markdown
 # Markdown Quick Look Test
@@ -80,10 +80,9 @@ graph TD;
 
 #### Quick Test
 
-1. **Open the test file**:
+1. **Open the fixture**:
    ```bash
-   cd /path/to/markdown-quicklook
-   open -a Finder tests/fixtures/test-zoom.md
+   open -a Finder Tests/fixtures/zoom-test.md
    ```
 
 2. **Preview with QuickLook**:
@@ -108,10 +107,10 @@ graph TD;
 
 #### Debug with Logs
 
-Run the debug script to see what's happening:
+To debug, you can stream logs directly:
 
 ```bash
-./tests/scripts/debug-zoom.sh
+log stream --predicate 'subsystem == "com.markdownquicklook.app"' --level debug
 ```
 
 This will:
@@ -139,13 +138,12 @@ Look for these log messages:
 - Keyboard shortcuts may be intercepted by system
 - Focus handling may require clicking in the window first
 
-### Auto-Refresh Testing
+### Link Navigation Testing
 
-Test file: `tests/fixtures/test-auto-refresh.md`
+See:
 
-1. Open file in QuickLook
-2. Edit the file and save
-3. Preview should automatically refresh without closing
+- `Tests/TEST_LINK_ALERT.md`
+- `Tests/test-link-navigation.md`
 
 ## Debug Tools
 
@@ -154,7 +152,7 @@ Test file: `tests/fixtures/test-auto-refresh.md`
 Stream logs from the extension in real-time:
 
 ```bash
-./tests/scripts/debug-extension.sh
+log stream --predicate 'subsystem == "com.markdownquicklook.app"' --level debug
 ```
 
 Or manually:
@@ -166,20 +164,14 @@ log stream --predicate 'subsystem contains "com.markdownquicklook"' --level debu
 
 Check if the extension is registered:
 
-```bash
-./tests/scripts/verify-extension.sh
-```
-
-Or manually:
+Manually:
 ```bash
 qlmanage -m | grep -i markdown
 ```
 
-### Check Keyboard Event Handling
+### Fixtures overview
 
-Test file: `tests/fixtures/check-keyboard.html`
-
-A simple HTML page that logs keyboard events for debugging purposes.
+All fixtures in this repo live under `Tests/fixtures/`.
 
 ## Troubleshooting
 
@@ -211,24 +203,16 @@ The issue may be that QuickLook system intercepts CMD+key combinations before th
 2. Pinch gesture - Natural for macOS users
 3. Use the Host App directly for full keyboard shortcut support
 
-## Test Scripts Reference
-
-All test scripts are located in `tests/scripts/`:
+## Helper Scripts (Repo)
 
 | Script | Purpose |
 |--------|---------|
-| `debug-extension.sh` | Stream logs from QuickLook extension |
-| `debug-zoom.sh` | Test zoom feature with real-time logs |
-| `verify-extension.sh` | Check if extension is properly installed |
-| `test-zoom.sh` | Automated zoom feature testing |
+| `Tests/watch-console.sh` | Quick hint for inspecting logs |
+| `Tests/check-logs.sh` | Stream logs and filter image-related lines |
+| `Tests/scripts/watch-link-clicks.sh` | Stream link-click related logs |
 
-## Test Fixtures Reference
+## Automated Tests
 
-All test files are located in `tests/fixtures/`:
-
-| File | Purpose |
-|------|---------|
-| `test-sample.md` | General feature testing |
-| `test-zoom.md` | Zoom functionality testing |
-| `test-auto-refresh.md` | Auto-refresh feature testing |
-| `check-keyboard.html` | Keyboard event debugging |
+- Swift unit tests: `Tests/MarkdownTests/`
+- Renderer unit tests: `web-renderer/test/`
+- Benchmarks: `benchmark/` (see `benchmark/run-all.sh`)

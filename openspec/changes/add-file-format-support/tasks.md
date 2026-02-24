@@ -7,7 +7,7 @@
 
 ## 2. 配置（TDD：先写验收标准）
 
-- [x] 2.1 准备测试 fixture：各格式的简单 Markdown 文件（`tests/fixtures/test-*.mdx` 等）
+- [x] 2.1 准备测试 fixture：各格式的简单 Markdown 文件（`Tests/fixtures/`）
 - [x] 2.2 用 `qlmanage -p <file>` 验证扩展前各格式无法预览（记录基线）
 
 ## 3. 实现
