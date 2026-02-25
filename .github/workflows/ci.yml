@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  docs-and-renderer:
+    name: Docs links + renderer tests
+    runs-on: ubuntu-latest
+    env:
+      CI: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web-renderer/package-lock.json
+
+      - name: Check internal Markdown links
+        run: bash scripts/check-links.sh
+
+      - name: Install renderer dependencies
+        working-directory: web-renderer
+        run: npm ci
+
+      - name: Run renderer unit tests
+        working-directory: web-renderer
+        run: npm test
+
+  macos-build-test:
+    name: macOS build + XCTest
+    runs-on: macos-latest
+    env:
+      CI: true
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web-renderer/package-lock.json
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Build web renderer
+        working-directory: web-renderer
+        run: |
+          npm ci
+          npm run build
+
+      - name: Generate Xcode project
+        run: |
+          rm -rf FluxMarkdown.xcodeproj
+          FULL_V="$(cat .version)"
+          BUILD="$(echo "$FULL_V" | cut -d'.' -f3)"
+          MARKETING_VERSION="$FULL_V" CURRENT_PROJECT_VERSION="$BUILD" xcodegen generate --quiet
+
+      - name: Run Swift tests (skip benchmarks)
+        run: |
+          xcodebuild test \
+            -project FluxMarkdown.xcodeproj \
+            -scheme Markdown \
+            -configuration Debug \
+            -destination 'platform=macOS' \
+            -skip-testing:MarkdownTests/RenderBenchmarkTests \
+            CODE_SIGNING_ALLOWED=NO
