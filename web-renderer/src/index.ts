@@ -37,6 +37,7 @@ import './styles/image-fallback.css';
 import './styles/search.css';
 import './styles/source-view.css';
 import './styles/callouts.css';
+import './styles/print.css';
 
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js/lib/core';

@@ -2,6 +2,7 @@ import SwiftUI
 import AppKit
 import WebKit
 import os.log
+import CoreGraphics
 
 enum ViewMode {
     case preview
@@ -422,16 +423,95 @@ struct MarkdownWebView: NSViewRepresentable {
         
         func exportPDF(webView: WKWebView, completion: @escaping (Data?) -> Void) {
             let config = WKPDFConfiguration()
-            config.rect = CGRect(x: 0, y: 0, width: webView.bounds.width, height: webView.bounds.height)
             webView.createPDF(configuration: config) { result in
                 switch result {
                 case .success(let data):
-                    completion(data)
+                    // Slice the single tall page into multiple A4 pages
+                    let slicedData = self.slicePDFToA4Pages(data: data)
+                    completion(slicedData)
                 case .failure(let error):
                     os_log("exportPDF error: %{public}@", log: self.logger, type: .error, error.localizedDescription)
                     completion(nil)
                 }
             }
+        }
+        
+        /// Slices a single tall PDF page into multiple A4-sized pages
+        private func slicePDFToA4Pages(data: Data) -> Data? {
+            guard let provider = CGDataProvider(data: data as CFData),
+                  let pdfDoc = CGPDFDocument(provider),
+                  let singlePage = pdfDoc.page(at: 1) else {
+                os_log("slicePDFToA4Pages: Failed to read PDF", log: logger, type: .error)
+                return nil
+            }
+            
+            let originalBounds = singlePage.getBoxRect(.mediaBox)
+            
+            // A4 dimensions in points (595 x 842)
+            let a4Height: CGFloat = 842
+            let a4Width: CGFloat = 595
+            
+            // If content fits on one A4 page, return as-is
+            if originalBounds.height <= a4Height && originalBounds.width <= a4Width {
+                return data
+            }
+            
+            // Calculate scale factor to fit width to A4
+            let scaleFactor = a4Width / originalBounds.width
+            let scaledHeight = originalBounds.height * scaleFactor
+            
+            let outputData = NSMutableData()
+            guard let consumer = CGDataConsumer(data: outputData as CFMutableData),
+                  let context = CGContext(consumer: consumer, mediaBox: nil, nil) else {
+                os_log("slicePDFToA4Pages: Failed to create PDF context", log: logger, type: .error)
+                return nil
+            }
+            
+            // Work in OUTPUT coordinates, from TOP to BOTTOM
+            // PDF coordinates: y=0 is BOTTOM, y=height is TOP
+            var currentTop = scaledHeight
+            var pageNum = 0
+            
+            while currentTop > 0 {
+                // CRITICAL FIX: Do NOT use max(..., 0) here. 
+                // Always subtract exactly one full A4 height.
+                // If it goes negative on the last page, it correctly pushes 
+                // the remaining short content to the TOP of the final A4 page.
+                let sliceBottom = currentTop - a4Height
+                
+                // Convert to original coordinates for the translation
+                let origBottom = sliceBottom / scaleFactor
+                let origTop = currentTop / scaleFactor
+                
+                os_log("slicePDF: Page %d - output[%.1f, %.1f] -> original[%.1f, %.1f]", 
+                       log: logger, type: .default, pageNum + 1, sliceBottom, currentTop, origBottom, origTop)
+                
+                var mediaBox = CGRect(x: 0, y: 0, width: a4Width, height: a4Height)
+                context.beginPage(mediaBox: &mediaBox)
+                
+                context.saveGState()
+                
+                // Scale then translate
+                // This maps the region [origBottom, origTop] in the original document
+                // to exactly fill the [0, a4Height] media box.
+                let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+                    .translatedBy(x: 0, y: -origBottom)
+                
+                context.concatenate(transform)
+                context.drawPDFPage(singlePage)
+                
+                context.restoreGState()
+                context.endPage()
+                
+                currentTop = sliceBottom
+                pageNum += 1
+            }
+            
+            context.closePDF()
+            
+            os_log("slicePDFToA4Pages: Created %d pages from original height %.0f", log: logger, type: .default, pageNum, originalBounds.height)
+            
+            return outputData as Data
         }
         
         private func handleLinkClick(href: String) {

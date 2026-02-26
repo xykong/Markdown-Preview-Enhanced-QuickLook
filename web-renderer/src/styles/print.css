@@ -1,0 +1,116 @@
+/* Print styles for PDF export */
+@media print {
+  /* Page setup */
+  @page {
+    margin: 1.5cm;
+    size: A4 portrait;
+  }
+
+  /* Base body styles for print */
+  body {
+    font-size: 11pt;
+    line-height: 1.5;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  /* Keep headers with their content - avoid orphaned headers */
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* Prevent code blocks from splitting across pages */
+  pre, code {
+    page-break-inside: avoid;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+  }
+
+  /* Prevent blockquotes from splitting */
+  blockquote {
+    page-break-inside: avoid;
+  }
+
+  /* Prevent images from splitting */
+  img {
+    page-break-inside: avoid;
+    max-width: 100% !important;
+    max-height: 100% !important;
+  }
+
+  /* Table handling - prevent rows from breaking */
+  table {
+    page-break-inside: avoid;
+    display: table;
+  }
+
+  tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+  }
+
+  /* Lists */
+  ul, ol {
+    page-break-inside: avoid;
+  }
+
+  /* Links - show URL in print */
+  a[href]:after {
+    content: " (" attr(href) ")";
+    font-size: 0.8em;
+    color: #666;
+  }
+
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
+    content: "";
+  }
+
+  /* Manual page break support */
+  .pagebreak, .newpage {
+    page-break-before: always;
+  }
+
+  /* Hide UI elements in print */
+  #toc-container,
+  #search-container,
+  #outline-panel,
+  .toc-toggle-btn,
+  .search-toggle-btn,
+  .md-sidebar-toc {
+    display: none !important;
+  }
+
+  /* Mermaid and diagram handling */
+  .mermaid, .vega-embed, .graphviz {
+    page-break-inside: avoid;
+    max-width: 100% !important;
+  }
+
+  /* Code block with scroll - show all content */
+  pre::-webkit-scrollbar {
+    display: none;
+  }
+
+  pre {
+    overflow: visible !important;
+  }
+
+  /* Ensure text is visible */
+  .markdown-body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Dark mode override for print */
+  .markdown-body.dark {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Callouts/Alerts */
+  .markdown-alert {
+    page-break-inside: avoid;
+  }
+}

@@ -1,8 +1,10 @@
-# Changelog
-
 ## [Unreleased]
 
 ### Added
+- **PDF 导出分页功能**: 导出 PDF 时自动将长文档分页为标准 A4 页面
+  - 使用 CoreGraphics 将单页 PDF 切片为多个 A4 页面
+  - 添加 `@media print` CSS 规则优化打印样式（防止代码块、图片跨页截断）
+  - 最后一页内容自动对齐到页面顶部
 - **欢迎窗口 (Welcome Window)**: 直接启动 App 时显示友好的欢迎界面，引导用户快速上手
   - 大号 "+" 按钮支持点击打开文件或拖拽文件到窗口
   - 简洁的使用提示：QuickLook 空格预览、双击打开、拖拽文件

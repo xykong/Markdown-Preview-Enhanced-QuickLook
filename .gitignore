@@ -78,3 +78,7 @@ release_notes_tmp.md
 *_README.md
 !README.md
 !README_ZH.md
+
+# Generated HTML files (except web-renderer)
+/*.html
+!web-renderer/
