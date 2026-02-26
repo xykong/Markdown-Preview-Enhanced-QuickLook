@@ -4,6 +4,7 @@ This repository uses topic-based documentation under `docs/`.
 
 ## User
 - Installation & updates: [`user/AUTO_UPDATE.md`](user/AUTO_UPDATE.md)
+- Getting started / help: [`user/HELP.md`](user/HELP.md)
 - Troubleshooting: [`user/TROUBLESHOOTING.md`](user/TROUBLESHOOTING.md)
 
 ## Testing

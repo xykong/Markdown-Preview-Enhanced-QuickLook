@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+- **欢迎窗口 (Welcome Window)**: 直接启动 App 时显示友好的欢迎界面，引导用户快速上手
+  - 大号 "+" 按钮支持点击打开文件或拖拽文件到窗口
+  - 简洁的使用提示：QuickLook 空格预览、双击打开、拖拽文件
+  - 快捷入口：Open Settings (Cmd+,)、Troubleshooting 帮助文档
+  - 显示应用图标，提升品牌识别度
+- **用户友好帮助文档**: 新增 `docs/user/HELP.md`，由浅入深引导用户
+  - 先体验成功（Space 预览）
+  - 常见问题由简到难排查
+  - 文末引导到高级排障文档
+
+### Changed
+- **Troubleshooting 文档优化**: 在 `docs/user/TROUBLESHOOTING.md` 顶部添加提示，引导普通用户先看 HELP.md
+
 _无待发布的变更_
 
 ## [1.16.195] - 2026-02-26

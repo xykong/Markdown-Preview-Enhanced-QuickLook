@@ -64,10 +64,11 @@ struct MarkdownApp: App {
     @State private var viewMode: ViewMode = .preview
 
     var body: some Scene {
-        Settings {
-            SettingsView()
+        WindowGroup {
+            WelcomeView()
         }
-        
+        .windowStyle(.titleBar)
+
         DocumentGroup(newDocument: MarkdownDocument()) { file in
             ZStack(alignment: .topTrailing) {
                 MarkdownWebView(
@@ -177,6 +178,10 @@ struct MarkdownApp: App {
                     }
                 }
             }
+        }
+
+        Settings {
+            SettingsView()
         }
     }
 }

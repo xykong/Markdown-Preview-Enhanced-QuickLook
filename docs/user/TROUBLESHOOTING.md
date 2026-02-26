@@ -1,5 +1,7 @@
 # Troubleshooting Guide
 
+> 普通用户建议先看：[`HELP.md`](HELP.md)（由浅入深、尽量不需要理解内部原理）。
+
 ## Extension Not Registered
 
 ### Issue
