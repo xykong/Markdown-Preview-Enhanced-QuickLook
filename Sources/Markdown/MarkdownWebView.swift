@@ -497,6 +497,12 @@ struct MarkdownWebView: NSViewRepresentable {
 }
 
 class ResizableWKWebView: WKWebView {
+    private let webUndoManager = UndoManager()
+
+    override var undoManager: UndoManager? {
+        webUndoManager
+    }
+
     private var hasSetInitialSize = false
     private var currentZoomLevel: Double = 1.0
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "ResizableWKWebView")
@@ -559,4 +565,3 @@ class ResizableWKWebView: WKWebView {
         os_log("🔵 Enabled WKWebView magnification, initial level: %.2f", log: logger, type: .default, currentZoomLevel)
     }
 }
-

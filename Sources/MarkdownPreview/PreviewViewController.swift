@@ -73,6 +73,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     var currentZoomLevel: Double = 1.0
     var currentViewMode: ViewMode = .preview
     var localSchemeHandler: LocalSchemeHandler?
+
+    private var securityScopedURL: URL?
+    private var isSecurityScopedAccessActive: Bool = false
     
     // MARK: - Process Pool Management
     
@@ -143,6 +146,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     // MARK: - File Monitoring
     private var fileMonitor: DispatchSourceFileSystemObject?
     private var monitoredFileDescriptor: Int32 = -1
+
+    private var lastKnownFileSize: UInt64?
+    private var lastKnownFileModificationDate: Date?
     
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "MarkdownPreview")
     
@@ -442,6 +448,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         resizeTrackingWorkItem = nil
         
         cleanupWebView()
+        stopSecurityScopedAccessIfNeeded()
     }
     
     private func cleanupWebView() {
@@ -471,10 +478,24 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         os_log("🔵 PreviewViewController DEINIT called (PID: %d)", log: logger, type: .default, getpid())
         cleanupWebView()
         stopFileMonitoring()
+        stopSecurityScopedAccessIfNeeded()
         NotificationCenter.default.removeObserver(self)
         handshakeWorkItem?.cancel()
         saveSizeWorkItem?.cancel()
         resizeTrackingWorkItem?.cancel()
+    }
+
+    private func stopSecurityScopedAccessIfNeeded() {
+        guard isSecurityScopedAccessActive, let url = securityScopedURL else {
+            securityScopedURL = nil
+            isSecurityScopedAccessActive = false
+            return
+        }
+
+        url.stopAccessingSecurityScopedResource()
+        securityScopedURL = nil
+        isSecurityScopedAccessActive = false
+        os_log("🔵 Security-scoped resource access stopped", log: logger, type: .debug)
     }
     
 
@@ -757,8 +778,10 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         os_log("🔵 preparePreviewOfFile called for: %{public}@", log: logger, type: .default, url.path)
         self.currentURL = url
         
-        let accessGranted = url.startAccessingSecurityScopedResource()
-        os_log("🔵 Security-scoped resource access: %{public}@", log: logger, type: .debug, accessGranted ? "GRANTED" : "DENIED")
+        stopSecurityScopedAccessIfNeeded()
+        securityScopedURL = url
+        isSecurityScopedAccessActive = url.startAccessingSecurityScopedResource()
+        os_log("🔵 Security-scoped resource access: %{public}@", log: logger, type: .debug, isSecurityScopedAccessActive ? "GRANTED" : "DENIED")
         
         logScreenEnvironment(context: "preparePreviewOfFile-ENTRY")
         
@@ -795,6 +818,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             do {
                 let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
                 let fileSize = attributes[.size] as? UInt64 ?? 0
+                let fileMtime = attributes[.modificationDate] as? Date
                 
                 var content: String
                 if fileSize > self.maxPreviewSizeBytes {
@@ -814,6 +838,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 }
                 
                 self.pendingMarkdown = content
+                self.lastKnownFileSize = fileSize
+                self.lastKnownFileModificationDate = fileMtime
                 if self.isWebViewLoaded {
                     self.renderPendingMarkdown()
                 }
@@ -1475,6 +1501,12 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         do {
             let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
             let fileSize = attributes[.size] as? UInt64 ?? 0
+            let fileMtime = attributes[.modificationDate] as? Date
+
+            if fileSize == lastKnownFileSize, fileMtime == lastKnownFileModificationDate {
+                os_log("🟡 File event received but content unchanged (size/mtime identical); ignoring", log: logger, type: .debug)
+                return
+            }
             
             var content: String
             if fileSize > self.maxPreviewSizeBytes {
@@ -1494,6 +1526,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             }
             
             self.pendingMarkdown = content
+            self.lastKnownFileSize = fileSize
+            self.lastKnownFileModificationDate = fileMtime
             if self.isWebViewLoaded {
                 self.renderPendingMarkdown()
             }

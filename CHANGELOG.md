@@ -12,13 +12,18 @@
   - 删除根目录竞品 README 副本，仅保留 `docs/research/COMPETITIVE_ANALYSIS.md` 中的分析
   - 清理所有 `.DS_Store` 文件
 
+### Fixed
+- **搜索功能导致文件被标记为已编辑**: 修复在 Host App 中使用搜索功能时，Markdown 文件被错误标记为「已编辑」且修改时间戳更新的问题 (#8)
+  - Host App: 为 `ResizableWKWebView` 隔离独立的 `UndoManager`，避免搜索输入触发 `DocumentGroup` 的 autosave
+  - QuickLook Extension: 修复 security-scoped 资源访问泄漏，添加文件监控的 size/mtime 门禁
+  - Web Renderer: 移除搜索框的 100ms 延迟 focus，添加 `stopPropagation()` 防止按键冒泡
+
 ### Added
 - **脚注支持（Footnotes）**: 使用 `[^1]` 语法添加脚注，脚注内容自动渲染在文档底部
 - **上标 / 下标**: 支持 `H~2~O`（下标）和 `x^2^`（上标）语法，适用于化学式和数学表达式
 - **`==高亮==` 语法**: 使用 `==文本==` 语法高亮标注重要内容，渲染为 `<mark>` 标签
 - **Smart 排版（Typographer）**: 自动转换直引号为弯引号（`"` → `""`），`--` 为连接号（–），`---` 为破折号（—）
 - **Raw 源码切换**: 点击预览窗口右上角 `</>` 按钮，可在渲染视图与原始 Markdown 源码（带语法高亮）之间切换
-
 ## [1.16.182] - 2026-02-23
 
 ### Added

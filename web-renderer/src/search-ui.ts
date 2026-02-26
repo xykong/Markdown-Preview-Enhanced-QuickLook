@@ -1,250 +1,281 @@
-import { SearchEngine, SearchOptions } from './search';
+import type { SearchEngine, SearchOptions } from "./search";
 
 export class SearchUI {
-    private container: HTMLElement;
-    private searchEngine: SearchEngine;
-    private isVisible: boolean = false;
-    
-    private searchInput!: HTMLInputElement;
-    private caseSensitiveCheckbox!: HTMLInputElement;
-    private wholeWordCheckbox!: HTMLInputElement;
-    private regexCheckbox!: HTMLInputElement;
-    private matchCounter!: HTMLSpanElement;
-    private errorMessage!: HTMLDivElement;
-    private prevButton!: HTMLButtonElement;
-    private nextButton!: HTMLButtonElement;
-    private closeButton!: HTMLButtonElement;
+	private container: HTMLElement;
+	private searchEngine: SearchEngine;
+	private isVisible: boolean = false;
 
-    constructor(containerId: string, searchEngine: SearchEngine) {
-        const element = document.getElementById(containerId);
-        if (!element) {
-            throw new Error(`Search container element not found: ${containerId}`);
-        }
-        this.container = element;
-        this.searchEngine = searchEngine;
-        
-        this.createUI();
-        this.attachEventListeners();
-    }
+	private searchInput!: HTMLInputElement;
+	private caseSensitiveCheckbox!: HTMLInputElement;
+	private wholeWordCheckbox!: HTMLInputElement;
+	private regexCheckbox!: HTMLInputElement;
+	private matchCounter!: HTMLSpanElement;
+	private errorMessage!: HTMLDivElement;
+	private prevButton!: HTMLButtonElement;
+	private nextButton!: HTMLButtonElement;
+	private closeButton!: HTMLButtonElement;
 
-    private createUI(): void {
-        const toolbar = document.createElement('div');
-        toolbar.className = 'search-toolbar';
-        toolbar.setAttribute('role', 'search');
-        toolbar.setAttribute('aria-label', 'Find in page');
+	constructor(containerId: string, searchEngine: SearchEngine) {
+		const element = document.getElementById(containerId);
+		if (!element) {
+			throw new Error(`Search container element not found: ${containerId}`);
+		}
+		this.container = element;
+		this.searchEngine = searchEngine;
 
-        const inputGroup = document.createElement('div');
-        inputGroup.className = 'search-input-group';
+		this.createUI();
+		this.attachEventListeners();
+	}
 
-        this.searchInput = document.createElement('input');
-        this.searchInput.type = 'text';
-        this.searchInput.className = 'search-input';
-        this.searchInput.placeholder = 'Find in page';
-        this.searchInput.setAttribute('aria-label', 'Search query');
-        
-        this.matchCounter = document.createElement('span');
-        this.matchCounter.className = 'search-match-counter';
-        this.matchCounter.textContent = '';
+	private createUI(): void {
+		const toolbar = document.createElement("div");
+		toolbar.className = "search-toolbar";
+		toolbar.setAttribute("role", "search");
+		toolbar.setAttribute("aria-label", "Find in page");
 
-        inputGroup.appendChild(this.searchInput);
-        inputGroup.appendChild(this.matchCounter);
+		const inputGroup = document.createElement("div");
+		inputGroup.className = "search-input-group";
 
-        this.prevButton = this.createButton('prev', '↑', 'Previous match');
-        this.nextButton = this.createButton('next', '↓', 'Next match');
+		this.searchInput = document.createElement("input");
+		this.searchInput.type = "text";
+		this.searchInput.className = "search-input";
+		this.searchInput.placeholder = "Find in page";
+		this.searchInput.setAttribute("aria-label", "Search query");
 
-        const optionsGroup = document.createElement('div');
-        optionsGroup.className = 'search-options';
+		this.matchCounter = document.createElement("span");
+		this.matchCounter.className = "search-match-counter";
+		this.matchCounter.textContent = "";
 
-        this.caseSensitiveCheckbox = this.createCheckbox('case', 'Aa', 'Match case');
-        this.wholeWordCheckbox = this.createCheckbox('word', 'ab', 'Match whole word');
-        this.regexCheckbox = this.createCheckbox('regex', '.*', 'Use regular expression');
+		inputGroup.appendChild(this.searchInput);
+		inputGroup.appendChild(this.matchCounter);
 
-        optionsGroup.appendChild(this.caseSensitiveCheckbox.parentElement!);
-        optionsGroup.appendChild(this.wholeWordCheckbox.parentElement!);
-        optionsGroup.appendChild(this.regexCheckbox.parentElement!);
+		this.prevButton = this.createButton("prev", "↑", "Previous match");
+		this.nextButton = this.createButton("next", "↓", "Next match");
 
-        this.closeButton = this.createButton('close', '×', 'Close');
+		const optionsGroup = document.createElement("div");
+		optionsGroup.className = "search-options";
 
-        toolbar.appendChild(inputGroup);
-        toolbar.appendChild(this.prevButton);
-        toolbar.appendChild(this.nextButton);
-        toolbar.appendChild(optionsGroup);
-        toolbar.appendChild(this.closeButton);
+		this.caseSensitiveCheckbox = this.createCheckbox(
+			"case",
+			"Aa",
+			"Match case",
+		);
+		this.wholeWordCheckbox = this.createCheckbox(
+			"word",
+			"ab",
+			"Match whole word",
+		);
+		this.regexCheckbox = this.createCheckbox(
+			"regex",
+			".*",
+			"Use regular expression",
+		);
 
-        this.errorMessage = document.createElement('div');
-        this.errorMessage.className = 'search-error';
-        this.errorMessage.setAttribute('role', 'alert');
-        this.errorMessage.style.display = 'none';
+		const caseLabel = this.caseSensitiveCheckbox.parentElement;
+		const wordLabel = this.wholeWordCheckbox.parentElement;
+		const regexLabel = this.regexCheckbox.parentElement;
 
-        this.container.appendChild(toolbar);
-        this.container.appendChild(this.errorMessage);
-    }
+		if (caseLabel) optionsGroup.appendChild(caseLabel);
+		if (wordLabel) optionsGroup.appendChild(wordLabel);
+		if (regexLabel) optionsGroup.appendChild(regexLabel);
 
-    private createButton(className: string, text: string, ariaLabel: string): HTMLButtonElement {
-        const button = document.createElement('button');
-        button.className = `search-button search-button-${className}`;
-        button.textContent = text;
-        button.setAttribute('aria-label', ariaLabel);
-        button.type = 'button';
-        return button;
-    }
+		this.closeButton = this.createButton("close", "×", "Close");
 
-    private createCheckbox(name: string, label: string, ariaLabel: string): HTMLInputElement {
-        const wrapper = document.createElement('label');
-        wrapper.className = 'search-checkbox-label';
-        wrapper.title = ariaLabel;
+		toolbar.appendChild(inputGroup);
+		toolbar.appendChild(this.prevButton);
+		toolbar.appendChild(this.nextButton);
+		toolbar.appendChild(optionsGroup);
+		toolbar.appendChild(this.closeButton);
 
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.className = 'search-checkbox';
-        checkbox.id = `search-${name}`;
-        checkbox.setAttribute('aria-label', ariaLabel);
+		this.errorMessage = document.createElement("div");
+		this.errorMessage.className = "search-error";
+		this.errorMessage.setAttribute("role", "alert");
+		this.errorMessage.style.display = "none";
 
-        const labelText = document.createElement('span');
-        labelText.textContent = label;
+		this.container.appendChild(toolbar);
+		this.container.appendChild(this.errorMessage);
+	}
 
-        wrapper.appendChild(checkbox);
-        wrapper.appendChild(labelText);
+	private createButton(
+		className: string,
+		text: string,
+		ariaLabel: string,
+	): HTMLButtonElement {
+		const button = document.createElement("button");
+		button.className = `search-button search-button-${className}`;
+		button.textContent = text;
+		button.setAttribute("aria-label", ariaLabel);
+		button.type = "button";
+		return button;
+	}
 
-        return checkbox;
-    }
+	private createCheckbox(
+		name: string,
+		label: string,
+		ariaLabel: string,
+	): HTMLInputElement {
+		const wrapper = document.createElement("label");
+		wrapper.className = "search-checkbox-label";
+		wrapper.title = ariaLabel;
 
-    private attachEventListeners(): void {
-        this.searchInput.addEventListener('input', () => this.performSearch());
-        this.searchInput.addEventListener('keydown', (e) => this.handleInputKeydown(e));
+		const checkbox = document.createElement("input");
+		checkbox.type = "checkbox";
+		checkbox.className = "search-checkbox";
+		checkbox.id = `search-${name}`;
+		checkbox.setAttribute("aria-label", ariaLabel);
 
-        this.caseSensitiveCheckbox.addEventListener('change', () => this.performSearch());
-        this.wholeWordCheckbox.addEventListener('change', () => this.performSearch());
-        this.regexCheckbox.addEventListener('change', () => this.performSearch());
+		const labelText = document.createElement("span");
+		labelText.textContent = label;
 
-        this.prevButton.addEventListener('click', () => this.navigatePrevious());
-        this.nextButton.addEventListener('click', () => this.navigateNext());
-        this.closeButton.addEventListener('click', () => this.hide());
+		wrapper.appendChild(checkbox);
+		wrapper.appendChild(labelText);
 
-        document.addEventListener('keydown', (e) => this.handleGlobalKeydown(e));
-    }
+		return checkbox;
+	}
 
-    private handleInputKeydown(event: KeyboardEvent): void {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            if (event.shiftKey) {
-                this.navigatePrevious();
-            } else {
-                this.navigateNext();
-            }
-        } else if (event.key === 'Escape') {
-            event.preventDefault();
-            this.hide();
-        }
-    }
+	private attachEventListeners(): void {
+		this.searchInput.addEventListener("input", () => this.performSearch());
+		this.searchInput.addEventListener("keydown", (e) =>
+			this.handleInputKeydown(e),
+		);
 
-    private handleGlobalKeydown(event: KeyboardEvent): void {
-        if (!this.isVisible) return;
+		this.caseSensitiveCheckbox.addEventListener("change", () =>
+			this.performSearch(),
+		);
+		this.wholeWordCheckbox.addEventListener("change", () =>
+			this.performSearch(),
+		);
+		this.regexCheckbox.addEventListener("change", () => this.performSearch());
 
-        if (event.key === 'Escape') {
-            event.preventDefault();
-            this.hide();
-        }
-    }
+		this.prevButton.addEventListener("click", () => this.navigatePrevious());
+		this.nextButton.addEventListener("click", () => this.navigateNext());
+		this.closeButton.addEventListener("click", () => this.hide());
 
-    private performSearch(): void {
-        const query = this.searchInput.value;
-        
-        this.hideError();
-        
-        if (!query) {
-            this.searchEngine.clear();
-            this.updateMatchCounter(0, 0);
-            this.updateButtonStates(false);
-            return;
-        }
+		document.addEventListener("keydown", (e) => this.handleGlobalKeydown(e));
+	}
 
-        const options: SearchOptions = {
-            caseSensitive: this.caseSensitiveCheckbox.checked,
-            wholeWord: this.wholeWordCheckbox.checked,
-            useRegex: this.regexCheckbox.checked
-        };
+	private handleInputKeydown(event: KeyboardEvent): void {
+		if (event.key === "Enter") {
+			event.preventDefault();
+			event.stopPropagation();
+			if (event.shiftKey) {
+				this.navigatePrevious();
+			} else {
+				this.navigateNext();
+			}
+		} else if (event.key === "Escape") {
+			event.preventDefault();
+			event.stopPropagation();
+			this.hide();
+		}
+	}
 
-        const matchCount = this.searchEngine.search(query, options);
+	private handleGlobalKeydown(event: KeyboardEvent): void {
+		if (!this.isVisible) return;
 
-        if (matchCount === -1) {
-            this.showError('Invalid regular expression');
-            this.updateMatchCounter(0, 0);
-            this.updateButtonStates(false);
-            return;
-        }
+		if (event.key === "Escape") {
+			event.preventDefault();
+			event.stopPropagation();
+			this.hide();
+		}
+	}
 
-        const currentIndex = this.searchEngine.getCurrentIndex();
-        this.updateMatchCounter(currentIndex, matchCount);
-        this.updateButtonStates(matchCount > 0);
-    }
+	private performSearch(): void {
+		const query = this.searchInput.value;
 
-    private navigateNext(): void {
-        this.searchEngine.next();
-        const currentIndex = this.searchEngine.getCurrentIndex();
-        const matchCount = this.searchEngine.getMatchCount();
-        this.updateMatchCounter(currentIndex, matchCount);
-    }
+		this.hideError();
 
-    private navigatePrevious(): void {
-        this.searchEngine.previous();
-        const currentIndex = this.searchEngine.getCurrentIndex();
-        const matchCount = this.searchEngine.getMatchCount();
-        this.updateMatchCounter(currentIndex, matchCount);
-    }
+		if (!query) {
+			this.searchEngine.clear();
+			this.updateMatchCounter(0, 0);
+			this.updateButtonStates(false);
+			return;
+		}
 
-    private updateMatchCounter(current: number, total: number): void {
-        if (total === 0) {
-            this.matchCounter.textContent = '';
-        } else {
-            this.matchCounter.textContent = `${current}/${total}`;
-        }
-    }
+		const options: SearchOptions = {
+			caseSensitive: this.caseSensitiveCheckbox.checked,
+			wholeWord: this.wholeWordCheckbox.checked,
+			useRegex: this.regexCheckbox.checked,
+		};
 
-    private updateButtonStates(enabled: boolean): void {
-        this.prevButton.disabled = !enabled;
-        this.nextButton.disabled = !enabled;
-    }
+		const matchCount = this.searchEngine.search(query, options);
 
-    private showError(message: string): void {
-        this.errorMessage.textContent = message;
-        this.errorMessage.style.display = 'block';
-        this.searchInput.classList.add('search-input-error');
-    }
+		if (matchCount === -1) {
+			this.showError("Invalid regular expression");
+			this.updateMatchCounter(0, 0);
+			this.updateButtonStates(false);
+			return;
+		}
 
-    private hideError(): void {
-        this.errorMessage.style.display = 'none';
-        this.searchInput.classList.remove('search-input-error');
-    }
+		const currentIndex = this.searchEngine.getCurrentIndex();
+		this.updateMatchCounter(currentIndex, matchCount);
+		this.updateButtonStates(matchCount > 0);
+	}
 
-    public show(): void {
-        this.isVisible = true;
-        this.container.style.display = 'flex';
-        
-        setTimeout(() => {
-            this.searchInput.focus();
-            this.searchInput.select();
-        }, 100);
-    }
+	private navigateNext(): void {
+		this.searchEngine.next();
+		const currentIndex = this.searchEngine.getCurrentIndex();
+		const matchCount = this.searchEngine.getMatchCount();
+		this.updateMatchCounter(currentIndex, matchCount);
+	}
 
-    public hide(): void {
-        this.isVisible = false;
-        this.container.style.display = 'none';
-        this.searchEngine.clear();
-        this.searchInput.value = '';
-        this.updateMatchCounter(0, 0);
-        this.hideError();
-    }
+	private navigatePrevious(): void {
+		this.searchEngine.previous();
+		const currentIndex = this.searchEngine.getCurrentIndex();
+		const matchCount = this.searchEngine.getMatchCount();
+		this.updateMatchCounter(currentIndex, matchCount);
+	}
 
-    public toggle(): void {
-        if (this.isVisible) {
-            this.hide();
-        } else {
-            this.show();
-        }
-    }
+	private updateMatchCounter(current: number, total: number): void {
+		if (total === 0) {
+			this.matchCounter.textContent = "";
+		} else {
+			this.matchCounter.textContent = `${current}/${total}`;
+		}
+	}
 
-    public isSearchVisible(): boolean {
-        return this.isVisible;
-    }
+	private updateButtonStates(enabled: boolean): void {
+		this.prevButton.disabled = !enabled;
+		this.nextButton.disabled = !enabled;
+	}
+
+	private showError(message: string): void {
+		this.errorMessage.textContent = message;
+		this.errorMessage.style.display = "block";
+		this.searchInput.classList.add("search-input-error");
+	}
+
+	private hideError(): void {
+		this.errorMessage.style.display = "none";
+		this.searchInput.classList.remove("search-input-error");
+	}
+
+	public show(): void {
+		this.isVisible = true;
+		this.container.style.display = "flex";
+
+		this.searchInput.focus();
+		this.searchInput.select();
+	}
+
+	public hide(): void {
+		this.isVisible = false;
+		this.container.style.display = "none";
+		this.searchEngine.clear();
+		this.searchInput.value = "";
+		this.updateMatchCounter(0, 0);
+		this.hideError();
+	}
+
+	public toggle(): void {
+		if (this.isVisible) {
+			this.hide();
+		} else {
+			this.show();
+		}
+	}
+
+	public isSearchVisible(): boolean {
+		return this.isVisible;
+	}
 }
