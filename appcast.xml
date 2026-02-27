@@ -7,6 +7,59 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.16.204</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.16.204</link>
+            <sparkle:version>204</sparkle:version>
+            <sparkle:shortVersionString>1.16.204</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Fri, 27 Feb 2026 03:52:33 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.16.204/FluxMarkdown.dmg"
+                sparkle:edSignature="Rxpm/VTZGeLXcW5gAL+KwnTEsOZCiqASQy7YHVNp8Lg1+TdAXnvUBYpY4eGIeHNP5LU2A07H8IRZV6pMUqpOAg=="
+                length="9979365"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><pre>
+Added
+- **PDF 导出分页功能**: 导出 PDF 时自动将长文档分页为标准 A4 页面
+  - 使用 CoreGraphics 将单页 PDF 切片为多个 A4 页面
+  - 添加 ` print` CSS 规则优化打印样式（防止代码块、图片跨页截断）
+  - 最后一页内容自动对齐到页面顶部
+- **欢迎窗口 (Welcome Window)**: 直接启动 App 时显示友好的欢迎界面，引导用户快速上手
+  - 大号 "+" 按钮支持点击打开文件或拖拽文件到窗口
+  - 简洁的使用提示：QuickLook 空格预览、双击打开、拖拽文件
+  - 快捷入口：Open Settings (Cmd+,)、Troubleshooting 帮助文档
+  - 显示应用图标，提升品牌识别度
+- **用户友好帮助文档**: 新增 `docs/user/HELP.md`，由浅入深引导用户
+  - 先体验成功（Space 预览）
+  - 常见问题由简到难排查
+  - 文末引导到高级排障文档
+
+Fixed
+- **HTML 导出功能重构**: 参考 MPE (Markdown Preview Enhanced) 方案，彻底重构 HTML 导出逻辑
+  - 生成纯净的独立 HTML 文件，不再包含臃肿的 JS Bundle（文件体积大幅缩小）
+  - 内联所有 CSS 样式，确保离线打开时格式、字体、代码高亮正确显示
+  - 自动将本地图片（GIF、PNG、JPG、SVG、WebP）转换为 base64 Data URI，确保图片在任意环境下正常显示
+  - 导出的 HTML 可直接分享给他人，无需依赖原始文件路径
+- **构建过程警告修复**: 清理 `make install` 过程中的冗余警告信息
+  - 抑制 xcodebuild 的 DVTDeviceOperation 内部警告（Xcode 15/16 已知问题）
+  - 抑制 Vite 打包的 chunk size 警告（本地应用无需严格限制块大小）
+  - 静默 Vite 详细构建日志，提升输出可读性
+- **安装脚本兼容性修复**: 修复 macOS 新版本上默认应用设置失败的问题
+  - 将废弃的 Python LaunchServices 脚本替换为 Swift 原生实现
+  - 修复 macOS 12+ 不再自带 LaunchServices Python 模块的问题
+
+- **应用图标透明通道修复**: 修复 macOS 12.7 和 15.7 上应用图标显示白色方形背景的问题
+  - 使用 AI 图像分割 (rembg) 精准移除白色背景，保留图标内部的白色纸张区域
+  - 强制对齐图标边缘为数学直线，消除 AI 抠图产生的波浪边缘
+  - 完美保留下拉阴影的半透明渐变效果
+
+Changed
+- **Troubleshooting 文档优化**: 在 `docs/user/TROUBLESHOOTING.md` 顶部添加提示，引导普通用户先看 HELP.md</pre><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.16.204">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.16.195</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.16.195</link>
             <sparkle:version>195</sparkle:version>
