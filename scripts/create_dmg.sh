@@ -69,7 +69,7 @@ cp assets/dmg/background@2x.png "$TMP_DIR/.background/background@2x.png"
 echo "💿 Creating styled DMG using create-dmg..."
 
 # Volume name must change to bypass Finder cache for the layout
-VOLUME_NAME="Install FluxMarkdown 6"
+VOLUME_NAME="Install FluxMarkdown 9"
 
 create-dmg \
   --volname "${VOLUME_NAME}" \
