@@ -21,13 +21,16 @@
   - 内联所有 CSS 样式，确保离线打开时格式、字体、代码高亮正确显示
   - 自动将本地图片（GIF、PNG、JPG、SVG、WebP）转换为 base64 Data URI，确保图片在任意环境下正常显示
   - 导出的 HTML 可直接分享给他人，无需依赖原始文件路径
+- **构建过程警告修复**: 清理 `make install` 过程中的冗余警告信息
+  - 抑制 xcodebuild 的 DVTDeviceOperation 内部警告（Xcode 15/16 已知问题）
+  - 抑制 Vite 打包的 chunk size 警告（本地应用无需严格限制块大小）
+  - 静默 Vite 详细构建日志，提升输出可读性
+- **安装脚本兼容性修复**: 修复 macOS 新版本上默认应用设置失败的问题
+  - 将废弃的 Python LaunchServices 脚本替换为 Swift 原生实现
+  - 修复 macOS 12+ 不再自带 LaunchServices Python 模块的问题
 
 ### Changed
 - **Troubleshooting 文档优化**: 在 `docs/user/TROUBLESHOOTING.md` 顶部添加提示，引导普通用户先看 HELP.md
-### Changed
-- **Troubleshooting 文档优化**: 在 `docs/user/TROUBLESHOOTING.md` 顶部添加提示，引导普通用户先看 HELP.md
-
-_无待发布的变更_
 
 ## [1.16.195] - 2026-02-26
 

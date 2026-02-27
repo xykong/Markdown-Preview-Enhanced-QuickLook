@@ -4,8 +4,7 @@
   "description": "Web renderer for macOS Quick Look Extension",
   "main": "index.js",
   "scripts": {
-    "build": "vite build && sed -i '' 's/crossorigin//g' dist/index.html",
-    "dev": "vite",
+    "build": "vite build --logLevel silent && sed -i '' 's/crossorigin//g' dist/index.html",
     "preview": "vite preview",
     "test": "jest"
   },

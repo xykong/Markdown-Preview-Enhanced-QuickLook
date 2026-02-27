@@ -79,25 +79,39 @@ if command -v duti >/dev/null 2>&1; then
     duti -s "$BUNDLE_ID" .mdown all
     echo "   ✓ Default associations set via duti"
 else
-    # Fallback to manual LSSetDefaultRoleHandlerForContentType
-    echo "   Using LaunchServices API (duti not available)..."
-    /usr/bin/python3 -c "
-from LaunchServices import LSSetDefaultRoleHandlerForContentType, LSSetDefaultHandlerForURLScheme
-from CoreServices import kLSRolesAll
+    # Fallback to Swift LaunchServices API
+    echo "   Using Swift LaunchServices API (duti not available)..."
+    cat << 'EOF' > /tmp/set_default_handler.swift
+import Foundation
+import CoreServices
 
-bundle_id = '$BUNDLE_ID'
-content_types = ['net.daringfireball.markdown', 'public.markdown']
+func setDefaultHandler(bundleId: String, contentType: String) -> Bool {
+    let cfBundleId = bundleId as CFString
+    let cfContentType = contentType as CFString
+    
+    let result = LSSetDefaultRoleHandlerForContentType(cfContentType, LSRolesMask.all, cfBundleId)
+    return result == noErr
+}
 
-for content_type in content_types:
-    try:
-        LSSetDefaultRoleHandlerForContentType(content_type, kLSRolesAll, bundle_id)
-        print(f'   ✓ Set handler for {content_type}')
-    except Exception as e:
-        print(f'   ⚠ Failed for {content_type}: {e}')
-" 2>/dev/null || {
+let bundleId = "com.xykong.Markdown"
+let types = ["net.daringfireball.markdown", "public.markdown"]
+
+var allSuccess = true
+for type in types {
+    if setDefaultHandler(bundleId: bundleId, contentType: type) {
+        print("   ✓ Set handler for \(type)")
+    } else {
+        print("   ⚠ Failed for \(type)")
+        allSuccess = false
+    }
+}
+exit(allSuccess ? 0 : 1)
+EOF
+    swift /tmp/set_default_handler.swift || {
         echo "   ⚠️  Automatic default app setting failed."
         echo "   📝 You can set it manually or install duti: brew install duti"
     }
+    rm -f /tmp/set_default_handler.swift
 fi
 
 echo ""

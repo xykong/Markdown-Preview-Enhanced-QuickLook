@@ -3,6 +3,9 @@ options:
   bundleIdPrefix: com.xykong
   deploymentTarget:
     macOS: "11.0"
+settings:
+  MARKETING_VERSION: ${MARKETING_VERSION}
+  CURRENT_PROJECT_VERSION: ${CURRENT_PROJECT_VERSION}
 packages:
   Sparkle:
     url: https://github.com/sparkle-project/Sparkle
@@ -67,7 +70,8 @@ targets:
     settings:
       GENERATE_INFOPLIST_FILE: YES
       PRODUCT_BUNDLE_IDENTIFIER: com.xykong.Markdown.Tests
-
+      MARKETING_VERSION: ${MARKETING_VERSION}
+      CURRENT_PROJECT_VERSION: ${CURRENT_PROJECT_VERSION}
 schemes:
   Markdown:
     build:
