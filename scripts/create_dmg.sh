@@ -60,7 +60,7 @@ echo "📂 Preparing appdmg configuration..."
 APP_DMG_JSON="build/appdmg.json"
 cat << EOF > "$APP_DMG_JSON"
 {
-  "title": "${APP_NAME}",
+  "title": "Install ${APP_NAME}",
   "background": "$(pwd)/assets/dmg/background.png",
   "icon-size": 100,
   "contents": [
