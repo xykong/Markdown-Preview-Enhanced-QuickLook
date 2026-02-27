@@ -15,6 +15,15 @@
   - 常见问题由简到难排查
   - 文末引导到高级排障文档
 
+### Fixed
+- **HTML 导出功能重构**: 参考 MPE (Markdown Preview Enhanced) 方案，彻底重构 HTML 导出逻辑
+  - 生成纯净的独立 HTML 文件，不再包含臃肿的 JS Bundle（文件体积大幅缩小）
+  - 内联所有 CSS 样式，确保离线打开时格式、字体、代码高亮正确显示
+  - 自动将本地图片（GIF、PNG、JPG、SVG、WebP）转换为 base64 Data URI，确保图片在任意环境下正常显示
+  - 导出的 HTML 可直接分享给他人，无需依赖原始文件路径
+
+### Changed
+- **Troubleshooting 文档优化**: 在 `docs/user/TROUBLESHOOTING.md` 顶部添加提示，引导普通用户先看 HELP.md
 ### Changed
 - **Troubleshooting 文档优化**: 在 `docs/user/TROUBLESHOOTING.md` 顶部添加提示，引导普通用户先看 HELP.md
 

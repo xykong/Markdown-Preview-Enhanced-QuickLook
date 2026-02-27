@@ -326,12 +326,47 @@ struct MarkdownWebView: NSViewRepresentable {
         }
         
         func exportHTML(webView: WKWebView, completion: @escaping (String?) -> Void) {
-            webView.evaluateJavaScript("window.exportHTML()") { result, error in
+            webView.evaluateJavaScript("window.exportHTML()") { [weak self] result, error in
                 if let error = error {
-                    os_log("exportHTML JS error: %{public}@", log: self.logger, type: .error, error.localizedDescription)
+                    os_log("exportHTML JS error: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
                     completion(nil)
+                } else if var html = result as? String {
+                    // Convert local file URLs (e.g. file:///... or local-md://...) to base64 inline data URIs
+                    // to ensure images like GIFs are preserved in the offline HTML.
+                    do {
+                        // Match any src attribute starting with file:// or local-md://
+                        let pattern = "src=\"(?:file|local-md)://([^\"]+)\""
+                        let regex = try NSRegularExpression(pattern: pattern, options: [])
+                        let matches = regex.matches(in: html, options: [], range: NSRange(location: 0, length: html.utf16.count))
+                        
+                        for match in matches.reversed() {
+                            let range = match.range(at: 1)
+                            if let swiftRange = Range(range, in: html), let fullRange = Range(match.range, in: html) {
+                                let path = String(html[swiftRange])
+                                if let decodedPath = path.removingPercentEncoding {
+                                    let fileURL = URL(fileURLWithPath: decodedPath)
+                                    if let data = try? Data(contentsOf: fileURL) {
+                                        let base64 = data.base64EncodedString()
+                                        
+                                        var mimeType = "image/png"
+                                        let ext = fileURL.pathExtension.lowercased()
+                                        if ext == "gif" { mimeType = "image/gif" }
+                                        else if ext == "jpg" || ext == "jpeg" { mimeType = "image/jpeg" }
+                                        else if ext == "svg" { mimeType = "image/svg+xml" }
+                                        else if ext == "webp" { mimeType = "image/webp" }
+                                        
+                                        html.replaceSubrange(fullRange, with: "src=\"data:\(mimeType);base64,\(base64)\"")
+                                    }
+                                }
+                            }
+                        }
+                    } catch {
+                        os_log("exportHTML regex error: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
+                    }
+                    
+                    completion(html)
                 } else {
-                    completion(result as? String)
+                    completion(nil)
                 }
             }
         }

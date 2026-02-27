@@ -433,20 +433,121 @@ async function renderGraphvizDiagrams(container: HTMLElement): Promise<void> {
     }
 }
 
-window.exportHTML = function(): string {
-    const clone = document.documentElement.cloneNode(true) as HTMLElement;
+// Store loaded CSS text so exportHTML can use it synchronously
+let cachedCssText = '';
 
-    const panel = clone.querySelector('#outline-panel') as HTMLElement | null;
-    if (panel) panel.style.display = 'none';
-
-    const search = clone.querySelector('#search-container') as HTMLElement | null;
-    if (search) search.style.display = 'none';
-
-    clone.querySelectorAll<HTMLElement>('[class*="toggle-btn"], [class*="control-btn"]').forEach(el => {
-        el.style.display = 'none';
+async function preloadStylesheets() {
+    cachedCssText = '';
+    
+    // Grab all <style> tags (like Vite's dev injected styles)
+    const styleTags = document.querySelectorAll('style');
+    styleTags.forEach(tag => {
+        if (tag.innerHTML && !cachedCssText.includes(tag.innerHTML)) {
+            cachedCssText += tag.innerHTML + '\n';
+        }
     });
 
-    return '<!DOCTYPE html>\n' + clone.outerHTML;
+    // Fetch external stylesheets
+    const links = document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]');
+    for (let i = 0; i < links.length; i++) {
+        const link = links[i];
+        try {
+            const response = await fetch(link.href);
+            if (response.ok) {
+                cachedCssText += await response.text() + '\n';
+            }
+        } catch (err) {
+            logToSwift(`Warning: Could not fetch stylesheet ${link.href}: ${err}`);
+        }
+    }
+}
+
+// Call this early
+setTimeout(preloadStylesheets, 500);
+
+window.exportHTML = function(): string {
+    // Collect all CSS rules into a single string
+    let cssText = cachedCssText;
+    
+    // Also try to get any runtime CSS rules just in case
+    try {
+        const sheets = Array.from(document.styleSheets);
+        for (const sheet of sheets) {
+            try {
+                if (sheet.cssRules) {
+                    for (const rule of Array.from(sheet.cssRules)) {
+                        if (!cssText.includes(rule.cssText)) {
+                            cssText += rule.cssText + '\n';
+                        }
+                    }
+                }
+            } catch (e) {
+                // Ignore CORS or access errors for cross-origin stylesheets
+            }
+        }
+    } catch (e) {
+        logToSwift(`Warning: Could not read stylesheets: ${e}`);
+    }
+
+    // Get the core rendered markdown content
+    const previewDiv = document.getElementById('markdown-preview');
+    // Ensure we clone the content so we don't modify the active DOM
+    const clone = previewDiv ? (previewDiv.cloneNode(true) as HTMLElement) : document.createElement('div');
+    
+    // Force all relative image srcs to be absolute file:// or local-md:// URIs
+    // so Swift can easily find and replace them with base64 data URIs
+    const images = clone.querySelectorAll('img');
+    images.forEach(img => {
+        if (img.src && !img.src.startsWith('data:')) {
+            img.setAttribute('src', img.src);
+        }
+    });
+    // Build the final HTML document
+    const finalHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exported Markdown</title>
+    <style>
+        /* Base document styles */
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0d1117;
+                color: #c9d1d9;
+            }
+        }
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: none;
+            margin: 0 auto;
+            padding: 45px;
+        }
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+        
+        /* Extracted application styles */
+${cssText}
+    </style>
+</head>
+<body>
+    <div class="markdown-body">
+${clone.innerHTML}
+    </div>
+</body>
+</html>`;
+
+    return finalHtml;
 };
 
 window.renderMarkdown = async function (text: string, options: RenderOptions = {}) {
