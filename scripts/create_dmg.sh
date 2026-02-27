@@ -55,31 +55,31 @@ echo "✅ Found app at: $APP_PATH"
 mkdir -p "$OUTPUT_DIR"
 rm -f "$OUTPUT_DIR/$DMG_NAME"
 
-# 4. Prepare appdmg configuration
-echo "📂 Preparing appdmg configuration..."
-APP_DMG_JSON="build/appdmg.json"
-cat << EOF > "$APP_DMG_JSON"
-{
-  "title": "Flux Markdown Release",
-  "background": "$(pwd)/assets/dmg/background.tiff",
-  "icon-size": 100,
-  "contents": [
-    { "x": 150, "y": 200, "type": "file", "path": "${APP_PATH}" },
-    { "x": 450, "y": 200, "type": "link", "path": "/Applications" }
-  ],
-  "window": {
-    "size": { "width": 600, "height": 400 },
-    "position": { "x": 400, "y": 400 }
-  }
-}
-EOF
+# 4. Prepare temporary folder
+TMP_DIR=$(mktemp -d)
+echo "📂 Preparing DMG content in $TMP_DIR..."
+cp -R "$APP_PATH" "$TMP_DIR/"
 
-# 5. Create DMG using appdmg
-echo "💿 Creating styled DMG using appdmg..."
-npx appdmg "$APP_DMG_JSON" "$OUTPUT_DIR/$DMG_NAME"
+  # 5. Create DMG using create-dmg
+  echo "💿 Creating styled DMG using create-dmg..."
+
+  # Volume name must change to bypass Finder cache for the layout
+    VOLUME_NAME="Install FluxMarkdown 2"
+
+  create-dmg \
+  --volname "${VOLUME_NAME}" \
+  --background "assets/dmg/background.png" \
+  --window-pos 200 120 \
+  --window-size 600 400 \
+  --icon-size 100 \
+  --icon "${APP_BUNDLE}" 150 200 \
+  --hide-extension "${APP_BUNDLE}" \
+  --app-drop-link 450 200 \
+  "$OUTPUT_DIR/$DMG_NAME" \
+  "$TMP_DIR/"
 
 # 6. Cleanup
-rm -f "$APP_DMG_JSON"
+rm -rf "$TMP_DIR"
 
 echo ""
 echo "✅ DMG created successfully at: $OUTPUT_DIR/$DMG_NAME"
