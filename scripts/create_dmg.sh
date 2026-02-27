@@ -71,11 +71,11 @@ create-dmg \
   --volname "${VOLUME_NAME}" \
   --background "assets/dmg/background.png" \
   --window-pos 200 120 \
-  --window-size 600 400 \
+  --window-size 660 440 \
   --icon-size 100 \
-  --icon "${APP_BUNDLE}" 150 200 \
+  --icon "${APP_BUNDLE}" 180 220 \
   --hide-extension "${APP_BUNDLE}" \
-  --icon "Applications" 450 200 \
+  --icon "Applications" 480 220 \
   "$OUTPUT_DIR/$DMG_NAME" \
   "$TMP_DIR/"
 
