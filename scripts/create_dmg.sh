@@ -61,7 +61,7 @@ APP_DMG_JSON="build/appdmg.json"
 cat << EOF > "$APP_DMG_JSON"
 {
   "title": "Install ${APP_NAME}",
-  "background": "$(pwd)/assets/dmg/background.png",
+  "background": "$(pwd)/assets/dmg/background_1200x800.png",
   "icon-size": 100,
   "contents": [
     { "x": 150, "y": 200, "type": "file", "path": "${APP_PATH}" },
