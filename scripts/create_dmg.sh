@@ -55,19 +55,31 @@ echo "✅ Found app at: $APP_PATH"
 mkdir -p "$OUTPUT_DIR"
 rm -f "$OUTPUT_DIR/$DMG_NAME"
 
-# 4. Create temporary folder for DMG content
-TMP_DIR=$(mktemp -d)
-echo "📂 Preparing DMG content in $TMP_DIR..."
+# 4. Prepare appdmg configuration
+echo "📂 Preparing appdmg configuration..."
+APP_DMG_JSON="build/appdmg.json"
+cat << EOF > "$APP_DMG_JSON"
+{
+  "title": "${APP_NAME}",
+  "background": "$(pwd)/assets/dmg/background.png",
+  "icon-size": 100,
+  "contents": [
+    { "x": 150, "y": 200, "type": "file", "path": "${APP_PATH}" },
+    { "x": 450, "y": 200, "type": "link", "path": "/Applications" }
+  ],
+  "window": {
+    "size": { "width": 600, "height": 400 },
+    "position": { "x": 400, "y": 400 }
+  }
+}
+EOF
 
-cp -R "$APP_PATH" "$TMP_DIR/"
-ln -s /Applications "$TMP_DIR/Applications"
-
-# 5. Create DMG using hdiutil
-echo "💿 Creating DMG..."
-hdiutil create -volname "${APP_NAME}" -srcfolder "$TMP_DIR" -ov -format UDZO "$OUTPUT_DIR/$DMG_NAME"
+# 5. Create DMG using appdmg
+echo "💿 Creating styled DMG using appdmg..."
+npx appdmg "$APP_DMG_JSON" "$OUTPUT_DIR/$DMG_NAME"
 
 # 6. Cleanup
-rm -rf "$TMP_DIR"
+rm -f "$APP_DMG_JSON"
 
 echo ""
 echo "✅ DMG created successfully at: $OUTPUT_DIR/$DMG_NAME"

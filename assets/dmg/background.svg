@@ -1,0 +1,48 @@
+<svg width="600" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Soft, bright macOS-style background -->
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#f1f5f9"/> <!-- slate-100 -->
+    </linearGradient>
+    
+    <!-- Arrow Gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity="0"/>
+      <stop offset="50%" stop-color="#3b82f6" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#2563eb" stop-opacity="1"/>
+    </linearGradient>
+    
+    <!-- Very subtle grid to give a workspace feel -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#e2e8f0" stroke-width="1" stroke-opacity="0.8"/>
+    </pattern>
+  </defs>
+
+  <!-- Base Layer -->
+  <rect width="600" height="400" fill="url(#bgGrad)"/>
+  <rect width="600" height="400" fill="url(#grid)"/>
+
+  <!-- Top Title -->
+  <text x="300" y="80" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="600" fill="#0f172a" text-anchor="middle" letter-spacing="-0.5">Flux Markdown</text>
+  
+  <!-- Subtitle -->
+  <text x="300" y="115" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif" font-size="15" font-weight="500" fill="#64748b" text-anchor="middle">拖拽到 Applications 安装</text>
+
+  <!-- The Arrow -->
+  <!-- Centered perfectly between 150 and 450 (center is 300) -->
+  <!-- Start at x=230, End at x=370 (Length 140) -->
+  <g transform="translate(230, 200)">
+    <!-- Arrow track/line -->
+    <path d="M0,0 L130,0" stroke="url(#arrowGrad)" stroke-width="3" stroke-dasharray="6,4" fill="none" stroke-linecap="round"/>
+    <!-- Arrow head -->
+    <path d="M120,-8 L136,0 L120,8" stroke="#2563eb" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  
+  <!-- App Icon Placeholder Hint (For designer visual checking) -->
+  <!-- <circle cx="150" cy="200" r="45" fill="red" fill-opacity="0.2" /> -->
+  <!-- <circle cx="450" cy="200" r="45" fill="blue" fill-opacity="0.2" /> -->
+  
+  <!-- Bottom Version Note -->
+  <text x="300" y="360" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="500" fill="#94a3b8" text-anchor="middle">macOS QuickLook Extension</text>
+</svg>
