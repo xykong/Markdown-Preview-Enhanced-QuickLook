@@ -63,14 +63,11 @@ cp -R "$APP_PATH" "$TMP_DIR/"
 mkdir -p "$TMP_DIR/.background"
 cp assets/dmg/background@2x.png "$TMP_DIR/.background/background@2x.png"
 
-# 4.6. Create hardcoded alias to Applications with explicit icon
-ln -s /Applications "$TMP_DIR/Applications"
-fileicon set "$TMP_DIR/Applications" assets/dmg/Applications.icns
 # 5. Create DMG using create-dmg
 echo "💿 Creating styled DMG using create-dmg..."
 
 # Volume name must change to bypass Finder cache for the layout
-VOLUME_NAME="Install FluxMarkdown 16"
+VOLUME_NAME="Install FluxMarkdown 17"
 
 create-dmg \
   --volname "${VOLUME_NAME}" \
@@ -79,8 +76,7 @@ create-dmg \
   --window-size 660 468 \
   --icon-size 100 \
   --icon "${APP_BUNDLE}" 180 220 \
-  --hide-extension "${APP_BUNDLE}" \
-  --icon "Applications" 480 220 \
+  --app-drop-link 480 220 \
   --icon ".background" 120 120 \
   "$OUTPUT_DIR/$DMG_NAME" \
   "$TMP_DIR/"
