@@ -69,7 +69,7 @@ cp assets/dmg/background@2x.png "$TMP_DIR/.background/background@2x.png"
 echo "💿 Creating styled DMG using create-dmg..."
 
 # Volume name must change to bypass Finder cache for the layout
-VOLUME_NAME="Install FluxMarkdown 12"
+VOLUME_NAME="Install FluxMarkdown 14"
 
 create-dmg \
   --volname "${VOLUME_NAME}" \
@@ -80,9 +80,9 @@ create-dmg \
   --icon "${APP_BUNDLE}" 180 220 \
   --hide-extension "${APP_BUNDLE}" \
   --icon "Applications" 480 220 \
+  --icon ".background" 120 120 \
   "$OUTPUT_DIR/$DMG_NAME" \
   "$TMP_DIR/"
-
 # 6. Cleanup
 rm -rf "$TMP_DIR"
 
