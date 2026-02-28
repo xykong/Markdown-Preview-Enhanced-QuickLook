@@ -1,7 +1,7 @@
 ---
 name: publish
 description: FluxMarkdown 完整发布工作流。用于发布新版本、版本升级或更新分发渠道（GitHub、Sparkle、Homebrew）。触发词包括 "release", "publish", "bump version", "make release", "create release" 或任何涉及版本管理和分发更新的请求。
-model: animal-gateway/glm-4.7
+model: animal-gateway/glm-5
 ---
 
 # Publish 命令 - 发布工作流
