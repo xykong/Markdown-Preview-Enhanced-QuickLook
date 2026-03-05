@@ -7,6 +7,35 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.16.236</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.16.236</link>
+            <sparkle:version>236</sparkle:version>
+            <sparkle:shortVersionString>1.16.236</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 05 Mar 2026 05:00:25 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.16.236/FluxMarkdown.dmg"
+                sparkle:edSignature="g2mmEEWsHyIxk+xyncJ96KMpkWFFjVvvL8Z1i3Btfjo7l89bQQgT1EFOKif2SsrRqhLohZE7s1fFN8dsTY94Dw=="
+                length="9835273"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><pre>
+Added
+- **链接状态栏**: 鼠标悬停在链接上时，当显示文字与实际链接不一致，在窗口左下角显示实际链接地址
+  - 支持 QuickLook 预览和主应用
+  - 自动解码 URL 编码的中文链接（如 `#%E4%B8%AD%E6%96%87` 显示为 `⚓ #中文`）
+  - 显示链接类型图标：🔗 外部链接、⚓ 内部锚点、✉️ 邮件链接
+  - 裸链接（显示文字即 URL）不显示状态栏，避免冗余
+
+Fixed
+- **Help 菜单修复**: 修复 Help 菜单显示 "Help isn't available for FluxMarkdown" 的问题
+  - 添加自定义 Help 菜单，替换默认的 macOS Help 菜单
+  - FluxMarkdown Help (Cmd+?) 打开在线帮助文档
+  - 添加 README、Report an Issue、Release Notes 快捷链接</pre><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.16.236">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.16.231</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.16.231</link>
             <sparkle:version>231</sparkle:version>
