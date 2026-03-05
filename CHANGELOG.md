@@ -39,6 +39,10 @@
 
 ## [Unreleased]
 
+_无待发布的变更_
+
+## [1.16.236] - 2026-03-05
+
 ### Added
 - **链接状态栏**: 鼠标悬停在链接上时，当显示文字与实际链接不一致，在窗口左下角显示实际链接地址
   - 支持 QuickLook 预览和主应用
@@ -51,6 +55,7 @@
   - 添加自定义 Help 菜单，替换默认的 macOS Help 菜单
   - FluxMarkdown Help (Cmd+?) 打开在线帮助文档
   - 添加 README、Report an Issue、Release Notes 快捷链接
+
 ## [1.16.231] - 2026-02-28
 
 ### Fixed
