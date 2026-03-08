@@ -7,6 +7,34 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.17.239</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.17.239</link>
+            <sparkle:version>239</sparkle:version>
+            <sparkle:shortVersionString>1.17.239</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sun, 08 Mar 2026 17:53:36 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.17.239/FluxMarkdown.dmg"
+                sparkle:edSignature="ZmF9vcb+XCiVE4HN08F/KlNRst6uCy6pNZzFyCFElPON7j4SZLmBGvM8Gwg1ha+MgX4SKPugn8mbcq23NPRUDg=="
+                length="9866504"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><pre>
+Added
+- **功能帮助面板**: 按 `?` 键或点击右上角 `?` 按钮显示完整的快捷键与功能指南
+  - 区分 QuickLook 与 App 两种运行环境，显示不同的可用功能
+  - QuickLook 环境显示黄色警告横幅，提示键盘事件被系统拦截
+  - App 独占功能（导出、设置、检查更新）标记黄色 `App` badge
+  - 两端都支持的功能标记蓝色 `QuickLook` + 黄色 `App` badge
+  - 支持 `?` 键、按住 `⌘` 2秒、点击 `?` 按钮三种触发方式
+  - 首次打开时显示 Toast 提示
+- **多语言支持**: 帮助面板支持中英文切换
+  - Settings → Appearance → Language 选择 System Default / English / 中文
+  - 默认跟随系统语言设置</pre><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.17.239">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.16.236</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.16.236</link>
             <sparkle:version>236</sparkle:version>
