@@ -70,7 +70,7 @@ brew install --cask xykong/tap/flux-markdown
 | 📊 **Charts & Graphs** | Vega, Vega-Lite, and Graphviz (DOT) support |
 | 📑 **TOC Panel** | Interactive table of contents with section tracking |
 | 📄 **YAML Metadata** | Auto-parses frontmatter into a clean table |
-| 📤 **Export Options** | Export as PDF (Cmd+Shift+P) or HTML (Cmd+Shift+E) |
+| 📤 **Export** | PDF (Cmd+Shift+P) / HTML (Cmd+Shift+E) — V2EX 用户求的功能！ |
 | 🔍 **Zoom & Pan** | Cmd +/-/0, Cmd+scroll, pinch gestures |
 | 💾 **Position Memory** | Remembers scroll position and last-viewed file |
 | 🌓 **Themes** | Light, Dark, and System-synchronized modes |

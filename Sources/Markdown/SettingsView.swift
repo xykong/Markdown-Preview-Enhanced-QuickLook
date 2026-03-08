@@ -123,8 +123,50 @@ struct AppearanceSettingsView: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color(NSColor.separatorColor), lineWidth: 1)
             )
+
+            SettingsSectionHeader(title: "Language", description: "Interface language for the help panel")
+
+            VStack(spacing: 0) {
+                LanguageOptionRow(label: "System Default", value: "system", current: preference.uiLanguage) {
+                    preference.uiLanguage = "system"
+                }
+                Divider().padding(.leading, 12)
+                LanguageOptionRow(label: "English", value: "en", current: preference.uiLanguage) {
+                    preference.uiLanguage = "en"
+                }
+                Divider().padding(.leading, 12)
+                LanguageOptionRow(label: "中文", value: "zh", current: preference.uiLanguage) {
+                    preference.uiLanguage = "zh"
+                }
+            }
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color(NSColor.separatorColor), lineWidth: 1)
+            )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func LanguageOptionRow(label: String, value: String, current: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Text(label)
+                    .font(.system(size: 13))
+                    .foregroundColor(.primary)
+                Spacer()
+                if current == value {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(.accentColor)
+                        .font(.system(size: 11, weight: .semibold))
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 
     private func ThemeOptionButton(mode: AppearanceMode, icon: String, label: String, current: AppearanceMode, action: @escaping () -> Void) -> some View {

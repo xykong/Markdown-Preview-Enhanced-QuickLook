@@ -1,0 +1,437 @@
+#help-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+#help-overlay.help-overlay-visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.help-dialog {
+    width: min(680px, 94vw);
+    max-height: 85vh;
+    background: #ffffff;
+    border: 1px solid #d0d7de;
+    border-radius: 12px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.22), 0 4px 16px rgba(0, 0, 0, 0.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: scale(0.95) translateY(8px);
+    transition: transform 0.2s ease;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+}
+
+#help-overlay.help-overlay-visible .help-dialog {
+    transform: scale(1) translateY(0);
+}
+
+
+.help-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid #d0d7de;
+    flex-shrink: 0;
+}
+
+.help-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #24292f;
+    flex: 1;
+}
+
+.help-context-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+}
+
+.help-context-ql {
+    background: #ddf4ff;
+    color: #0969da;
+    border: 1px solid #54aeff4d;
+}
+
+.help-context-app {
+    background: #dafbe1;
+    color: #1a7f37;
+    border: 1px solid #2da44e4d;
+}
+
+.help-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #d0d7de;
+    background: transparent;
+    color: #57606a;
+    cursor: pointer;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+}
+
+.help-close:hover {
+    background: #f6f8fa;
+    color: #24292f;
+}
+
+
+.help-ql-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #fff8c5;
+    border-bottom: 1px solid #d4a72c33;
+    font-size: 12px;
+    color: #7d4e00;
+    line-height: 1.5;
+    flex-shrink: 0;
+}
+
+.help-ql-banner-icon {
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.help-ql-banner strong {
+    font-weight: 600;
+}
+
+
+.help-body {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    overflow-y: auto;
+    padding: 16px 20px;
+}
+
+.help-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.help-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.help-body::-webkit-scrollbar-thumb {
+    background-color: #d0d7de;
+    border-radius: 3px;
+}
+
+.help-group {
+    padding: 8px 12px 12px;
+    border-radius: 8px;
+}
+
+.help-group-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #57606a;
+    margin: 0 0 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #f0f2f4;
+}
+
+.help-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.help-item {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+
+.help-keys {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    flex-shrink: 0;
+    min-width: 80px;
+}
+
+.help-keys kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    padding: 1px 5px;
+    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Menlo', monospace;
+    color: #24292f;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    line-height: 18px;
+    white-space: nowrap;
+}
+
+
+.help-label {
+    font-size: 12px;
+    color: #57606a;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.help-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.help-badge-app {
+    background: #fff8c5;
+    color: #9a6700;
+    border: 1px solid #d4a72c33;
+}
+
+.help-badge-ql {
+    background: #ddf4ff;
+    color: #0969da;
+    border: 1px solid #54aeff4d;
+}
+
+.help-item-dimmed .help-keys kbd {
+    opacity: 0.35;
+}
+
+.help-item-dimmed .help-label {
+    color: #afb8c1;
+}
+
+
+.help-footer {
+    padding: 10px 20px;
+    border-top: 1px solid #d0d7de;
+    font-size: 11px;
+    color: #8c959f;
+    text-align: center;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.help-footer kbd {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Menlo', monospace;
+    color: #57606a;
+    background: #f6f8fa;
+    border: 1px solid #d0d7de;
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    line-height: 16px;
+}
+
+
+.help-toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: rgba(36, 41, 47, 0.92);
+    color: #ffffff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 3000;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    white-space: nowrap;
+}
+
+.help-toast-visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.help-toast kbd {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 5px;
+    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Mono', 'Menlo', monospace;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    line-height: 16px;
+}
+
+.help-toast strong {
+    font-weight: 700;
+}
+
+.help-toast-close {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    border: none;
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.help-toast-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+}
+
+
+@media (prefers-color-scheme: dark) {
+    .help-dialog {
+        background: #0d1117;
+        border-color: #30363d;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .help-header {
+        border-bottom-color: #30363d;
+    }
+
+    .help-title {
+        color: #c9d1d9;
+    }
+
+    .help-close {
+        border-color: #30363d;
+        color: #8b949e;
+    }
+
+    .help-close:hover {
+        background: #161b22;
+        color: #c9d1d9;
+    }
+
+    .help-ql-banner {
+        background: #272115;
+        border-bottom-color: #bb800933;
+        color: #e3b341;
+    }
+
+    .help-body::-webkit-scrollbar-thumb {
+        background-color: #30363d;
+    }
+
+    .help-group-title {
+        color: #8b949e;
+        border-bottom-color: #21262d;
+    }
+
+    .help-keys kbd {
+        color: #c9d1d9;
+        background: #161b22;
+        border-color: #30363d;
+    }
+
+    .help-label {
+        color: #8b949e;
+    }
+
+    .help-badge-app {
+        background: #272115;
+        color: #bb8009;
+        border-color: #bb800933;
+    }
+
+    .help-badge-ql {
+        background: #1c2128;
+        color: #58a6ff;
+        border-color: #388bfd4d;
+    }
+
+    .help-item-dimmed .help-label {
+        color: #484f58;
+    }
+
+    .help-footer {
+        border-top-color: #30363d;
+        color: #484f58;
+    }
+
+    .help-footer kbd {
+        color: #8b949e;
+        background: #161b22;
+        border-color: #30363d;
+    }
+
+    .help-context-ql {
+        background: #1c2128;
+        color: #58a6ff;
+        border-color: #388bfd4d;
+    }
+
+    .help-context-app {
+        background: #1b2a23;
+        color: #3fb950;
+        border-color: #2ea04326;
+    }
+}
+
+
+@media (max-width: 500px) {
+    .help-body {
+        grid-template-columns: 1fr;
+    }
+}

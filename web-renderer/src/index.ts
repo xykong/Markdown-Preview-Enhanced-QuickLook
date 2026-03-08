@@ -38,6 +38,7 @@ import './styles/search.css';
 import './styles/source-view.css';
 import './styles/callouts.css';
 import './styles/print.css';
+import './styles/help-overlay.css';
 
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js/lib/core';
@@ -174,6 +175,7 @@ import { extractOutline } from './outline';
 import { TableOfContents } from './table-of-contents';
 import { SearchEngine } from './search';
 import { SearchUI } from './search-ui';
+import { HelpOverlay } from './help-overlay';
 
 function extractFrontMatter(text: string): { yaml: string | null; body: string } {
     if (!text.startsWith('---')) {
@@ -295,6 +297,7 @@ function rebuildMd(): void {
 let toc: TableOfContents | null = null;
 let searchEngine: SearchEngine | null = null;
 let searchUI: SearchUI | null = null;
+let helpOverlay: HelpOverlay | null = null;
 let mermaidInstance: typeof import('mermaid')['default'] | null = null;
 let mermaidCurrentTheme: string | null = null;
 let katexPlugin: ((md: MarkdownIt) => void) | null = null;
@@ -311,7 +314,11 @@ interface RenderOptions {
     enableMermaid?: boolean;
     enableKatex?: boolean;
     enableEmoji?: boolean;
+    context?: 'quicklook' | 'app';
+    uiLanguage?: string;
 }
+
+let currentContext: 'quicklook' | 'app' = 'app';
 
 const HLJS_THEMES: Record<string, string> = {
     'github': `pre code.hljs{display:block;overflow-x:auto;padding:1em}code.hljs{padding:3px 5px}.hljs{color:#24292e;background:#fff}.hljs-doctag,.hljs-keyword,.hljs-meta .hljs-keyword,.hljs-template-tag,.hljs-template-variable,.hljs-type,.hljs-variable.language_{color:#d73a49}.hljs-title,.hljs-title.class_,.hljs-title.class_.inherited__,.hljs-title.function_{color:#6f42c1}.hljs-attr,.hljs-attribute,.hljs-literal,.hljs-meta,.hljs-number,.hljs-operator,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-id,.hljs-variable{color:#005cc5}.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#032f62}.hljs-built_in,.hljs-symbol{color:#e36209}.hljs-code,.hljs-comment,.hljs-formula{color:#6a737d}.hljs-name,.hljs-quote,.hljs-selector-pseudo,.hljs-selector-tag{color:#22863a}.hljs-subst{color:#24292e}.hljs-section{color:#005cc5;font-weight:700}.hljs-bullet{color:#735c0f}.hljs-emphasis{color:#24292e;font-style:italic}.hljs-strong{color:#24292e;font-weight:700}.hljs-addition{color:#22863a;background-color:#f0fff4}.hljs-deletion{color:#b31d28;background-color:#ffeef0}`,
@@ -577,6 +584,15 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         existingBase.setAttribute('href', 'file://' + baseHref);
     }
 
+    if (options.context) {
+        currentContext = options.context;
+        (window as any).__fluxContext = currentContext;
+    }
+
+    if (options.uiLanguage) {
+        (window as any).__fluxLang = options.uiLanguage === 'system' ? undefined : options.uiLanguage;
+    }
+
     let currentTheme = options.theme || 'default';
     if (currentTheme === 'system') {
         currentTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default';
@@ -597,6 +613,13 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
                 searchUI = new SearchUI('search-container', searchEngine);
             } catch (e) {
                 logToSwift("JS Warning: Search initialization failed: " + e);
+            }
+        }
+        if (!helpOverlay) {
+            try {
+                helpOverlay = new HelpOverlay();
+            } catch (e) {
+                logToSwift("JS Warning: HelpOverlay initialization failed: " + e);
             }
         }
 
@@ -920,5 +943,9 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 window.showSearch = function() { if (searchUI) searchUI.show(); };
 window.hideSearch = function() { if (searchUI) searchUI.hide(); };
 window.toggleSearch = function() { if (searchUI) searchUI.toggle(); };
+
+window.showHelp = function() { if (helpOverlay) helpOverlay.show(); };
+window.hideHelp = function() { if (helpOverlay) helpOverlay.hide(); };
+window.toggleHelp = function() { if (helpOverlay) helpOverlay.toggle(); };
 
 logToSwift("rendererReady");

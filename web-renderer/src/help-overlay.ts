@@ -1,0 +1,367 @@
+const FIRST_RUN_KEY = 'fluxmd-help-shown-v1';
+const CMD_HOLD_DELAY_MS = 2000;
+
+declare global {
+    interface Window {
+        __fluxContext?: string;
+        __fluxLang?: string;
+    }
+}
+
+type Lang = 'zh' | 'en';
+
+interface I18n {
+    title: string;
+    contextBadgeQL: string;
+    contextBadgeApp: string;
+    badgeApp: string;
+    badgeQL: string;
+    qlBannerText: string;
+    footerQL: string;
+    footerApp: string;
+    toastText: string;
+    closeLabel: string;
+    groups: {
+        searchNav: { title: string; items: string[] };
+        zoom: { title: string; items: string[] };
+        view: { title: string; items: string[] };
+        export: { title: string; items: string[] };
+        settings: { title: string; items: string[] };
+    };
+}
+
+const STRINGS: Record<Lang, I18n> = {
+    zh: {
+        title: '⌨️ FluxMarkdown 功能指南',
+        contextBadgeQL: 'QuickLook 预览',
+        contextBadgeApp: 'FluxMarkdown App',
+        badgeApp: 'App',
+        badgeQL: 'QuickLook',
+        qlBannerText: 'QuickLook 系统会拦截键盘事件。仅 <strong>Cmd+滚轮</strong> 和<strong>捏合手势</strong>可用；其余操作请点击右上角按钮，或双击文件用 App 打开。',
+        footerQL: '点击遮罩或右上角 <kbd>✕</kbd> 关闭',
+        footerApp: '按 <kbd>?</kbd> 或 <kbd>Esc</kbd> 关闭 · 按住 <kbd>⌘</kbd> 2秒再次打开',
+        toastText: '💡 按 <kbd>?</kbd> 或点击右上角 <strong>?</strong> 查看所有功能快捷键',
+        closeLabel: '关闭',
+        groups: {
+            searchNav: {
+                title: '搜索与导航',
+                items: ['打开 / 关闭搜索', '下一个匹配', '上一个匹配', '关闭搜索', '右上角目录按钮打开 TOC'],
+            },
+            zoom: {
+                title: '缩放',
+                items: ['放大', '缩小', '重置缩放', '滚动缩放', '触控板缩放'],
+            },
+            view: {
+                title: '视图',
+                items: ['切换渲染 / 源码视图', '右上角 </> 按钮切换源码视图', '右上角 ☀/🌙 切换主题'],
+            },
+            export: {
+                title: '导出',
+                items: ['导出为 HTML', '导出为 PDF'],
+            },
+            settings: {
+                title: '设置',
+                items: ['打开偏好设置', '检查更新', '右上角 ? 按钮显示此帮助', '显示此帮助面板'],
+            },
+        },
+    },
+    en: {
+        title: '⌨️ FluxMarkdown Feature Guide',
+        contextBadgeQL: 'QuickLook Preview',
+        contextBadgeApp: 'FluxMarkdown App',
+        badgeApp: 'App',
+        badgeQL: 'QuickLook',
+        qlBannerText: 'QuickLook intercepts keyboard events. Only <strong>Cmd+scroll</strong> and <strong>pinch gesture</strong> work; use toolbar buttons or double-click to open in App for full access.',
+        footerQL: 'Click backdrop or <kbd>✕</kbd> to close',
+        footerApp: 'Press <kbd>?</kbd> or <kbd>Esc</kbd> to close · Hold <kbd>⌘</kbd> 2s to reopen',
+        toastText: '💡 Press <kbd>?</kbd> or click <strong>?</strong> in the toolbar to view all shortcuts',
+        closeLabel: 'Close',
+        groups: {
+            searchNav: {
+                title: 'Search & Navigation',
+                items: ['Open / close search', 'Next match', 'Previous match', 'Close search', 'TOC button (top-right)'],
+            },
+            zoom: {
+                title: 'Zoom',
+                items: ['Zoom in', 'Zoom out', 'Reset zoom', 'Scroll zoom', 'Pinch to zoom'],
+            },
+            view: {
+                title: 'View',
+                items: ['Toggle preview / source', 'Source button (top-right </>)', 'Theme toggle (☀/🌙 top-right)'],
+            },
+            export: {
+                title: 'Export',
+                items: ['Export as HTML', 'Export as PDF'],
+            },
+            settings: {
+                title: 'Settings',
+                items: ['Open preferences', 'Check for updates', 'Help button (? top-right)', 'Show this help panel'],
+            },
+        },
+    },
+};
+
+interface ShortcutGroup {
+    icon: string;
+    groupKey: keyof I18n['groups'];
+    items: Array<{ keys: string[]; labelIdx: number; appOnly?: true; qlDisabled?: true }>;
+}
+
+const SHORTCUT_GROUPS: ShortcutGroup[] = [
+    {
+        icon: '🔍',
+        groupKey: 'searchNav',
+        items: [
+            { keys: ['⌘', 'F'], labelIdx: 0, qlDisabled: true },
+            { keys: ['Enter'], labelIdx: 1, qlDisabled: true },
+            { keys: ['⇧', 'Enter'], labelIdx: 2, qlDisabled: true },
+            { keys: ['Esc'], labelIdx: 3, qlDisabled: true },
+            { keys: ['Click'], labelIdx: 4 },
+        ],
+    },
+    {
+        icon: '🔎',
+        groupKey: 'zoom',
+        items: [
+            { keys: ['⌘', '+'], labelIdx: 0, qlDisabled: true },
+            { keys: ['⌘', '-'], labelIdx: 1, qlDisabled: true },
+            { keys: ['⌘', '0'], labelIdx: 2, qlDisabled: true },
+            { keys: ['⌘', '⬆scroll'], labelIdx: 3 },
+            { keys: ['Pinch'], labelIdx: 4 },
+        ],
+    },
+    {
+        icon: '📄',
+        groupKey: 'view',
+        items: [
+            { keys: ['⌘', '⇧', 'M'], labelIdx: 0, qlDisabled: true },
+            { keys: ['Click'], labelIdx: 1 },
+            { keys: ['Click'], labelIdx: 2 },
+        ],
+    },
+    {
+        icon: '📤',
+        groupKey: 'export',
+        items: [
+            { keys: ['⌘', '⇧', 'E'], labelIdx: 0, appOnly: true },
+            { keys: ['⌘', '⇧', 'P'], labelIdx: 1, appOnly: true },
+        ],
+    },
+    {
+        icon: '⚙️',
+        groupKey: 'settings',
+        items: [
+            { keys: ['⌘', ','], labelIdx: 0, appOnly: true },
+            { keys: ['⌘', 'U'], labelIdx: 1, appOnly: true },
+            { keys: ['Click'], labelIdx: 2 },
+            { keys: ['⌘', 'Hold'], labelIdx: 3, qlDisabled: true },
+        ],
+    },
+];
+
+function detectLang(): Lang {
+    const stored = window.__fluxLang;
+    if (stored === 'zh' || stored === 'en') return stored;
+    const sys = navigator.language || '';
+    return sys.startsWith('zh') ? 'zh' : 'en';
+}
+
+export class HelpOverlay {
+    private overlayEl: HTMLElement | null = null;
+    private toastEl: HTMLElement | null = null;
+    private isVisible = false;
+
+    private cmdHoldTimer: ReturnType<typeof setTimeout> | null = null;
+    private cmdHoldActive = false;
+
+    constructor() {
+        this.createOverlay();
+        this.registerKeyListeners();
+        this.showFirstRunToast();
+    }
+
+    private createOverlay(): void {
+        const overlay = document.createElement('div');
+        overlay.id = 'help-overlay';
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Keyboard shortcuts');
+
+        overlay.innerHTML = this.buildOverlayHTML();
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) this.hide();
+        });
+        overlay.querySelector('#help-overlay-close')?.addEventListener('click', () => this.hide());
+
+        document.body.appendChild(overlay);
+        this.overlayEl = overlay;
+    }
+
+    private buildOverlayHTML(): string {
+        const isQuickLook = window.__fluxContext === 'quicklook';
+        const lang = detectLang();
+        const s = STRINGS[lang];
+
+        const contextBadge = isQuickLook
+            ? `<span class="help-context-badge help-context-ql">${s.contextBadgeQL}</span>`
+            : `<span class="help-context-badge help-context-app">${s.contextBadgeApp}</span>`;
+
+        const groups = SHORTCUT_GROUPS.map(g => {
+            const groupStrings = s.groups[g.groupKey];
+            const items = g.items.map(item => {
+                const isAppOnlyDimmed = isQuickLook && item.appOnly;
+                const isQlDisabled = isQuickLook && item.qlDisabled;
+
+                let className = 'help-item';
+                if (isAppOnlyDimmed || isQlDisabled) className += ' help-item-dimmed';
+
+                const badges: string[] = [];
+                if (item.appOnly) {
+                    badges.push(`<span class="help-badge help-badge-app">${s.badgeApp}</span>`);
+                } else if (!item.qlDisabled) {
+                    badges.push(`<span class="help-badge help-badge-ql">${s.badgeQL}</span>`);
+                    badges.push(`<span class="help-badge help-badge-app">${s.badgeApp}</span>`);
+                }
+
+                const label = groupStrings.items[item.labelIdx] ?? '';
+
+                return `
+                    <li class="${className}">
+                        <span class="help-keys">${item.keys.map(k => `<kbd>${k}</kbd>`).join('')}</span>
+                        <span class="help-label">${label}${badges.join('')}</span>
+                    </li>
+                `;
+            }).join('');
+            return `
+                <div class="help-group">
+                    <h3 class="help-group-title">${g.icon} ${groupStrings.title}</h3>
+                    <ul class="help-items">${items}</ul>
+                </div>
+            `;
+        }).join('');
+
+        const qlBanner = isQuickLook ? `
+            <div class="help-ql-banner">
+                <span class="help-ql-banner-icon">⚠️</span>
+                <span>${s.qlBannerText}</span>
+            </div>
+        ` : '';
+
+        const footer = isQuickLook ? `<span>${s.footerQL}</span>` : `<span>${s.footerApp}</span>`;
+
+        return `
+            <div class="help-dialog">
+                <div class="help-header">
+                    <span class="help-title">${s.title}</span>
+                    ${contextBadge}
+                    <button id="help-overlay-close" class="help-close" aria-label="${s.closeLabel}">✕</button>
+                </div>
+                ${qlBanner}
+                <div class="help-body">
+                    ${groups}
+                </div>
+                <div class="help-footer">
+                    ${footer}
+                </div>
+            </div>
+        `;
+    }
+
+    private registerKeyListeners(): void {
+        document.addEventListener('keydown', (e: KeyboardEvent) => {
+            if (
+                e.key === '?' &&
+                !(e.target instanceof HTMLInputElement) &&
+                !(e.target instanceof HTMLTextAreaElement) &&
+                !e.metaKey && !e.ctrlKey
+            ) {
+                e.preventDefault();
+                this.toggle();
+                return;
+            }
+
+            if (e.key === 'Escape' && this.isVisible) {
+                e.preventDefault();
+                this.hide();
+                return;
+            }
+
+            if ((e.key === 'Meta' || e.key === 'Control') && !e.repeat && !this.cmdHoldActive && !this.cmdHoldTimer) {
+                this.cmdHoldTimer = setTimeout(() => {
+                    this.cmdHoldActive = true;
+                    this.show();
+                }, CMD_HOLD_DELAY_MS);
+            }
+        });
+
+        document.addEventListener('keyup', (e: KeyboardEvent) => {
+            if (e.key === 'Meta' || e.key === 'Control') {
+                if (this.cmdHoldTimer) {
+                    clearTimeout(this.cmdHoldTimer);
+                    this.cmdHoldTimer = null;
+                }
+                this.cmdHoldActive = false;
+            }
+        });
+    }
+
+    private showFirstRunToast(): void {
+        try {
+            if (localStorage.getItem(FIRST_RUN_KEY)) return;
+            localStorage.setItem(FIRST_RUN_KEY, '1');
+        } catch {
+            return;
+        }
+        setTimeout(() => this.mountToast(), 1500);
+    }
+
+    private mountToast(): void {
+        const lang = detectLang();
+        const s = STRINGS[lang];
+        const toast = document.createElement('div');
+        toast.id = 'help-toast';
+        toast.className = 'help-toast';
+        toast.innerHTML = `
+            <span>${s.toastText}</span>
+            <button class="help-toast-close" aria-label="${s.closeLabel}">✕</button>
+        `;
+
+        toast.querySelector('.help-toast-close')?.addEventListener('click', () => this.dismissToast());
+        document.body.appendChild(toast);
+        this.toastEl = toast;
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => toast.classList.add('help-toast-visible'));
+        });
+
+        setTimeout(() => this.dismissToast(), 6000);
+    }
+
+    private dismissToast(): void {
+        if (!this.toastEl) return;
+        this.toastEl.classList.remove('help-toast-visible');
+        setTimeout(() => {
+            this.toastEl?.remove();
+            this.toastEl = null;
+        }, 400);
+    }
+
+    public show(): void {
+        if (this.isVisible || !this.overlayEl) return;
+        this.isVisible = true;
+        this.overlayEl.innerHTML = this.buildOverlayHTML();
+        this.overlayEl.querySelector('#help-overlay-close')?.addEventListener('click', () => this.hide());
+        this.overlayEl.classList.add('help-overlay-visible');
+        this.dismissToast();
+    }
+
+    public hide(): void {
+        if (!this.isVisible || !this.overlayEl) return;
+        this.isVisible = false;
+        this.overlayEl.classList.remove('help-overlay-visible');
+    }
+
+    public toggle(): void {
+        this.isVisible ? this.hide() : this.show();
+    }
+}

@@ -132,6 +132,12 @@ struct MarkdownWebView: NSViewRepresentable {
                 name: .exportPDF,
                 object: nil
             )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleToggleHelp),
+                name: .toggleHelp,
+                object: nil
+            )
         }
         
         deinit {
@@ -146,6 +152,11 @@ struct MarkdownWebView: NSViewRepresentable {
                     os_log("Failed to toggle search: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
                 }
             }
+        }
+
+        @objc func handleToggleHelp() {
+            guard let webView = currentWebView else { return }
+            webView.evaluateJavaScript("window.toggleHelp();", completionHandler: nil)
         }
         
         @objc func handleExportHTML() {
@@ -239,7 +250,7 @@ struct MarkdownWebView: NSViewRepresentable {
 
             let safeContentArg = String(contentJsonArray.dropFirst().dropLast())
 
-            var options: [String: Any] = [:]
+            var options: [String: Any] = ["context": "app"]
 
             if let url = fileURL {
                 let baseUrlString = url.deletingLastPathComponent().path
@@ -260,6 +271,7 @@ struct MarkdownWebView: NSViewRepresentable {
             options["enableMermaid"] = enableMermaid
             options["enableKatex"] = enableKatex
             options["enableEmoji"] = enableEmoji
+            options["uiLanguage"] = AppearancePreference.shared.uiLanguage
             
             guard let optionsData = try? JSONSerialization.data(withJSONObject: options, options: []),
                   let optionsJson = String(data: optionsData, encoding: .utf8) else {

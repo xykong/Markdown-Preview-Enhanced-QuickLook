@@ -111,6 +111,7 @@ public class AppearancePreference: ObservableObject {
     private let enableMermaidKey = "enableMermaid"
     private let enableKatexKey = "enableKatex"
     private let enableEmojiKey = "enableEmoji"
+    private let uiLanguageKey = "uiLanguage"
 
     public var baseFontSize: Double {
         get {
@@ -161,6 +162,14 @@ public class AppearancePreference: ObservableObject {
         set {
             objectWillChange.send()
             store.set(newValue, forKey: enableEmojiKey)
+        }
+    }
+
+    public var uiLanguage: String {
+        get { store.string(forKey: uiLanguageKey) ?? "system" }
+        set {
+            objectWillChange.send()
+            store.set(newValue, forKey: uiLanguageKey)
         }
     }
 

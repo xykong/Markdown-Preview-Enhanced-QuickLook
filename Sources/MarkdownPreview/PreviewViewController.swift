@@ -229,6 +229,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     
     private var themeButton: NSButton!
     private var sourceButton: NSButton!
+    private var helpButton: NSButton!
     
     public override func loadView() {
         os_log("🔵 loadView called", log: logger, type: .debug)
@@ -323,6 +324,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         setupThemeButton()
         setupSourceButton()
+        setupHelpButton()
         
         var bundleURL: URL?
         if let url = Bundle(for: type(of: self)).url(forResource: "index", withExtension: "html", subdirectory: "WebRenderer") {
@@ -607,6 +609,37 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             sourceButton.contentTintColor = iconColor
         }
     }
+
+    private func setupHelpButton() {
+        let button = NSButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.bezelStyle = .circular
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.cornerRadius = 15
+        button.target = self
+        button.action = #selector(toggleHelp)
+
+        if let image = NSImage(systemSymbolName: "questionmark.circle", accessibilityDescription: "Show Help") {
+            button.image = image
+            button.contentTintColor = NSColor.darkGray
+        }
+
+        self.view.addSubview(button)
+        self.helpButton = button
+
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 10),
+            button.trailingAnchor.constraint(equalTo: sourceButton.leadingAnchor, constant: -8),
+            button.widthAnchor.constraint(equalToConstant: 30),
+            button.heightAnchor.constraint(equalToConstant: 30)
+        ])
+    }
+
+    @objc private func toggleHelp() {
+        webView.evaluateJavaScript("window.toggleHelp();", completionHandler: nil)
+    }
     
     private func renderCurrentMode() {
         if currentViewMode == .preview {
@@ -890,7 +923,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
             
-            var options: [String: Any] = ["theme": theme]
+            var options: [String: Any] = ["theme": theme, "context": "quicklook", "uiLanguage": AppearancePreference.shared.uiLanguage]
             if let url = capturedURL {
                 options["baseUrl"] = url.deletingLastPathComponent().path
             }

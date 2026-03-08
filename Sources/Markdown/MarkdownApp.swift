@@ -85,6 +85,18 @@ struct MarkdownApp: App {
 
                 HStack(spacing: 8) {
                     Button(action: {
+                        NotificationCenter.default.post(name: .toggleHelp, object: nil)
+                    }) {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundColor(.secondary)
+                            .frame(width: 30, height: 30)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .background(Color.black.opacity(0.1))
+                    .clipShape(Circle())
+                    .help("Show Help")
+
+                    Button(action: {
                         viewMode = (viewMode == .preview) ? .source : .preview
                     }) {
                         Image(systemName: viewMode == .source ? "eye.fill" : "doc.text.fill")
