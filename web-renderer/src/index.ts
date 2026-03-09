@@ -351,6 +351,9 @@ declare global {
         showSearch: () => void;
         hideSearch: () => void;
         toggleSearch: () => void;
+        showHelp: () => void;
+        hideHelp: () => void;
+        toggleHelp: () => void;
     }
 }
 
