@@ -111,7 +111,21 @@ struct MarkdownWebView: NSViewRepresentable {
         weak var currentWebView: WKWebView?
         var currentFileURL: URL?
         var pendingAnchor: String?  // anchor to scroll to after next render
-        
+
+        // File monitoring
+        private var fileMonitor: DispatchSourceFileSystemObject?
+        private var monitoredFileDescriptor: Int32 = -1
+        private var lastKnownFileSize: UInt64 = 0
+        private var lastKnownFileModificationDate: Date?
+        // Cached render parameters for file-change re-render
+        private var lastViewMode: ViewMode = .preview
+        private var lastAppearanceMode: AppearanceMode = .light
+        private var lastBaseFontSize: Double = 16
+        private var lastEnableMermaid: Bool = true
+        private var lastEnableKatex: Bool = true
+        private var lastEnableEmoji: Bool = true
+        private var lastCodeHighlightTheme: String = "default"
+
         override init() {
             super.init()
             NotificationCenter.default.addObserver(
@@ -142,6 +156,7 @@ struct MarkdownWebView: NSViewRepresentable {
         
         deinit {
             NotificationCenter.default.removeObserver(self)
+            stopFileMonitoring()
         }
         
         @objc func handleToggleSearch() {
@@ -213,8 +228,19 @@ struct MarkdownWebView: NSViewRepresentable {
         }
         
         func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String) {
-            currentFileURL = fileURL
-            
+            lastViewMode = viewMode
+            lastAppearanceMode = appearanceMode
+            lastBaseFontSize = baseFontSize
+            lastEnableMermaid = enableMermaid
+            lastEnableKatex = enableKatex
+            lastEnableEmoji = enableEmoji
+            lastCodeHighlightTheme = codeHighlightTheme
+
+            if fileURL != currentFileURL {
+                currentFileURL = fileURL
+                startFileMonitoring()
+            }
+
             if let url = fileURL {
                 // Configure the scheme handler with the base directory
                 // This allows loading local images via local-md:// scheme
@@ -516,6 +542,91 @@ struct MarkdownWebView: NSViewRepresentable {
             return outputData as Data
         }
         
+        private func startFileMonitoring() {
+            stopFileMonitoring()
+
+            guard let url = currentFileURL else { return }
+
+            let fd = open(url.path, O_EVTONLY)
+            guard fd >= 0 else {
+                os_log("🔴 Cannot open file for monitoring: %{public}@", log: logger, type: .error, url.path)
+                return
+            }
+            monitoredFileDescriptor = fd
+
+            let source = DispatchSource.makeFileSystemObjectSource(
+                fileDescriptor: fd,
+                eventMask: [.write, .delete, .rename],
+                queue: .main
+            )
+
+            source.setEventHandler { [weak self] in
+                self?.handleFileChange()
+            }
+
+            source.setCancelHandler { [weak self] in
+                guard let self, self.monitoredFileDescriptor >= 0 else { return }
+                close(self.monitoredFileDescriptor)
+                self.monitoredFileDescriptor = -1
+            }
+
+            source.resume()
+            fileMonitor = source
+            os_log("🟢 File monitoring started: %{public}@", log: logger, type: .default, url.path)
+        }
+
+        private func stopFileMonitoring() {
+            fileMonitor?.cancel()
+            fileMonitor = nil
+        }
+
+        private func handleFileChange() {
+            guard let url = currentFileURL else { return }
+
+            let flags = fileMonitor?.data ?? []
+            if flags.contains(.delete) || flags.contains(.rename) {
+                os_log("🟡 File deleted/renamed, restarting monitor: %{public}@", log: logger, type: .debug, url.path)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                    self?.startFileMonitoring()
+                    self?.handleFileChange()
+                }
+                return
+            }
+
+            do {
+                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
+                let fileSize = attributes[.size] as? UInt64 ?? 0
+                let fileMtime = attributes[.modificationDate] as? Date
+
+                guard fileSize != lastKnownFileSize || fileMtime != lastKnownFileModificationDate else {
+                    os_log("🟡 File event ignored: size/mtime unchanged", log: logger, type: .debug)
+                    return
+                }
+
+                let newContent = try String(contentsOf: url, encoding: .utf8)
+                lastKnownFileSize = fileSize
+                lastKnownFileModificationDate = fileMtime
+
+                os_log("🟢 File changed, re-rendering: %{public}@", log: logger, type: .default, url.path)
+
+                guard let webView = currentWebView else { return }
+                executeRender(
+                    webView: webView,
+                    content: newContent,
+                    fileURL: url,
+                    viewMode: lastViewMode,
+                    appearanceMode: lastAppearanceMode,
+                    baseFontSize: lastBaseFontSize,
+                    enableMermaid: lastEnableMermaid,
+                    enableKatex: lastEnableKatex,
+                    enableEmoji: lastEnableEmoji,
+                    codeHighlightTheme: lastCodeHighlightTheme
+                )
+            } catch {
+                os_log("🔴 Failed to read file on change: %{public}@", log: logger, type: .error, error.localizedDescription)
+            }
+        }
+
         private func handleLinkClick(href: String) {
             if href.starts(with: "http://") || href.starts(with: "https://") {
                 if let url = URL(string: href) {
