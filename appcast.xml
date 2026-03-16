@@ -7,6 +7,29 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.17.243</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.17.243</link>
+            <sparkle:version>243</sparkle:version>
+            <sparkle:shortVersionString>1.17.243</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 16 Mar 2026 18:27:36 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.17.243/FluxMarkdown.dmg"
+                sparkle:edSignature="chFUqmr74c7obzbN3Jh/N50wWE1AHPsNi1KGzU3kWWyoXPYUDMWyJZxIDoSuidWNcjTMQGPqLM2q3jX2MiJyAQ=="
+                length="9883206"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><pre>
+Fixed
+- **App 模式文件实时刷新**: 修复用外部编辑器修改文档后 App 窗口内容不更新的问题
+  - 使用 DispatchSource (kqueue) 监听文件变更事件 (.write/.delete/.rename)
+  - 检测到变更后自动重新读取文件并触发重渲染
+  - 兼容原子写入（先写临时文件再 rename）的场景
+  - 通过 size + mtime 去重，避免无意义重渲染</pre><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.17.243">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.17.239</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.17.239</link>
             <sparkle:version>239</sparkle:version>
