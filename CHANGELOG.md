@@ -39,6 +39,10 @@
 
 ## [Unreleased]
 
+_无待发布的变更_
+
+## [1.17.243] - 2026-03-17
+
 ### Fixed
 - **App 模式文件实时刷新**: 修复用外部编辑器修改文档后 App 窗口内容不更新的问题
   - 使用 DispatchSource (kqueue) 监听文件变更事件 (.write/.delete/.rename)
