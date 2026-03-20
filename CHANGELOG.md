@@ -40,6 +40,11 @@
 ## [Unreleased]
 
 ### Fixed
+- **Sparkle 更新提示 Markdown 渲染**: 修复更新提示界面中 `**粗体**` 等 Markdown 语法显示为原始星号的问题
+  - `scripts/generate-appcast.sh` 新增 Markdown → HTML 转换逻辑
+  - 支持 `### 标题` → `<h3>`、`**粗体**` → `<strong>`、`` `代码` `` → `<code>`、`- 列表` → `<ul><li>`
+  - 批量修复 `appcast.xml` 中历史版本的 description 格式
+  - 更新 `/publish` 命令文档，明确说明 description 必须是 HTML 格式
 - **帮助面板触发逻辑优化** (Issue #12): 修复 Cmd 长按触发功能指南时，在 Cmd+Tab、Cmd+Space、老板键等快捷键组合下误触发的问题
   - 新增修饰键检测：按下非修饰键（如 Tab、Space、字母）时立即取消 Cmd-hold 计时器
   - 仅纯 Cmd 长按（不按其他功能键）才会触发帮助面板

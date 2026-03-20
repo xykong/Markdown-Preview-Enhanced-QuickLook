@@ -203,10 +203,20 @@ gh release view "v{FULL_VERSION}" --json assets -q '.assets[].name'
         length="{DMG_SIZE}"
         type="application/octet-stream" />
     <description><![CDATA[
-        {USER_FACING_CHANGELOG}
+        <h2>更新内容</h2>{HTML_CONVERTED_CHANGELOG}<p><a href="https://github.com/xykong/flux-markdown/releases/tag/v{FULL_VERSION}">查看完整更新日志</a></p>
     ]]></description>
 </item>
 ```
+
+> ⚠️ **重要**：`description` 的内容必须是 **HTML**，不能是原始 Markdown 文本。
+> Sparkle 的更新界面直接渲染 HTML，如果放入 `**bold**` 等 Markdown 语法，星号会被原样显示而不是加粗。
+> `scripts/generate-appcast.sh` 已内置 Markdown → HTML 转换逻辑，会自动处理以下转换：
+> - `### Added/Fixed/Changed` → `<h3>`
+> - `**粗体**` → `<strong>`
+> - `` `code` `` → `<code>`
+> - `- 列表项` / `  - 子项` → `<ul><li>`
+>
+> **不要**把 changelog 文本包在 `<pre>` 标签里。
 
 **错误处理：**
 - 如果找不到 `sign_update` 工具：警告用户构建一次项目（`make app`）

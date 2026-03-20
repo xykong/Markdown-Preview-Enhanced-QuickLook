@@ -96,8 +96,68 @@ else
     CHANGELOG_ENTRY="Update to version $FULL_VERSION"
 fi
 
-# Simple HTML conversion for changelog
-CHANGELOG_HTML="<h2>更新内容</h2><pre>$CHANGELOG_ENTRY</pre><p><a href=\"$RELEASE_URL\">查看完整更新日志</a></p>"
+# Convert Markdown changelog to HTML
+# Handles: ### headings, bare category words (Added/Fixed/Changed),
+#           **bold**, `code` (single-line only), - list items
+CHANGELOG_HTML=$(echo "$CHANGELOG_ENTRY" | python3 -c "
+import sys, re
+
+CATEGORY_WORDS = {'Added', 'Fixed', 'Changed', 'Removed', 'Security', 'Deprecated'}
+
+def inline_md(text):
+    text = re.sub(r'\*\*(.+?)\*\*', r'<strong>\1</strong>', text)
+    text = re.sub(r'\`([^\`\n]+)\`', r'<code>\1</code>', text)
+    return text
+
+lines = sys.stdin.read().splitlines()
+html_lines = []
+in_list = False
+
+for line in lines:
+    line = line.rstrip()
+
+    if re.match(r'^### (.+)', line):
+        if in_list:
+            html_lines.append('</ul>')
+            in_list = False
+        html_lines.append(re.sub(r'^### (.+)', r'<h3>\1</h3>', line))
+        continue
+
+    if line.strip() in CATEGORY_WORDS:
+        if in_list:
+            html_lines.append('</ul>')
+            in_list = False
+        html_lines.append(f'<h3>{line.strip()}</h3>')
+        continue
+
+    list_match = re.match(r'^( *- )(.*)', line)
+    if list_match:
+        indent = list_match.group(1)
+        content = inline_md(list_match.group(2))
+        if not in_list:
+            html_lines.append('<ul>')
+            in_list = True
+        depth = max(0, len(indent) - 2)
+        prefix = '&nbsp;&nbsp;' * depth
+        html_lines.append(f'<li>{prefix}{content}</li>')
+        continue
+
+    if in_list and line.strip():
+        html_lines.append('</ul>')
+        in_list = False
+
+    if not line.strip():
+        html_lines.append('')
+        continue
+
+    html_lines.append(f'<p>{inline_md(line)}</p>')
+
+if in_list:
+    html_lines.append('</ul>')
+
+print(''.join(html_lines))
+")
+CHANGELOG_HTML="<h2>更新内容</h2>${CHANGELOG_HTML}<p><a href=\"$RELEASE_URL\">查看完整更新日志</a></p>"
 
 TEMP_ITEM=$(cat <<EOF
         <item>
