@@ -1,5 +1,6 @@
 const FIRST_RUN_KEY = 'fluxmd-help-shown-v1';
 const CMD_HOLD_DELAY_MS = 2000;
+const CMD_HOLD_ENABLED_KEY = 'fluxmd-cmd-hold-enabled';
 
 declare global {
     interface Window {
@@ -15,12 +16,12 @@ interface I18n {
     contextBadgeQL: string;
     contextBadgeApp: string;
     badgeApp: string;
-    badgeQL: string;
     qlBannerText: string;
     footerQL: string;
     footerApp: string;
     toastText: string;
     closeLabel: string;
+    cmdHoldCheckboxLabel: string;
     groups: {
         searchNav: { title: string; items: string[] };
         zoom: { title: string; items: string[] };
@@ -36,12 +37,12 @@ const STRINGS: Record<Lang, I18n> = {
         contextBadgeQL: 'QuickLook 预览',
         contextBadgeApp: 'FluxMarkdown App',
         badgeApp: 'App',
-        badgeQL: 'QuickLook',
         qlBannerText: 'QuickLook 系统会拦截键盘事件。仅 <strong>Cmd+滚轮</strong> 和<strong>捏合手势</strong>可用；其余操作请点击右上角按钮，或双击文件用 App 打开。',
         footerQL: '点击遮罩或右上角 <kbd>✕</kbd> 关闭',
         footerApp: '按 <kbd>?</kbd> 或 <kbd>Esc</kbd> 关闭 · 按住 <kbd>⌘</kbd> 2秒再次打开',
         toastText: '💡 按 <kbd>?</kbd> 或点击右上角 <strong>?</strong> 查看所有功能快捷键',
         closeLabel: '关闭',
+        cmdHoldCheckboxLabel: '按住 ⌘ 2 秒自动打开此面板',
         groups: {
             searchNav: {
                 title: '搜索与导航',
@@ -70,12 +71,12 @@ const STRINGS: Record<Lang, I18n> = {
         contextBadgeQL: 'QuickLook Preview',
         contextBadgeApp: 'FluxMarkdown App',
         badgeApp: 'App',
-        badgeQL: 'QuickLook',
         qlBannerText: 'QuickLook intercepts keyboard events. Only <strong>Cmd+scroll</strong> and <strong>pinch gesture</strong> work; use toolbar buttons or double-click to open in App for full access.',
         footerQL: 'Click backdrop or <kbd>✕</kbd> to close',
         footerApp: 'Press <kbd>?</kbd> or <kbd>Esc</kbd> to close · Hold <kbd>⌘</kbd> 2s to reopen',
         toastText: '💡 Press <kbd>?</kbd> or click <strong>?</strong> in the toolbar to view all shortcuts',
         closeLabel: 'Close',
+        cmdHoldCheckboxLabel: 'Auto-open this panel by holding ⌘ for 2s',
         groups: {
             searchNav: {
                 title: 'Search & Navigation',
@@ -174,6 +175,21 @@ export class HelpOverlay {
     private cmdHoldTimer: ReturnType<typeof setTimeout> | null = null;
     private cmdHoldActive = false;
 
+    private isCmdHoldEnabled(): boolean {
+        try {
+            const stored = localStorage.getItem(CMD_HOLD_ENABLED_KEY);
+            return stored === null ? true : stored === '1';
+        } catch {
+            return true;
+        }
+    }
+
+    private setCmdHoldEnabled(enabled: boolean): void {
+        try {
+            localStorage.setItem(CMD_HOLD_ENABLED_KEY, enabled ? '1' : '0');
+        } catch {}
+    }
+
     constructor() {
         this.createOverlay();
         this.registerKeyListeners();
@@ -216,10 +232,7 @@ export class HelpOverlay {
                 if (isAppOnlyDimmed || isQlDisabled) className += ' help-item-dimmed';
 
                 const badges: string[] = [];
-                if (item.appOnly) {
-                    badges.push(`<span class="help-badge help-badge-app">${s.badgeApp}</span>`);
-                } else if (!item.qlDisabled) {
-                    badges.push(`<span class="help-badge help-badge-ql">${s.badgeQL}</span>`);
+                if (item.appOnly || item.qlDisabled) {
                     badges.push(`<span class="help-badge help-badge-app">${s.badgeApp}</span>`);
                 }
 
@@ -247,7 +260,14 @@ export class HelpOverlay {
             </div>
         ` : '';
 
-        const footer = isQuickLook ? `<span>${s.footerQL}</span>` : `<span>${s.footerApp}</span>`;
+        const footerText = isQuickLook ? `<span>${s.footerQL}</span>` : `<span>${s.footerApp}</span>`;
+
+        const cmdHoldCheckbox = !isQuickLook ? `
+            <label class="help-checkbox-label">
+                <input type="checkbox" id="help-cmd-hold-checkbox" ${this.isCmdHoldEnabled() ? 'checked' : ''}>
+                ${s.cmdHoldCheckboxLabel}
+            </label>
+        ` : '';
 
         return `
             <div class="help-dialog">
@@ -261,13 +281,19 @@ export class HelpOverlay {
                     ${groups}
                 </div>
                 <div class="help-footer">
-                    ${footer}
+                    ${footerText}
+                    ${cmdHoldCheckbox}
                 </div>
             </div>
         `;
     }
 
     private registerKeyListeners(): void {
+        // Modifier-only keys that should NOT cancel the Cmd-hold timer.
+        // Any other key pressed while Cmd is held means the user is using a shortcut,
+        // so we cancel the timer to avoid false positives (Cmd+Tab, Cmd+Ctrl+X, boss keys, etc.).
+        const MODIFIER_KEYS = new Set(['Meta', 'Control', 'Alt', 'Shift', 'CapsLock', 'Fn', 'FnLock', 'Hyper', 'Super', 'Symbol', 'SymbolLock']);
+
         document.addEventListener('keydown', (e: KeyboardEvent) => {
             if (
                 e.key === '?' &&
@@ -286,7 +312,16 @@ export class HelpOverlay {
                 return;
             }
 
-            if ((e.key === 'Meta' || e.key === 'Control') && !e.repeat && !this.cmdHoldActive && !this.cmdHoldTimer) {
+            // If a non-modifier key is pressed while the Cmd-hold timer is running,
+            // the user is using a keyboard shortcut (e.g. Cmd+Tab, Cmd+Space, boss key).
+            // Cancel the timer immediately so the help overlay does NOT appear.
+            if (!MODIFIER_KEYS.has(e.key) && this.cmdHoldTimer) {
+                clearTimeout(this.cmdHoldTimer);
+                this.cmdHoldTimer = null;
+                return;
+            }
+
+            if ((e.key === 'Meta' || e.key === 'Control') && !e.repeat && !this.cmdHoldActive && !this.cmdHoldTimer && this.isCmdHoldEnabled()) {
                 this.cmdHoldTimer = setTimeout(() => {
                     this.cmdHoldActive = true;
                     this.show();
@@ -351,6 +386,10 @@ export class HelpOverlay {
         this.isVisible = true;
         this.overlayEl.innerHTML = this.buildOverlayHTML();
         this.overlayEl.querySelector('#help-overlay-close')?.addEventListener('click', () => this.hide());
+
+        const checkbox = this.overlayEl.querySelector<HTMLInputElement>('#help-cmd-hold-checkbox');
+        checkbox?.addEventListener('change', () => this.setCmdHoldEnabled(checkbox.checked));
+
         this.overlayEl.classList.add('help-overlay-visible');
         this.dismissToast();
     }
