@@ -7,6 +7,31 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.18.246</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.18.246</link>
+            <sparkle:version>246</sparkle:version>
+            <sparkle:shortVersionString>1.18.246</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Fri, 20 Mar 2026 16:41:41 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.18.246/FluxMarkdown.dmg"
+                sparkle:edSignature="rn97PGw+ATfwrPoeguFmPevyLL0ucXNTE7TrgwJXp9A0HjhKq2fGlvfrixgNfASX67ELNu+xkPBW1VEqGWiwBg=="
+                length="9883194"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><pre>
+Added
+- **Mermaid 节点标签换行支持**: AI 生成的 Mermaid 图表常在双引号节点标签中使用 `
+` 表示换行（如 `A["line1
+line2"]`），但 Mermaid 默认将其渲染为字面字符串
+  - 新增预处理函数，自动将引号内的 `
+` 转换为 `<br/>` HTML 换行标签
+  - 用户无需手动修改 AI 生成的文档即可获得正确的换行效果
+  - 支持所有 Mermaid 图类型（flowchart、sequence、class 等）</pre><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.18.246">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.17.243</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.17.243</link>
             <sparkle:version>243</sparkle:version>
