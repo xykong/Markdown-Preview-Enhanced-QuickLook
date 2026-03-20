@@ -1,3 +1,23 @@
+/**
+ * Pre-processes Mermaid diagram source code to convert literal `\n` escape
+ * sequences inside quoted node labels into `<br/>` HTML line breaks.
+ *
+ * AI-generated Mermaid diagrams commonly use `\n` inside double-quoted labels
+ * (e.g. `A["line1\nline2"]`) expecting a line break, but Mermaid's parser
+ * treats `\n` as a literal two-character sequence. This function normalises
+ * that before handing the source to `mermaid.render()`.
+ *
+ * Only content inside double-quoted strings is affected; the rest of the
+ * diagram syntax is left untouched.
+ */
+export function preprocessMermaidNewlines(code: string): string {
+    // Match double-quoted strings, handling escaped quotes (\\") inside them.
+    // Replace every \n (the two characters backslash + n) with <br/>.
+    return code.replace(/"((?:[^"\\]|\\.)*)"/g, (_match, inner: string) => {
+        return '"' + inner.replace(/\\n/g, '<br/>') + '"';
+    });
+}
+
 function escapeHtml(text: string): string {
     const map: Record<string, string> = {
         '&': '&amp;',
@@ -706,9 +726,10 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
                 const mermaidDivs = outputDiv.querySelectorAll('.mermaid');
                 for (const div of mermaidDivs) {
                     const code = div.textContent || '';
+                    const processedCode = preprocessMermaidNewlines(code);
                     const id = div.id || `mermaid-${Date.now()}`;
                     try {
-                        const { svg } = await mermaid.render(id + '-svg', code);
+                        const { svg } = await mermaid.render(id + '-svg', processedCode);
                         div.innerHTML = svg;
                     } catch (renderErr: any) {
                         const errorMessage = renderErr?.message || String(renderErr);

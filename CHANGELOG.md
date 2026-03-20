@@ -39,7 +39,11 @@
 
 ## [Unreleased]
 
-_无待发布的变更_
+### Added
+- **Mermaid 节点标签换行支持**: AI 生成的 Mermaid 图表常在双引号节点标签中使用 `\n` 表示换行（如 `A["line1\nline2"]`），但 Mermaid 默认将其渲染为字面字符串
+  - 新增预处理函数，自动将引号内的 `\n` 转换为 `<br/>` HTML 换行标签
+  - 用户无需手动修改 AI 生成的文档即可获得正确的换行效果
+  - 支持所有 Mermaid 图类型（flowchart、sequence、class 等）
 
 ## [1.17.243] - 2026-03-17
 
