@@ -38,7 +38,12 @@
 - **Troubleshooting 文档优化**: 在 `docs/user/TROUBLESHOOTING.md` 顶部添加提示，引导普通用户先看 HELP.md
 
 ## [Unreleased]
-_无待发布的变更_
+
+### Fixed
+- **Mermaid sequenceDiagram participant 标签引号渲染**: 修复 `participant U as "用户（飞书）"` 语法中引号被原样渲染到方块中的问题
+  - Mermaid parser 不会自动剥除 `as "..."` 中的引号，导致用户看到 `"用户（飞书）"` 而非 `用户（飞书）`
+  - 预处理函数新增 quote stripping 逻辑，在渲染前剥除 participant/actor alias 的引号
+  - 同时支持带 `\n` 换行的 alias（如 `participant X as "line1\nline2"`）
 
 ## [1.19.250] - 2026-03-21
 

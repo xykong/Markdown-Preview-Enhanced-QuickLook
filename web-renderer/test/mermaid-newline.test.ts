@@ -1,6 +1,41 @@
 import { preprocessMermaidNewlines } from '../src/index';
 
 describe('preprocessMermaidNewlines', () => {
+    describe('sequenceDiagram participant quote stripping', () => {
+        test('strips quotes from participant alias', () => {
+            const input = 'participant U as "用户（飞书）"';
+            expect(preprocessMermaidNewlines(input)).toBe('participant U as 用户（飞书）');
+        });
+
+        test('strips quotes from actor alias', () => {
+            const input = 'actor U as "用户（飞书）"';
+            expect(preprocessMermaidNewlines(input)).toBe('actor U as 用户（飞书）');
+        });
+
+        test('strips quotes from multiple participants', () => {
+            const input = [
+                'sequenceDiagram',
+                '    participant U as "用户（飞书）"',
+                '    participant FWS as "飞书平台"',
+                '    participant GW as "Gateway（Python）"',
+            ].join('\n');
+            const result = preprocessMermaidNewlines(input);
+            expect(result).toContain('participant U as 用户（飞书）');
+            expect(result).toContain('participant FWS as 飞书平台');
+            expect(result).toContain('participant GW as Gateway（Python）');
+        });
+
+        test('strips quotes and also converts \\n in same label', () => {
+            const input = 'participant PLG as "插件（TypeScript\\n运行在用户设备）"';
+            expect(preprocessMermaidNewlines(input)).toBe('participant PLG as 插件（TypeScript<br/>运行在用户设备）');
+        });
+
+        test('does not affect quoted labels elsewhere (e.g. flowchart nodes)', () => {
+            const input = 'A["line1\\nline2"]';
+            expect(preprocessMermaidNewlines(input)).toBe('A["line1<br/>line2"]');
+        });
+    });
+
     describe('basic substitution', () => {
         test('replaces \\n inside double-quoted label', () => {
             const input = 'A["line1\\nline2"]';

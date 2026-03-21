@@ -11,11 +11,20 @@
  * diagram syntax is left untouched.
  */
 export function preprocessMermaidNewlines(code: string): string {
-    // Match double-quoted strings, handling escaped quotes (\\") inside them.
-    // Replace every \n (the two characters backslash + n) with <br/>.
-    return code.replace(/"((?:[^"\\]|\\.)*)"/g, (_match, inner: string) => {
+    // Mermaid's parser does not strip quotes from `participant X as "label"`,
+    // so `"用户（飞书）"` renders with visible quotes. Strip the quotes and
+    // convert any \n inside the alias at the same time.
+    let result = code.replace(
+        /((?:participant|actor)\s+\S+\s+as\s+)"((?:[^"\\]|\\.)*)"/g,
+        (_match, prefix: string, inner: string) => prefix + inner.replace(/\\n/g, '<br/>')
+    );
+
+    // Convert literal \n inside double-quoted node labels to <br/>.
+    result = result.replace(/"((?:[^"\\]|\\.)*)"/g, (_match, inner: string) => {
         return '"' + inner.replace(/\\n/g, '<br/>') + '"';
     });
+
+    return result;
 }
 
 function escapeHtml(text: string): string {
