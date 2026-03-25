@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.19.256</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.19.256</link>
+            <sparkle:version>256</sparkle:version>
+            <sparkle:shortVersionString>1.19.256</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Wed, 25 Mar 2026 17:03:10 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.19.256/FluxMarkdown.dmg"
+                sparkle:edSignature="kB+KTDWjJetCCdZe6iZGAZHFOOVb8sXw9t/W2q86x2FLrK103RA9GT3HMjhRSwWAxJTCSA2F6f1QPPp3yzybDg=="
+                length="9893620"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Fixed</h3><ul><li><strong>链接导航支持文件名含空格 (%20 编码)</strong>: 点击链接现在可以正常打开目标文件</li><li>&nbsp;&nbsp;&nbsp;&nbsp;新增 <code>LinkNavigation</code> 模块封装 URL 解析逻辑，使用 <code>removingPercentEncoding</code> 解码 href 中的空格</li><li>&nbsp;&nbsp;&nbsp;&nbsp;新增测试用例覆盖 <code>%20</code> 编码的各种场景</li><li>&nbsp;&nbsp;&nbsp;&nbsp;新增 <code>docs/debug/DEBUG_PERCENT_ENCODED_LINK_NAVIGATION.md</code> 记录问题和排查过程</li><li>&nbsp;&nbsp;&nbsp;&nbsp;添加测试 fixture 文件用于手工验证</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.19.256">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.19.253</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.19.253</link>
             <sparkle:version>253</sparkle:version>
