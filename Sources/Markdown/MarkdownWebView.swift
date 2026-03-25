@@ -641,48 +641,13 @@ struct MarkdownWebView: NSViewRepresentable {
                 return
             }
             
-            // Separate fragment (#anchor) from the path portion
-            let hrefPath: String
-            let fragment: String?
-            if let hashRange = href.range(of: "#") {
-                hrefPath = String(href[href.startIndex..<hashRange.lowerBound])
-                fragment = String(href[hashRange.upperBound...])
-            } else {
-                hrefPath = href
-                fragment = nil
-            }
+            let (targetURL, fragment) = LinkNavigation.resolveLocalURLWithFragment(href: href, relativeTo: fileURL)
             
-            // Build the absolute target URL from the path portion only
-            let baseDir = fileURL.deletingLastPathComponent()
-            var targetURL: URL
-            
-            if hrefPath.isEmpty {
-                // href was pure anchor ("#foo") — same file, JS handles it
-                return
-            } else if hrefPath.starts(with: "file://") {
-                guard let url = URL(string: hrefPath) else {
-                    os_log("🔴 Invalid file URL: %{public}@", log: logger, type: .error, hrefPath)
-                    return
-                }
-                targetURL = url
-            } else if hrefPath.starts(with: "/") {
-                targetURL = URL(fileURLWithPath: hrefPath)
-            } else {
-                targetURL = baseDir
-                for component in hrefPath.split(separator: "/") {
-                    let componentStr = String(component)
-                    if componentStr == ".." {
-                        targetURL.deleteLastPathComponent()
-                    } else if componentStr != "." {
-                        targetURL.appendPathComponent(componentStr)
-                    }
-                }
-            }
+            guard let targetURL = targetURL else { return }
             
             os_log("🔵 Opening local file: %{public}@ anchor: %{public}@ (href: %{public}@)",
                    log: logger, type: .default, targetURL.path, fragment ?? "(none)", href)
             
-            // Store the pending anchor so the new window's renderer can scroll to it
             if let anchor = fragment, !anchor.isEmpty {
                 PendingAnchorStore.shared.set(anchor: anchor, for: targetURL.path)
             }
@@ -708,6 +673,7 @@ struct MarkdownWebView: NSViewRepresentable {
             }
         }
     }
+
 }
 
 class ResizableWKWebView: WKWebView {
