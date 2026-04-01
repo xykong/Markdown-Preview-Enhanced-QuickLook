@@ -7,6 +7,30 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.20.261</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.20.261</link>
+            <sparkle:version>261</sparkle:version>
+            <sparkle:shortVersionString>1.20.261</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Wed, 01 Apr 2026 12:09:40 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.20.261/FluxMarkdown.dmg"
+                sparkle:edSignature="+CVX4NrrYMC6FlP+Z6irUCx+sy9Tp4pNu4Ic8sj3f5Rpnr/v6pTySlfWs/74x6rZhsBEVfFivqUxdPb2tva/AA=="
+                length="9950565"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Added</h3><ul><li><strong>Mermaid 文件支持</strong>: 新增 <code>.mmd</code> 扩展名支持，直接预览 Mermaid 图表文件</li><li>&nbsp;&nbsp;&nbsp;&nbsp;自动将 <code>.mmd</code> 文件内容包装为 Mermaid 代码块进行渲染</li><li>&nbsp;&nbsp;&nbsp;&nbsp;支持所有 Mermaid 图表类型：flowchart、sequence、gantt、classDiagram 等</li><li><strong>更多 Markdown 变种扩展名</strong>: 支持以下新扩展名</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>.livemd</code> — Livebook 笔记本（Elixir 生态）</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>.markdown</code> <code>.mdown</code> <code>.mkd</code> <code>.mkdn</code> <code>.mkdown</code> <code>.mdwn</code> — Markdown 变种</li><li><strong>QuickLook Extension 注册增强</strong>: 改进 macOS Ventura+ 上的 extension 注册</li><li>&nbsp;&nbsp;&nbsp;&nbsp;使用 <code>pluginkit -e use</code> 显式启用 extension</li><li>&nbsp;&nbsp;&nbsp;&nbsp;自动设置 extension 优先级，避免被已卸载的旧 extension 抢占</li><li>&nbsp;&nbsp;&nbsp;&nbsp;使用 <code>UTExportedTypeDeclarations</code> 导出 UTI，解决 macOS 26 上 <code>.markdown</code> 等扩展名不被识别的问题</li></ul><h3>Fixed</h3><ul><li><strong>Swift 6 严格并发检查</strong>: 修复编译警告</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>PreviewViewController.swift</code>: 在 <code>Task.detached</code> 外捕获 <code>uiLanguage</code></li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>WindowAccessor.swift</code>: 使用 <code>MainActor.assumeIsolated</code> 处理通知回调</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>SharedPreferenceStore.swift</code>: 显式丢弃 <code>removeValue</code> 返回值</li><li>&nbsp;&nbsp;&nbsp;&nbsp;测试文件添加 <code></code> 修饰</li></ul><p>Tests</p><ul><li><strong>FileExtensionTests</strong>: 新增 37 个测试用例</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Fixture 文件存在性验证</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>.mmd</code> 包装逻辑测试</li><li>&nbsp;&nbsp;&nbsp;&nbsp;UTI 声明完整性验证</li><li>&nbsp;&nbsp;&nbsp;&nbsp;所有新扩展名的渲染验证</li></ul><h3>Fixed</h3><ul><li><strong>Mermaid 无引号节点标签 <code>
+</code> 换行支持</strong>: 修复 <code>
+</code> 在无引号节点标签（如 <code>A[text
+line2]</code>、<code>G{decision
+more}</code>）中不换行的问题</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Mermaid v11 只对双引号标签 <code>A["text
+line2"]</code> 转换 <code>
+</code> → <code><br></code>，无引号标签的 <code>
+</code> 会原样显示</li><li>&nbsp;&nbsp;&nbsp;&nbsp;扩展 <code>preprocessMermaidNewlines</code> 函数，增加对 <code>[...]</code>、<code>{...}</code>、<code>(...)</code> 三种无引号括号的预处理</li><li>&nbsp;&nbsp;&nbsp;&nbsp;使用字符类排除模式避免重复处理已由双引号 pass 处理的内容</li><li>&nbsp;&nbsp;&nbsp;&nbsp;更新 JSDoc 文档记录 Mermaid 内部行为差异，避免后人重走弯路</li><li><strong>主应用 Cmd+scroll 缩放支持</strong>: 在主应用中按住 Cmd 键滚动鼠标现在可以缩放内容，与 macOS 预览.app 行为一致</li><li>&nbsp;&nbsp;&nbsp;&nbsp;在 <code>ResizableWKWebView</code> 中添加 <code>scrollWheel(with:)</code> 方法拦截 Cmd+scroll 事件</li><li>&nbsp;&nbsp;&nbsp;&nbsp;缩放范围限制在 0.5x–3.0x，与 QuickLook 扩展保持一致</li><li>&nbsp;&nbsp;&nbsp;&nbsp;缩放级别自动持久化到用户偏好设置</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.20.261">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.19.256</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.19.256</link>
             <sparkle:version>256</sparkle:version>
