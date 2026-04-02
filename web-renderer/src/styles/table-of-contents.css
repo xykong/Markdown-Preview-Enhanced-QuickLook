@@ -39,7 +39,7 @@
     top: 115px;
     right: 20px;
     width: 280px;
-    max-height: calc(100vh - 120px);
+    max-height: calc(100vh - 135px);
     background-color: #ffffff;
     border: 1px solid #d0d7de;
     border-radius: 8px;
@@ -88,6 +88,15 @@
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+/* Ensure the last item is fully visible when scrolled to bottom.
+   WebKit may ignore bottom padding on overflow containers, so we
+   use a pseudo-element spacer instead. */
+.toc-nav .toc-list:last-child::after {
+    content: "";
+    display: block;
+    height: 4px;
 }
 
 .toc-item {
