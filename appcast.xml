@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.21.266</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.21.266</link>
+            <sparkle:version>266</sparkle:version>
+            <sparkle:shortVersionString>1.21.266</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Fri, 03 Apr 2026 06:31:45 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.21.266/FluxMarkdown.dmg"
+                sparkle:edSignature="8zsnLJUi56cZUf8PQTb3QoRcpsZwFUAM+RoTex5vifDDnE1ARrTynmWVNUzQt4XiVSNHrTD98zsJlhtTdGoWBQ=="
+                length="9961076"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Fixed</h3><ul><li><strong>目录面板底部截断</strong>: 修复 TOC 侧边栏滚动到底部时最后一项显示不全的问题</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.21.266">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.20.261</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.20.261</link>
             <sparkle:version>261</sparkle:version>
