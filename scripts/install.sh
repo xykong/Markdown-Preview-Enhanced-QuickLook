@@ -91,7 +91,6 @@ BUNDLE_ID="com.xykong.Markdown"
 if command -v duti >/dev/null 2>&1; then
     echo "   Using duti to set default associations..."
     duti -s "$BUNDLE_ID" net.daringfireball.markdown all
-    duti -s "$BUNDLE_ID" public.markdown all
     duti -s "$BUNDLE_ID" .md all
     duti -s "$BUNDLE_ID" .markdown all
     duti -s "$BUNDLE_ID" .mdown all
