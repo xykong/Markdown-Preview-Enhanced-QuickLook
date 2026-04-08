@@ -184,11 +184,11 @@ public class SharedPreferenceStore {
     }
 
     public func setNil(forKey key: String) {
-        queue.sync { cache.removeValue(forKey: key) }
+        queue.sync { _ = cache.removeValue(forKey: key) }
     }
 
     public func removeObject(forKey key: String) {
-        queue.sync { cache.removeValue(forKey: key) }
+        queue.sync { _ = cache.removeValue(forKey: key) }
     }
 
     /// Flush in-memory cache to disk. No-op for the sandboxed extension.
