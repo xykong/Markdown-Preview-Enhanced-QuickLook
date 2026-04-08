@@ -397,6 +397,8 @@ declare global {
         renderSource: (text: string, theme: string) => void;
         exportHTML: () => string;
         setZoomLevel: (level: number) => void;
+        setFontSize: (px: number) => void;
+        adjustFontSize: (delta: number) => void;
         showSearch: () => void;
         hideSearch: () => void;
         toggleSearch: () => void;
@@ -992,6 +994,23 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
         else if (e.key === '0') { e.preventDefault(); applyZoomLevel(1.0); }
     }
 });
+
+window.setFontSize = function(px: number) {
+    const outputDiv = document.getElementById('markdown-preview');
+    if (outputDiv) {
+        const clamped = Math.max(8, Math.min(48, px));
+        outputDiv.style.fontSize = clamped + 'px';
+    }
+};
+
+window.adjustFontSize = function(delta: number) {
+    const outputDiv = document.getElementById('markdown-preview');
+    if (outputDiv) {
+        const current = parseFloat(getComputedStyle(outputDiv).fontSize) || 16;
+        const newSize = Math.max(8, Math.min(48, current + delta));
+        outputDiv.style.fontSize = newSize + 'px';
+    }
+};
 
 window.showSearch = function() { if (searchUI) searchUI.show(); };
 window.hideSearch = function() { if (searchUI) searchUI.hide(); };
