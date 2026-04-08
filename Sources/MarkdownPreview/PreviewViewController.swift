@@ -230,6 +230,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     private var themeButton: NSButton!
     private var sourceButton: NSButton!
     private var helpButton: NSButton!
+    private var zoomInButton: NSButton!
+    private var zoomOutButton: NSButton!
     
     public override func loadView() {
         os_log("🔵 loadView called", log: logger, type: .debug)
@@ -325,6 +327,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         setupThemeButton()
         setupSourceButton()
         setupHelpButton()
+        setupZoomInButton()
+        setupZoomOutButton()
         
         var bundleURL: URL?
         if let url = Bundle(for: type(of: self)).url(forResource: "index", withExtension: "html", subdirectory: "WebRenderer") {
@@ -349,8 +353,10 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         webView.addGestureRecognizer(doubleClickGesture)
         
         webView.allowsMagnification = true
-        webView.magnification = currentZoomLevel
-        os_log("🔵 Enabled WKWebView magnification, initial level: %.2f", log: logger, type: .default, currentZoomLevel)
+        let savedZoom = AppearancePreference.shared.zoomLevel
+        if savedZoom > 0 {
+            webView.pageZoom = savedZoom
+        }
         
         DispatchQueue.main.async {
             self.view.window?.makeFirstResponder(self.webView)
@@ -359,8 +365,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         #if DEBUG
         setupDebugLabel()
         #endif
-        
-        currentZoomLevel = AppearancePreference.shared.zoomLevel
         
         startResizeTracking()
     }
@@ -640,6 +644,60 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     @objc private func toggleHelp() {
         webView.evaluateJavaScript("window.toggleHelp();", completionHandler: nil)
     }
+
+    private func setupZoomInButton() {
+        let button = NSButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.bezelStyle = .circular
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.cornerRadius = 15
+        button.target = self
+        button.action = #selector(zoomIn)
+
+        if let image = NSImage(systemSymbolName: "textformat.size.larger", accessibilityDescription: "Zoom In") {
+            button.image = image
+            button.contentTintColor = NSColor.darkGray
+        }
+
+        self.view.addSubview(button)
+        self.zoomInButton = button
+
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 10),
+            button.trailingAnchor.constraint(equalTo: helpButton.leadingAnchor, constant: -8),
+            button.widthAnchor.constraint(equalToConstant: 30),
+            button.heightAnchor.constraint(equalToConstant: 30)
+        ])
+    }
+
+    private func setupZoomOutButton() {
+        let button = NSButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.bezelStyle = .circular
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.cornerRadius = 15
+        button.target = self
+        button.action = #selector(zoomOut)
+
+        if let image = NSImage(systemSymbolName: "textformat.size.smaller", accessibilityDescription: "Zoom Out") {
+            button.image = image
+            button.contentTintColor = NSColor.darkGray
+        }
+
+        self.view.addSubview(button)
+        self.zoomOutButton = button
+
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 10),
+            button.trailingAnchor.constraint(equalTo: zoomInButton.leadingAnchor, constant: -8),
+            button.widthAnchor.constraint(equalToConstant: 30),
+            button.heightAnchor.constraint(equalToConstant: 30)
+        ])
+    }
     
     private func renderCurrentMode() {
         if currentViewMode == .preview {
@@ -694,29 +752,25 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 os_log("🔵 JS Execution Result (renderSource): %{public}@", log: self.logger, type: .debug, res)
             }
             
-            self.applyZoom()
         }
     }
     
     @objc private func zoomIn() {
-        currentZoomLevel = min(currentZoomLevel + 0.1, 3.0)
-        applyZoom()
+        webView.pageZoom += 0.1
+        AppearancePreference.shared.zoomLevel = webView.pageZoom
+        os_log("🔵 pageZoom in: %.2f", log: logger, type: .debug, webView.pageZoom)
     }
     
     @objc private func zoomOut() {
-        currentZoomLevel = max(currentZoomLevel - 0.1, 0.5)
-        applyZoom()
+        webView.pageZoom = max(0.5, webView.pageZoom - 0.1)
+        AppearancePreference.shared.zoomLevel = webView.pageZoom
+        os_log("🔵 pageZoom out: %.2f", log: logger, type: .debug, webView.pageZoom)
     }
     
     @objc private func resetZoom() {
-        currentZoomLevel = 1.0
-        applyZoom()
-    }
-    
-    private func applyZoom() {
-        webView.magnification = currentZoomLevel
-        os_log("🔵 Zoom applied via magnification: %.2f", log: logger, type: .debug, currentZoomLevel)
-        AppearancePreference.shared.zoomLevel = currentZoomLevel
+        webView.pageZoom = 1.0
+        AppearancePreference.shared.zoomLevel = 1.0
+        os_log("🔵 pageZoom reset", log: logger, type: .debug)
     }
     
     private func handleKeyDownEvent(_ event: NSEvent) -> NSEvent? {
@@ -960,8 +1014,6 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                     } else if let res = innerResult as? String {
                         os_log("🔵 JS Execution Result: %{public}@", log: self.logger, type: .debug, res)
                     }
-                    
-                    self.applyZoom()
                     
                     if let url = self.currentURL,
                        let savedScrollY = AppearancePreference.shared.getScrollPosition(for: url.path),
