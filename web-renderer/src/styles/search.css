@@ -1,7 +1,8 @@
 #search-container {
     position: fixed;
     top: 10px;
-    right: 60px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1000;
     display: none;
     flex-direction: column;
@@ -229,10 +230,10 @@
 @keyframes searchSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateX(-50%) translateY(-10px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(-50%) translateY(0);
     }
 }
