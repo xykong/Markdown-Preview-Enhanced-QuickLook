@@ -152,6 +152,18 @@ struct MarkdownWebView: NSViewRepresentable {
                 name: .toggleHelp,
                 object: nil
             )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleZoomIn),
+                name: .zoomIn,
+                object: nil
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleZoomOut),
+                name: .zoomOut,
+                object: nil
+            )
         }
         
         deinit {
@@ -172,6 +184,18 @@ struct MarkdownWebView: NSViewRepresentable {
         @objc func handleToggleHelp() {
             guard let webView = currentWebView else { return }
             webView.evaluateJavaScript("window.toggleHelp();", completionHandler: nil)
+        }
+
+        @objc func handleZoomIn() {
+            guard let webView = currentWebView else { return }
+            webView.pageZoom += 0.1
+            AppearancePreference.shared.zoomLevel = webView.pageZoom
+        }
+
+        @objc func handleZoomOut() {
+            guard let webView = currentWebView else { return }
+            webView.pageZoom = max(0.5, webView.pageZoom - 0.1)
+            AppearancePreference.shared.zoomLevel = webView.pageZoom
         }
         
         @objc func handleExportHTML() {
@@ -754,11 +778,11 @@ class ResizableWKWebView: WKWebView {
         }
         hasSetInitialSize = true
         
-        currentZoomLevel = AppearancePreference.shared.zoomLevel
-        
         self.allowsMagnification = true
-        self.magnification = currentZoomLevel
-        os_log("🔵 Enabled WKWebView magnification, initial level: %.2f", log: logger, type: .default, currentZoomLevel)
+        let savedZoom = AppearancePreference.shared.zoomLevel
+        if savedZoom > 0 {
+            self.pageZoom = savedZoom
+        }
     }
 }
 

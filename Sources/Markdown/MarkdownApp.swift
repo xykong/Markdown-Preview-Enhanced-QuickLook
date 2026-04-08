@@ -90,6 +90,30 @@ struct MarkdownApp: App {
 
                 HStack(spacing: 8) {
                     Button(action: {
+                        NotificationCenter.default.post(name: .zoomOut, object: nil)
+                    }) {
+                        Image(systemName: "textformat.size.smaller")
+                            .foregroundColor(.secondary)
+                            .frame(width: 30, height: 30)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .background(Color.black.opacity(0.1))
+                    .clipShape(Circle())
+                    .help("Zoom Out")
+
+                    Button(action: {
+                        NotificationCenter.default.post(name: .zoomIn, object: nil)
+                    }) {
+                        Image(systemName: "textformat.size.larger")
+                            .foregroundColor(.secondary)
+                            .frame(width: 30, height: 30)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .background(Color.black.opacity(0.1))
+                    .clipShape(Circle())
+                    .help("Zoom In")
+
+                    Button(action: {
                         NotificationCenter.default.post(name: .toggleHelp, object: nil)
                     }) {
                         Image(systemName: "questionmark.circle")
