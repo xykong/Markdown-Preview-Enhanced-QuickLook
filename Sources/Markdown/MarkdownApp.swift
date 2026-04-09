@@ -88,6 +88,14 @@ struct MarkdownApp: App {
                     codeHighlightTheme: preference.codeHighlightTheme
                 )
 
+                if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {
+                    Text("v\(version)")
+                        .font(.system(size: 10, weight: .regular, design: .monospaced))
+                        .foregroundColor(Color.secondary.opacity(0.5))
+                        .padding(.top, 48)
+                        .padding(.trailing, 72)
+                }
+
                 HStack(spacing: 8) {
                     Button(action: {
                         NotificationCenter.default.post(name: .zoomOut, object: nil)

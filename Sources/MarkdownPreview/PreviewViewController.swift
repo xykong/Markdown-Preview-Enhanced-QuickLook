@@ -232,6 +232,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     private var helpButton: NSButton!
     private var zoomInButton: NSButton!
     private var zoomOutButton: NSButton!
+    private var versionLabel: NSTextField!
     
     public override func loadView() {
         os_log("🔵 loadView called", log: logger, type: .debug)
@@ -329,6 +330,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         setupHelpButton()
         setupZoomInButton()
         setupZoomOutButton()
+        setupVersionLabel()
         
         var bundleURL: URL?
         if let url = Bundle(for: type(of: self)).url(forResource: "index", withExtension: "html", subdirectory: "WebRenderer") {
@@ -699,6 +701,25 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         ])
     }
     
+    private func setupVersionLabel() {
+        let bundleInfo = Bundle(for: type(of: self)).infoDictionary
+        let version = bundleInfo?["CFBundleShortVersionString"] as? String ?? ""
+        guard !version.isEmpty else { return }
+
+        let label = NSTextField(labelWithString: "v\(version)")
+        label.font = NSFont.monospacedSystemFont(ofSize: 10, weight: .regular)
+        label.textColor = NSColor.secondaryLabelColor
+        label.translatesAutoresizingMaskIntoConstraints = false
+
+        self.view.addSubview(label)
+        self.versionLabel = label
+
+        NSLayoutConstraint.activate([
+            label.topAnchor.constraint(equalTo: zoomOutButton.bottomAnchor, constant: 8),
+            label.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -72)
+        ])
+    }
+
     private func renderCurrentMode() {
         if currentViewMode == .preview {
             renderPendingMarkdown()
