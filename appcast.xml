@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.22.275</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.22.275</link>
+            <sparkle:version>275</sparkle:version>
+            <sparkle:shortVersionString>1.22.275</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Thu, 09 Apr 2026 06:29:49 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.22.275/FluxMarkdown.dmg"
+                sparkle:edSignature="p8JnHcgOdmTdGL7+wF716vfaH4w/MYt4MOlgPW+ShVDU8SD/bxEC4QKT4TIsnovJgBEE5qH8A15kWnlK7fK1DA=="
+                length="9974152"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Added</h3><ul><li><strong>版本号显示</strong>: 在 App 和 QuickLook 预览窗口右上角显示当前版本号</li><li>&nbsp;&nbsp;&nbsp;&nbsp;App 端：版本号位于工具栏按钮下方、目录（TOC）按钮左侧</li><li>&nbsp;&nbsp;&nbsp;&nbsp;QuickLook 端：版本号锚定在缩放按钮下方，与 App 端位置对齐</li><li>&nbsp;&nbsp;&nbsp;&nbsp;使用等宽字体（10pt），半透明次要文字色，保持界面整洁</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.22.275">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.21.266</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.21.266</link>
             <sparkle:version>266</sparkle:version>
