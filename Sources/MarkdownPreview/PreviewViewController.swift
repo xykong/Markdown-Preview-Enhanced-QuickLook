@@ -1523,9 +1523,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             queue: .main
         )
 
-        source.setEventHandler { [weak self] in
+        source.setEventHandler { [weak self, weak source] in
             guard let self else { return }
-            let flags = source.data
+            let flags = source?.data ?? []
             if flags.contains(.delete) || flags.contains(.rename) {
                 os_log("🟡 File replaced/renamed — restarting monitor: %{public}@",
                        log: self.logger, type: .debug, path)
