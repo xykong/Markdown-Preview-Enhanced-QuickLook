@@ -98,6 +98,18 @@ struct MarkdownApp: App {
 
                 HStack(spacing: 8) {
                     Button(action: {
+                        NotificationCenter.default.post(name: .reloadFile, object: nil)
+                    }) {
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundColor(.secondary)
+                            .frame(width: 30, height: 30)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .background(Color.black.opacity(0.1))
+                    .clipShape(Circle())
+                    .help("Reload File (⌘R)")
+
+                    Button(action: {
                         NotificationCenter.default.post(name: .zoomOut, object: nil)
                     }) {
                         Image(systemName: "textformat.size.smaller")
@@ -172,6 +184,12 @@ struct MarkdownApp: App {
         }
         .commands {
             CommandGroup(after: .saveItem) {
+                Button(action: {
+                    NotificationCenter.default.post(name: .reloadFile, object: nil)
+                }) {
+                    Text(NSLocalizedString("Reload File", comment: "Reload file menu item"))
+                }
+                .keyboardShortcut("r", modifiers: [.command])
                 Divider()
                 Button(action: {
                     NotificationCenter.default.post(name: .exportHTML, object: nil)
