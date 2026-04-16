@@ -149,6 +149,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
 
     private var lastKnownFileSize: UInt64?
     private var lastKnownFileModificationDate: Date?
+
+    private var pollingTimer: Timer?
+    private let pollingInterval: TimeInterval = 2.0
     
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "MarkdownPreview")
     
@@ -232,6 +235,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     private var helpButton: NSButton!
     private var zoomInButton: NSButton!
     private var zoomOutButton: NSButton!
+    private var reloadButton: NSButton!
     private var versionLabel: NSTextField!
     
     public override func loadView() {
@@ -330,6 +334,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         setupHelpButton()
         setupZoomInButton()
         setupZoomOutButton()
+        setupReloadButton()
         setupVersionLabel()
         
         var bundleURL: URL?
@@ -700,6 +705,34 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             button.heightAnchor.constraint(equalToConstant: 30)
         ])
     }
+
+    private func setupReloadButton() {
+        let button = NSButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.bezelStyle = .circular
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.cornerRadius = 15
+        button.target = self
+        button.action = #selector(reloadFileManually)
+        button.toolTip = "Reload File (⌘R)"
+
+        if let image = NSImage(systemSymbolName: "arrow.clockwise", accessibilityDescription: "Reload File") {
+            button.image = image
+            button.contentTintColor = NSColor.darkGray
+        }
+
+        self.view.addSubview(button)
+        self.reloadButton = button
+
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 10),
+            button.trailingAnchor.constraint(equalTo: zoomOutButton.leadingAnchor, constant: -8),
+            button.widthAnchor.constraint(equalToConstant: 30),
+            button.heightAnchor.constraint(equalToConstant: 30)
+        ])
+    }
     
     private func setupVersionLabel() {
         let bundleInfo = Bundle(for: type(of: self)).infoDictionary
@@ -716,7 +749,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
 
         NSLayoutConstraint.activate([
             label.topAnchor.constraint(equalTo: zoomOutButton.bottomAnchor, constant: 8),
-            label.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -72)
+            label.trailingAnchor.constraint(equalTo: reloadButton.leadingAnchor, constant: -8)
         ])
     }
 
@@ -793,6 +826,14 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         AppearancePreference.shared.zoomLevel = 1.0
         os_log("🔵 pageZoom reset", log: logger, type: .debug)
     }
+
+    @objc private func reloadFileManually() {
+        os_log("🔄 Manual reload triggered by button/shortcut", log: logger, type: .default)
+        // Clear cached metadata to force reload regardless of mtime
+        lastKnownFileSize = nil
+        lastKnownFileModificationDate = nil
+        reloadFromDisk()
+    }
     
     private func handleKeyDownEvent(_ event: NSEvent) -> NSEvent? {
         let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
@@ -815,6 +856,10 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             case "0":
                 os_log("🔵 Reset Zoom triggered", log: logger, type: .default)
                 resetZoom()
+                return nil
+            case "r", "R":
+                os_log("🔵 Reload File triggered", log: logger, type: .default)
+                reloadFileManually()
                 return nil
             default:
                 break
@@ -1458,78 +1503,115 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             os_log("🟡 Cannot start file monitoring: currentURL is nil", log: logger, type: .debug)
             return
         }
-        
+
         stopFileMonitoring()
-        
+
         let path = url.path
         let fd = open(path, O_EVTONLY)
-        
-        guard fd >= 0 else {
-            os_log("🔴 Failed to open file for monitoring: %{public}@", log: logger, type: .error, path)
+
+        if fd < 0 {
+            os_log("🔴 Failed to open file for monitoring, using polling only: %{public}@", log: logger, type: .error, path)
+            startPollingTimer()
             return
         }
-        
+
         monitoredFileDescriptor = fd
-        
+
         let source = DispatchSource.makeFileSystemObjectSource(
             fileDescriptor: fd,
             eventMask: [.write, .delete, .rename],
             queue: .main
         )
-        
+
         source.setEventHandler { [weak self] in
-            guard let self = self else { return }
-            os_log("🟢 File change detected, reloading content", log: self.logger, type: .default)
+            guard let self else { return }
+            let flags = source.data
+            if flags.contains(.delete) || flags.contains(.rename) {
+                os_log("🟡 File replaced/renamed — restarting monitor: %{public}@",
+                       log: self.logger, type: .debug, path)
+                self.stopDispatchMonitor()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                    guard let self else { return }
+                    self.startFileMonitoring()
+                    self.reloadFromDisk()
+                }
+                return
+            }
             self.handleFileChange()
         }
-        
+
         source.setCancelHandler { [weak self] in
-            guard let self = self, self.monitoredFileDescriptor >= 0 else { return }
+            guard let self, self.monitoredFileDescriptor >= 0 else { return }
             close(self.monitoredFileDescriptor)
             self.monitoredFileDescriptor = -1
         }
-        
+
         source.resume()
         self.fileMonitor = source
-        
         os_log("🟢 File monitoring started for: %{public}@", log: logger, type: .default, path)
-    }
-    
-    private func stopFileMonitoring() {
-        guard let monitor = fileMonitor else { return }
-        
-        monitor.cancel()
-        fileMonitor = nil
-        
-        os_log("🔵 File monitoring stopped", log: logger, type: .debug)
-    }
-    
-    private func handleFileChange() {
-        guard let url = currentURL else {
-            os_log("🔴 handleFileChange called but currentURL is nil", log: logger, type: .error)
-            return
-        }
-        
-        do {
-            let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
-            let fileSize = attributes[.size] as? UInt64 ?? 0
-            let fileMtime = attributes[.modificationDate] as? Date
 
-            if fileSize == lastKnownFileSize, fileMtime == lastKnownFileModificationDate {
-                os_log("🟡 File event received but content unchanged (size/mtime identical); ignoring", log: logger, type: .debug)
-                return
-            }
-            
+        startPollingTimer()
+    }
+    
+    private func stopDispatchMonitor() {
+        fileMonitor?.cancel()
+        fileMonitor = nil
+    }
+
+    private func stopFileMonitoring() {
+        stopDispatchMonitor()
+        stopPollingTimer()
+    }
+
+    private func startPollingTimer() {
+        stopPollingTimer()
+        pollingTimer = Timer.scheduledTimer(
+            withTimeInterval: pollingInterval,
+            repeats: true
+        ) { [weak self] _ in
+            self?.pollFileForChanges()
+        }
+    }
+
+    private func stopPollingTimer() {
+        pollingTimer?.invalidate()
+        pollingTimer = nil
+    }
+
+    private func pollFileForChanges() {
+        guard let url = currentURL else { return }
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path) else { return }
+        let newSize = attrs[.size] as? UInt64 ?? 0
+        let newMtime = attrs[.modificationDate] as? Date
+        guard FileMonitorHelpers.shouldReload(
+            newSize: newSize, newMtime: newMtime,
+            knownSize: lastKnownFileSize ?? 0,
+            knownMtime: lastKnownFileModificationDate
+        ) else { return }
+        os_log("🟢 [poll] File changed, reloading: %{public}@", log: logger, type: .default, url.lastPathComponent)
+        reloadFromDisk()
+    }
+
+    private func reloadFromDisk() {
+        guard let url = currentURL else { return }
+        do {
+            let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+            let newSize = attrs[.size] as? UInt64 ?? 0
+            let newMtime = attrs[.modificationDate] as? Date
+            guard FileMonitorHelpers.shouldReload(
+                newSize: newSize, newMtime: newMtime,
+                knownSize: lastKnownFileSize ?? 0,
+                knownMtime: lastKnownFileModificationDate
+            ) else { return }
+
             var content: String
-            if fileSize > self.maxPreviewSizeBytes {
-                let fileHandle = try FileHandle(forReadingFrom: url)
-                defer { try? fileHandle.close() }
-                let data = fileHandle.readData(ofLength: Int(self.maxPreviewSizeBytes))
-                if var stringContent = String(data: data, encoding: .utf8) {
-                    if let lastNewline = stringContent.lastIndex(of: "\n") {
-                        stringContent = String(stringContent[...lastNewline])
-                    }
-                    content = stringContent + "\n\n> **Preview truncated.**"
+            if newSize > maxPreviewSizeBytes {
+                let fh = try FileHandle(forReadingFrom: url)
+                defer { try? fh.close() }
+                let data = fh.readData(ofLength: Int(maxPreviewSizeBytes))
+                if var s = String(data: data, encoding: .utf8) {
+                    if let last = s.lastIndex(of: "\n") { s = String(s[...last]) }
+                    content = s + "\n\n> **Preview truncated.**"
                 } else {
                     content = "> **Encoding Error**"
                 }
@@ -1541,16 +1623,17 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 content = "```mermaid\n\(content)\n```"
             }
 
-            self.pendingMarkdown = content
-            self.lastKnownFileSize = fileSize
-            self.lastKnownFileModificationDate = fileMtime
-            if self.isWebViewLoaded {
-                self.renderPendingMarkdown()
-            }
-            
-            os_log("🟢 File content reloaded successfully", log: logger, type: .default)
+            pendingMarkdown = content
+            lastKnownFileSize = newSize
+            lastKnownFileModificationDate = newMtime
+            if isWebViewLoaded { renderCurrentMode() }
+            os_log("🟢 Reloaded from disk: %{public}@", log: logger, type: .default, url.lastPathComponent)
         } catch {
-            os_log("🔴 Failed to reload file: %{public}@", log: logger, type: .error, error.localizedDescription)
+            os_log("🔴 reloadFromDisk failed: %{public}@", log: logger, type: .error, error.localizedDescription)
         }
+    }
+
+    private func handleFileChange() {
+        reloadFromDisk()
     }
 }
