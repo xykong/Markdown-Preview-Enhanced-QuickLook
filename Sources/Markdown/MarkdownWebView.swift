@@ -125,6 +125,8 @@ struct MarkdownWebView: NSViewRepresentable {
         private var lastEnableKatex: Bool = true
         private var lastEnableEmoji: Bool = true
         private var lastCodeHighlightTheme: String = "default"
+        private var pollingTimer: Timer?
+        private let pollingInterval: TimeInterval = 2.0
 
         override init() {
             super.init()
@@ -164,6 +166,12 @@ struct MarkdownWebView: NSViewRepresentable {
                 name: .zoomOut,
                 object: nil
             )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleReloadFile),
+                name: .reloadFile,
+                object: nil
+            )
         }
         
         deinit {
@@ -196,6 +204,12 @@ struct MarkdownWebView: NSViewRepresentable {
             guard let webView = currentWebView else { return }
             webView.pageZoom = max(0.5, webView.pageZoom - 0.1)
             AppearancePreference.shared.zoomLevel = webView.pageZoom
+        }
+
+        @objc func handleReloadFile() {
+            guard let url = currentFileURL else { return }
+            os_log("🔄 Manual reload triggered: %{public}@", log: logger, type: .default, url.lastPathComponent)
+            reloadFromDisk(url: url)
         }
         
         @objc func handleExportHTML() {
@@ -573,7 +587,8 @@ struct MarkdownWebView: NSViewRepresentable {
 
             let fd = open(url.path, O_EVTONLY)
             guard fd >= 0 else {
-                os_log("🔴 Cannot open file for monitoring: %{public}@", log: logger, type: .error, url.path)
+                os_log("🔴 Cannot open file for monitoring, using polling only: %{public}@", log: logger, type: .error, url.path)
+                startPollingTimer()
                 return
             }
             monitoredFileDescriptor = fd
@@ -585,7 +600,20 @@ struct MarkdownWebView: NSViewRepresentable {
             )
 
             source.setEventHandler { [weak self] in
-                self?.handleFileChange()
+                guard let self else { return }
+                let flags = source.data
+                if flags.contains(.delete) || flags.contains(.rename) {
+                    os_log("🟡 File replaced/renamed — restarting monitor: %{public}@",
+                           log: self.logger, type: .debug, url.path)
+                    self.stopDispatchMonitor()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+                        guard let self else { return }
+                        self.startFileMonitoring()
+                        self.reloadFromDisk(url: url)
+                    }
+                    return
+                }
+                self.handleFileChange()
             }
 
             source.setCancelHandler { [weak self] in
@@ -597,42 +625,60 @@ struct MarkdownWebView: NSViewRepresentable {
             source.resume()
             fileMonitor = source
             os_log("🟢 File monitoring started: %{public}@", log: logger, type: .default, url.path)
+
+            startPollingTimer()
         }
 
-        private func stopFileMonitoring() {
+        private func stopDispatchMonitor() {
             fileMonitor?.cancel()
             fileMonitor = nil
         }
 
-        private func handleFileChange() {
-            guard let url = currentFileURL else { return }
+        private func stopFileMonitoring() {
+            stopDispatchMonitor()
+            stopPollingTimer()
+        }
 
-            let flags = fileMonitor?.data ?? []
-            if flags.contains(.delete) || flags.contains(.rename) {
-                os_log("🟡 File deleted/renamed, restarting monitor: %{public}@", log: logger, type: .debug, url.path)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                    self?.startFileMonitoring()
-                    self?.handleFileChange()
-                }
-                return
+        private func startPollingTimer() {
+            stopPollingTimer()
+            pollingTimer = Timer.scheduledTimer(
+                withTimeInterval: pollingInterval,
+                repeats: true
+            ) { [weak self] _ in
+                self?.pollFileForChanges()
             }
+        }
 
+        private func stopPollingTimer() {
+            pollingTimer?.invalidate()
+            pollingTimer = nil
+        }
+
+        private func pollFileForChanges() {
+            guard let url = currentFileURL else { return }
+            guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path) else { return }
+            let newSize = attrs[.size] as? UInt64 ?? 0
+            let newMtime = attrs[.modificationDate] as? Date
+            guard FileMonitorHelpers.shouldReload(
+                newSize: newSize, newMtime: newMtime,
+                knownSize: lastKnownFileSize, knownMtime: lastKnownFileModificationDate
+            ) else { return }
+            os_log("🟢 [poll] File changed, re-rendering: %{public}@", log: logger, type: .default, url.path)
+            reloadFromDisk(url: url)
+        }
+
+        private func reloadFromDisk(url: URL) {
             do {
-                let attributes = try FileManager.default.attributesOfItem(atPath: url.path)
-                let fileSize = attributes[.size] as? UInt64 ?? 0
-                let fileMtime = attributes[.modificationDate] as? Date
-
-                guard fileSize != lastKnownFileSize || fileMtime != lastKnownFileModificationDate else {
-                    os_log("🟡 File event ignored: size/mtime unchanged", log: logger, type: .debug)
-                    return
-                }
-
+                let attrs = try FileManager.default.attributesOfItem(atPath: url.path)
+                let newSize = attrs[.size] as? UInt64 ?? 0
+                let newMtime = attrs[.modificationDate] as? Date
+                guard FileMonitorHelpers.shouldReload(
+                    newSize: newSize, newMtime: newMtime,
+                    knownSize: lastKnownFileSize, knownMtime: lastKnownFileModificationDate
+                ) else { return }
                 let newContent = try String(contentsOf: url, encoding: .utf8)
-                lastKnownFileSize = fileSize
-                lastKnownFileModificationDate = fileMtime
-
-                os_log("🟢 File changed, re-rendering: %{public}@", log: logger, type: .default, url.path)
-
+                lastKnownFileSize = newSize
+                lastKnownFileModificationDate = newMtime
                 guard let webView = currentWebView else { return }
                 executeRender(
                     webView: webView,
@@ -646,9 +692,15 @@ struct MarkdownWebView: NSViewRepresentable {
                     enableEmoji: lastEnableEmoji,
                     codeHighlightTheme: lastCodeHighlightTheme
                 )
+                os_log("🟢 Reloaded from disk: %{public}@", log: logger, type: .default, url.lastPathComponent)
             } catch {
-                os_log("🔴 Failed to read file on change: %{public}@", log: logger, type: .error, error.localizedDescription)
+                os_log("🔴 reloadFromDisk failed: %{public}@", log: logger, type: .error, error.localizedDescription)
             }
+        }
+
+        private func handleFileChange() {
+            guard let url = currentFileURL else { return }
+            reloadFromDisk(url: url)
         }
 
         private func handleLinkClick(href: String) {
