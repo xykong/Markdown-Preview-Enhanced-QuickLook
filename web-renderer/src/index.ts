@@ -1020,4 +1020,8 @@ window.showHelp = function() { if (helpOverlay) helpOverlay.show(); };
 window.hideHelp = function() { if (helpOverlay) helpOverlay.hide(); };
 window.toggleHelp = function() { if (helpOverlay) helpOverlay.toggle(); };
 
+window.addEventListener('afterprint', () => {
+    document.documentElement.style.removeProperty('--print-font-size');
+});
+
 logToSwift("rendererReady");

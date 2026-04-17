@@ -110,7 +110,7 @@ struct MarkdownWebView: NSViewRepresentable {
         var pendingRender: (() -> Void)?
         weak var currentWebView: WKWebView?
         var currentFileURL: URL?
-        var pendingAnchor: String?  // anchor to scroll to after next render
+        var pendingAnchor: String?
 
         // File monitoring
         private var fileMonitor: DispatchSourceFileSystemObject?
@@ -180,7 +180,8 @@ struct MarkdownWebView: NSViewRepresentable {
         }
         
         @objc func handleToggleSearch() {
-            guard let webView = currentWebView else { return }
+            guard let webView = currentWebView,
+                  webView.window?.isKeyWindow == true else { return }
             let js = "window.toggleSearch();"
             webView.evaluateJavaScript(js) { [weak self] _, error in
                 if let error = error {
@@ -190,18 +191,21 @@ struct MarkdownWebView: NSViewRepresentable {
         }
 
         @objc func handleToggleHelp() {
-            guard let webView = currentWebView else { return }
+            guard let webView = currentWebView,
+                  webView.window?.isKeyWindow == true else { return }
             webView.evaluateJavaScript("window.toggleHelp();", completionHandler: nil)
         }
 
         @objc func handleZoomIn() {
-            guard let webView = currentWebView else { return }
+            guard let webView = currentWebView,
+                  webView.window?.isKeyWindow == true else { return }
             webView.pageZoom += 0.1
             AppearancePreference.shared.zoomLevel = webView.pageZoom
         }
 
         @objc func handleZoomOut() {
-            guard let webView = currentWebView else { return }
+            guard let webView = currentWebView,
+                  webView.window?.isKeyWindow == true else { return }
             webView.pageZoom = max(0.5, webView.pageZoom - 0.1)
             AppearancePreference.shared.zoomLevel = webView.pageZoom
         }
@@ -213,7 +217,9 @@ struct MarkdownWebView: NSViewRepresentable {
         }
         
         @objc func handleExportHTML() {
-            guard let webView = currentWebView else { return }
+            guard let webView = currentWebView,
+                  let win = webView.window,
+                  win.isKeyWindow || win.windowController?.document === NSDocumentController.shared.currentDocument else { return }
             exportHTML(webView: webView) { [weak self] htmlString in
                 DispatchQueue.main.async {
                     guard let htmlString = htmlString else {
@@ -237,26 +243,25 @@ struct MarkdownWebView: NSViewRepresentable {
         }
         
         @objc func handleExportPDF() {
-            guard let webView = currentWebView else { return }
-            exportPDF(webView: webView) { [weak self] pdfData in
-                DispatchQueue.main.async {
-                    guard let pdfData = pdfData else {
-                        os_log("exportPDF: received nil data", log: self?.logger ?? .default, type: .error)
-                        return
-                    }
-                    let panel = NSSavePanel()
-                    panel.allowedContentTypes = [.pdf]
-                    panel.nameFieldStringValue = self?.defaultExportFilename(extension: "pdf") ?? "export.pdf"
-                    panel.begin { response in
-                        guard response == .OK, let url = panel.url else { return }
-                        do {
-                            try pdfData.write(to: url, options: .atomic)
-                            os_log("Exported PDF to: %{public}@", log: self?.logger ?? .default, type: .default, url.path)
-                        } catch {
-                            os_log("Failed to write PDF: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
-                        }
-                    }
-                }
+            guard let webView = currentWebView,
+                  let win = webView.window,
+                  win.isKeyWindow || win.windowController?.document === NSDocumentController.shared.currentDocument else { return }
+
+            let effectiveFontSize = AppearancePreference.shared.baseFontSize * webView.pageZoom
+
+            let panel = NSSavePanel()
+            panel.allowedContentTypes = [.pdf]
+            panel.nameFieldStringValue = defaultExportFilename(extension: "pdf")
+            if let fileURL = currentFileURL {
+                panel.directoryURL = fileURL.deletingLastPathComponent()
+            }
+
+            let accessory = PDFFontSizeAccessoryView(initialFontSize: effectiveFontSize)
+            panel.accessoryView = accessory.view
+
+            panel.begin { [weak self] response in
+                guard let self, response == .OK, let saveURL = panel.url else { return }
+                self.exportPDF(webView: webView, to: saveURL, fontSize: accessory.fontSize)
             }
         }
         
@@ -487,99 +492,58 @@ struct MarkdownWebView: NSViewRepresentable {
             }
         }
         
-        func exportPDF(webView: WKWebView, completion: @escaping (Data?) -> Void) {
-            let config = WKPDFConfiguration()
-            webView.createPDF(configuration: config) { result in
-                switch result {
-                case .success(let data):
-                    // Slice the single tall page into multiple A4 pages
-                    let slicedData = self.slicePDFToA4Pages(data: data)
-                    completion(slicedData)
-                case .failure(let error):
-                    os_log("exportPDF error: %{public}@", log: self.logger, type: .error, error.localizedDescription)
-                    completion(nil)
+        func exportPDF(webView: WKWebView, to destinationURL: URL, fontSize: Double? = nil) {
+            guard webView.window != nil else {
+                os_log("exportPDF: webView has no window", log: logger, type: .error)
+                return
+            }
+
+            let resolvedSize = fontSize ?? (AppearancePreference.shared.baseFontSize * webView.pageZoom)
+            let injectJS = "document.documentElement.style.setProperty('--print-font-size', '\(resolvedSize)px');"
+            webView.evaluateJavaScript(injectJS) { [weak self] _, error in
+                if let error = error {
+                    os_log("exportPDF: failed to inject font-size variable: %{public}@",
+                           log: self?.logger ?? .default, type: .error, error.localizedDescription)
+                }
+                self?.runPrintOperation(webView: webView, to: destinationURL)
+            }
+        }
+
+        private func runPrintOperation(webView: WKWebView, to destinationURL: URL) {
+            // Build a fresh NSPrintInfo — do NOT use NSPrintInfo.shared to avoid the
+            // no-printer imageable-area scaling bug.
+            let a4PaperSize = NSSize(width: 595.0, height: 842.0)
+            let printInfo = NSPrintInfo()
+            printInfo.paperSize = a4PaperSize
+            printInfo.horizontalPagination = .fit
+            printInfo.verticalPagination = .automatic
+            printInfo.topMargin    = 0
+            printInfo.bottomMargin = 0
+            printInfo.leftMargin   = 0
+            printInfo.rightMargin  = 0
+            printInfo.isHorizontallyCentered = false
+            printInfo.isVerticallyCentered   = false
+            printInfo.jobDisposition = .save
+            printInfo.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = destinationURL
+
+            let printOperation = webView.printOperation(with: printInfo)
+            printOperation.showsPrintPanel    = false
+            printOperation.showsProgressPanel = false
+            printOperation.view?.frame = NSRect(origin: .zero, size: a4PaperSize)
+
+            let log = self.logger
+            DispatchQueue.global(qos: .userInitiated).async {
+                let success = printOperation.run()
+                DispatchQueue.main.async {
+                    if success {
+                        os_log("Exported PDF to: %{public}@", log: log, type: .default, destinationURL.path)
+                    } else {
+                        os_log("exportPDF: NSPrintOperation.run() failed", log: log, type: .error)
+                    }
                 }
             }
         }
-        
-        /// Slices a single tall PDF page into multiple A4-sized pages
-        private func slicePDFToA4Pages(data: Data) -> Data? {
-            guard let provider = CGDataProvider(data: data as CFData),
-                  let pdfDoc = CGPDFDocument(provider),
-                  let singlePage = pdfDoc.page(at: 1) else {
-                os_log("slicePDFToA4Pages: Failed to read PDF", log: logger, type: .error)
-                return nil
-            }
-            
-            let originalBounds = singlePage.getBoxRect(.mediaBox)
-            
-            // A4 dimensions in points (595 x 842)
-            let a4Height: CGFloat = 842
-            let a4Width: CGFloat = 595
-            
-            // If content fits on one A4 page, return as-is
-            if originalBounds.height <= a4Height && originalBounds.width <= a4Width {
-                return data
-            }
-            
-            // Calculate scale factor to fit width to A4
-            let scaleFactor = a4Width / originalBounds.width
-            let scaledHeight = originalBounds.height * scaleFactor
-            
-            let outputData = NSMutableData()
-            guard let consumer = CGDataConsumer(data: outputData as CFMutableData),
-                  let context = CGContext(consumer: consumer, mediaBox: nil, nil) else {
-                os_log("slicePDFToA4Pages: Failed to create PDF context", log: logger, type: .error)
-                return nil
-            }
-            
-            // Work in OUTPUT coordinates, from TOP to BOTTOM
-            // PDF coordinates: y=0 is BOTTOM, y=height is TOP
-            var currentTop = scaledHeight
-            var pageNum = 0
-            
-            while currentTop > 0 {
-                // CRITICAL FIX: Do NOT use max(..., 0) here. 
-                // Always subtract exactly one full A4 height.
-                // If it goes negative on the last page, it correctly pushes 
-                // the remaining short content to the TOP of the final A4 page.
-                let sliceBottom = currentTop - a4Height
-                
-                // Convert to original coordinates for the translation
-                let origBottom = sliceBottom / scaleFactor
-                let origTop = currentTop / scaleFactor
-                
-                os_log("slicePDF: Page %d - output[%.1f, %.1f] -> original[%.1f, %.1f]", 
-                       log: logger, type: .default, pageNum + 1, sliceBottom, currentTop, origBottom, origTop)
-                
-                var mediaBox = CGRect(x: 0, y: 0, width: a4Width, height: a4Height)
-                context.beginPage(mediaBox: &mediaBox)
-                
-                context.saveGState()
-                
-                // Scale then translate
-                // This maps the region [origBottom, origTop] in the original document
-                // to exactly fill the [0, a4Height] media box.
-                let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
-                    .translatedBy(x: 0, y: -origBottom)
-                
-                context.concatenate(transform)
-                context.drawPDFPage(singlePage)
-                
-                context.restoreGState()
-                context.endPage()
-                
-                currentTop = sliceBottom
-                pageNum += 1
-            }
-            
-            context.closePDF()
-            
-            os_log("slicePDFToA4Pages: Created %d pages from original height %.0f", log: logger, type: .default, pageNum, originalBounds.height)
-            
-            return outputData as Data
-        }
-        
+
         private func startFileMonitoring() {
             stopFileMonitoring()
 
@@ -840,6 +804,55 @@ class ResizableWKWebView: WKWebView {
 
 
 /// Thread-safe store for pending anchor fragments.
+// MARK: - PDF Export Accessory View
+
+final class PDFFontSizeAccessoryView {
+    let view: NSView
+    private let slider: NSSlider
+    private let valueLabel: NSTextField
+
+    var fontSize: Double { slider.doubleValue }
+
+    init(initialFontSize: Double) {
+        let clamped = max(8, min(72, initialFontSize))
+
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: 380, height: 40))
+
+        let title = NSTextField(labelWithString: NSLocalizedString("Font Size:", comment: ""))
+        title.frame = NSRect(x: 16, y: 11, width: 76, height: 18)
+        title.alignment = .right
+
+        let sl = NSSlider(frame: NSRect(x: 100, y: 10, width: 200, height: 20))
+        sl.minValue = 8
+        sl.maxValue = 72
+        sl.doubleValue = clamped
+        sl.numberOfTickMarks = 0
+        sl.allowsTickMarkValuesOnly = false
+        sl.isContinuous = true
+
+        let valLabel = NSTextField(labelWithString: "\(Int(clamped)) px")
+        valLabel.frame = NSRect(x: 308, y: 11, width: 56, height: 18)
+        valLabel.alignment = .left
+
+        container.addSubview(title)
+        container.addSubview(sl)
+        container.addSubview(valLabel)
+
+        self.slider     = sl
+        self.valueLabel = valLabel
+        self.view       = container
+
+        sl.target = self
+        sl.action = #selector(sliderChanged(_:))
+    }
+
+    @objc private func sliderChanged(_ sender: NSSlider) {
+        valueLabel.stringValue = "\(Int(sender.doubleValue)) px"
+    }
+}
+
+// MARK: - Pending Anchor Store
+
 /// When the app opens a cross-file md link with an anchor (e.g. `notes.md#section`),
 /// the anchor is stored here keyed by file path. The target window's renderer
 /// consumes and clears it after the first successful render.

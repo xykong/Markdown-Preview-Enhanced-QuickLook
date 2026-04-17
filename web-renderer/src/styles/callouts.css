@@ -157,29 +157,9 @@
         transform: none !important;
     }
 
-    body {
-        font-size: 12pt;
-        line-height: 1.6;
-    }
-
     pre,
     code {
         break-inside: avoid;
         page-break-inside: avoid;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-        break-after: avoid;
-        page-break-after: avoid;
-    }
-
-    a[href]::after {
-        content: " (" attr(href) ")";
-        font-size: 0.85em;
-        color: #555;
-    }
-
-    a[href^="#"]::after {
-        content: "";
     }
 }

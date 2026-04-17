@@ -56,12 +56,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        // Flush any debounced preference writes before exit
         AppearancePreference.shared.flushSharedPreferences()
     }
 }
 
-@main
 struct MarkdownApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @ObservedObject var preference = AppearancePreference.shared

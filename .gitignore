@@ -85,3 +85,9 @@ release_notes_tmp.md
 
 # Playwright MCP (temporary)
 .playwright-mcp/
+
+# OpenSpec/Superpowers session plans
+docs/superpowers/
+
+# Test PDF exports (from manual export testing)
+README*.pdf
