@@ -494,61 +494,33 @@ async function renderGraphvizDiagrams(container: HTMLElement): Promise<void> {
     }
 }
 
-// Store loaded CSS text so exportHTML can use it synchronously
 let cachedCssText = '';
 
-async function preloadStylesheets() {
-    cachedCssText = '';
-    
-    // Grab all <style> tags (like Vite's dev injected styles)
-    const styleTags = document.querySelectorAll('style');
-    styleTags.forEach(tag => {
-        if (tag.innerHTML && !cachedCssText.includes(tag.innerHTML)) {
-            cachedCssText += tag.innerHTML + '\n';
-        }
-    });
-
-    // Fetch external stylesheets
-    const links = document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]');
-    for (let i = 0; i < links.length; i++) {
-        const link = links[i];
+function collectStylesheetRules(): string {
+    let css = '';
+    for (const sheet of Array.from(document.styleSheets)) {
         try {
-            const response = await fetch(link.href);
-            if (response.ok) {
-                cachedCssText += await response.text() + '\n';
+            if (sheet.cssRules) {
+                for (const rule of Array.from(sheet.cssRules)) {
+                    if (!css.includes(rule.cssText)) {
+                        css += rule.cssText + '\n';
+                    }
+                }
             }
-        } catch (err) {
-            logToSwift(`Warning: Could not fetch stylesheet ${link.href}: ${err}`);
+        } catch (_e) {
         }
     }
+    return css;
 }
 
-// Call this early
+function preloadStylesheets() {
+    cachedCssText = collectStylesheetRules();
+}
+
 setTimeout(preloadStylesheets, 500);
 
 window.exportHTML = function(): string {
-    // Collect all CSS rules into a single string
-    let cssText = cachedCssText;
-    
-    // Also try to get any runtime CSS rules just in case
-    try {
-        const sheets = Array.from(document.styleSheets);
-        for (const sheet of sheets) {
-            try {
-                if (sheet.cssRules) {
-                    for (const rule of Array.from(sheet.cssRules)) {
-                        if (!cssText.includes(rule.cssText)) {
-                            cssText += rule.cssText + '\n';
-                        }
-                    }
-                }
-            } catch (e) {
-                // Ignore CORS or access errors for cross-origin stylesheets
-            }
-        }
-    } catch (e) {
-        logToSwift(`Warning: Could not read stylesheets: ${e}`);
-    }
+    let cssText = collectStylesheetRules();
 
     // Get the core rendered markdown content
     const previewDiv = document.getElementById('markdown-preview');
@@ -629,6 +601,10 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
     applyCodeTheme(options.codeHighlightTheme || 'default');
 
     if (options.baseUrl) {
+        document.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]').forEach(link => {
+            link.setAttribute('href', link.href);
+        });
+
         let existingBase = document.querySelector('base');
         if (!existingBase) {
             existingBase = document.createElement('base');
