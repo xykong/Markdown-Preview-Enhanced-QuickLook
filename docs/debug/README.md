@@ -9,3 +9,4 @@ This directory contains deep-dive debugging notes and incident writeups.
 - Percent-encoded link navigation: [`DEBUG_PERCENT_ENCODED_LINK_NAVIGATION.md`](DEBUG_PERCENT_ENCODED_LINK_NAVIGATION.md)
 - Preview loading issue: [`DEBUG_PREVIEW_LOADING_ISSUE.md`](DEBUG_PREVIEW_LOADING_ISSUE.md)
 - QuickLook window shrink: [`DEBUG_QUICKLOOK_WINDOW_SHRINK.md`](DEBUG_QUICKLOOK_WINDOW_SHRINK.md)
+- Issue #19 CSS base URL / macOS 26 Tahoe 样式丢失: [`DEBUG_ISSUE19_CSS_BASE_URL.md`](DEBUG_ISSUE19_CSS_BASE_URL.md)
