@@ -419,6 +419,65 @@ echo "    4. git push origin master"
 
 ---
 
+## 阶段 4: Issue 回复规范
+
+### 4.1 核心原则
+
+| 规则 | 说明 |
+|------|------|
+| **语言匹配** | **永远用 issue 的语言回复**。英文 issue → 英文回复；中文 issue → 中文回复。无需询问。 |
+| **不关闭 issue** | 只添加 `done` 标签 + 回复。由 issue 作者决定是否关闭。 |
+| **不重复打开** | 若 issue 被误关闭，先 reopen，再补标签和回复。 |
+
+### 4.2 已修复 Issue 的处理流程
+
+```bash
+# 1. 确认修复已包含在已发布版本中
+git tag --contains <fix-commit>  # 确认 tag 存在
+gh release view v<VERSION>       # 确认 release 已发布
+
+# 2. 添加 done 标签
+gh issue edit <NUMBER> --add-label "done"
+
+# 3. 用 issue 的语言回复（英文或中文，见模板）
+gh issue comment <NUMBER> --body "..."
+
+# 禁止执行:
+# gh issue close <NUMBER>
+```
+
+### 4.3 回复模板
+
+**英文 issue**:
+```
+Fixed in [vX.Y.Z](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z).
+
+**What changed:**
+- [specific fix relevant to this issue]
+
+**To update:**
+\`\`\`bash
+brew update && brew upgrade --cask flux-markdown
+\`\`\`
+Or download the DMG from the [Releases page](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z).
+```
+
+**中文 issue**:
+```
+已在 [vX.Y.Z](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z) 中修复。
+
+**修复内容：**
+- [与此 issue 相关的具体修复]
+
+**更新方式：**
+\`\`\`bash
+brew update && brew upgrade --cask flux-markdown
+\`\`\`
+或从 [Releases 页面](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z) 直接下载 DMG。
+```
+
+---
+
 ## 参考资料
 
 - [Keep a Changelog](https://keepachangelog.com/)

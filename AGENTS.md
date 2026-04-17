@@ -66,6 +66,56 @@ macOS QuickLook extension for Markdown files. Hybrid architecture: Native Swift 
 - **Docs**: Create `docs/debug/DEBUG_*.md` for hard problems.
 - **Logs**: Use `os_log` via the JS bridge. Do not rely on `console.log` alone.
 
+## GITHUB ISSUE MANAGEMENT
+
+### Replying to Issues
+- **Language**: Always reply in the same language as the issue. English issue → English reply. Chinese issue → Chinese reply. Never reply in a different language.
+- **Label `done`**: When a fix is confirmed released, add the `done` label and post a reply linking the release. Do NOT close the issue — the reporter closes it.
+- **Reply format** (confirmed fix):
+  - State which version fixed it and link to the release tag.
+  - List the specific fixes relevant to that issue.
+  - Provide update instructions (Homebrew + DMG link).
+- **No closing issues**: Only add `done` label + comment. The issue author decides when to close.
+
+### Workflow for Closing Out Fixed Issues
+```bash
+# 1. Add done label
+gh issue edit <NUMBER> --add-label "done"
+
+# 2. Post reply (in the issue's language)
+gh issue comment <NUMBER> --body "..."
+
+# DO NOT run: gh issue close <NUMBER>
+```
+
+### Issue Reply Template (English)
+```
+Fixed in [vX.Y.Z](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z).
+
+**What changed:**
+- [specific fix relevant to this issue]
+
+**To update:**
+\`\`\`bash
+brew update && brew upgrade --cask flux-markdown
+\`\`\`
+Or download the DMG from the [Releases page](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z).
+```
+
+### Issue Reply Template (Chinese)
+```
+已在 [vX.Y.Z](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z) 中修复。
+
+**修复内容：**
+- [与此 issue 相关的具体修复]
+
+**更新方式：**
+\`\`\`bash
+brew update && brew upgrade --cask flux-markdown
+\`\`\`
+或从 [Releases 页面](https://github.com/xykong/flux-markdown/releases/tag/vX.Y.Z) 直接下载 DMG。
+```
+
 ## ANTI-PATTERNS
 - **Never commit .xcodeproj**: It is generated.
 - **No manual build numbers**: Use `make` or scripts.
