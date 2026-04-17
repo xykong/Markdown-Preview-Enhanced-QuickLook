@@ -205,7 +205,7 @@ struct MarkdownWebView: NSViewRepresentable {
         @objc func handleExportHTML() {
             guard let webView = currentWebView,
                   let win = webView.window,
-                  win.isKeyWindow || win == NSApp.mainWindow else { return }
+                  win.isKeyWindow || win.windowController?.document === NSDocumentController.shared.currentDocument else { return }
             exportHTML(webView: webView) { [weak self] htmlString in
                 DispatchQueue.main.async {
                     guard let htmlString = htmlString else {
@@ -231,7 +231,7 @@ struct MarkdownWebView: NSViewRepresentable {
         @objc func handleExportPDF() {
             guard let webView = currentWebView,
                   let win = webView.window,
-                  win.isKeyWindow || win == NSApp.mainWindow else { return }
+                  win.isKeyWindow || win.windowController?.document === NSDocumentController.shared.currentDocument else { return }
             
             let panel = NSSavePanel()
             panel.allowedContentTypes = [.pdf]
@@ -472,99 +472,46 @@ struct MarkdownWebView: NSViewRepresentable {
             }
         }
         
-        private static let a4WidthPt:        CGFloat = 595.28
-        private static let a4HeightPt:       CGFloat = 841.89
-        private static let sideMarginPt:     CGFloat = 20.0
-        private static var a4ContentWidthPt: CGFloat { a4WidthPt - 2 * sideMarginPt }
-
         func exportPDF(webView: WKWebView, to destinationURL: URL) {
-            let originalFrame = webView.frame
-            let renderFrame = CGRect(x: originalFrame.origin.x, y: originalFrame.origin.y,
-                                     width: Self.a4ContentWidthPt,
-                                     height: max(originalFrame.height, 20_000))
-            webView.frame = renderFrame
+            // Build a fresh NSPrintInfo — do NOT use NSPrintInfo.shared to avoid the
+            // no-printer imageable-area scaling bug.
+            let a4PaperSize = NSSize(width: 595.0, height: 842.0)
+            let printInfo = NSPrintInfo()
+            printInfo.paperSize = a4PaperSize
+            printInfo.horizontalPagination = .fit
+            printInfo.verticalPagination = .automatic
+            printInfo.topMargin    = 0
+            printInfo.bottomMargin = 0
+            printInfo.leftMargin   = 0
+            printInfo.rightMargin  = 0
+            printInfo.isHorizontallyCentered = false
+            printInfo.isVerticallyCentered   = false
+            printInfo.jobDisposition = .save
+            printInfo.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = destinationURL
 
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-                guard let self else { return }
-                let config = WKPDFConfiguration()
-                webView.createPDF(configuration: config) { [weak self] result in
-                    DispatchQueue.main.async { webView.frame = originalFrame }
-                    guard let self else { return }
-                    switch result {
-                    case .failure(let error):
-                        os_log("exportPDF createPDF error: %{public}@",
-                               log: self.logger, type: .error, error.localizedDescription)
-                    case .success(let pdfData):
-                        guard let sliced = self.slicePDFToA4Pages(data: pdfData) else {
-                            os_log("exportPDF: slicePDFToA4Pages returned nil", log: self.logger, type: .error)
-                            return
-                        }
-                        do {
-                            try sliced.write(to: destinationURL, options: .atomic)
-                            os_log("Exported PDF to: %{public}@",
-                                   log: self.logger, type: .default, destinationURL.path)
-                        } catch {
-                            os_log("exportPDF write error: %{public}@",
-                                   log: self.logger, type: .error, error.localizedDescription)
-                        }
+            guard webView.window != nil else {
+                os_log("exportPDF: webView has no window", log: logger, type: .error)
+                return
+            }
+
+            let printOperation = webView.printOperation(with: printInfo)
+            printOperation.showsPrintPanel   = false
+            printOperation.showsProgressPanel = false
+            printOperation.view?.frame = NSRect(origin: .zero, size: a4PaperSize)
+
+            let log = self.logger
+            DispatchQueue.global(qos: .userInitiated).async {
+                let success = printOperation.run()
+                DispatchQueue.main.async {
+                    if success {
+                        os_log("Exported PDF to: %{public}@", log: log, type: .default, destinationURL.path)
+                    } else {
+                        os_log("exportPDF: NSPrintOperation.run() failed", log: log, type: .error)
                     }
                 }
             }
         }
 
-        private func slicePDFToA4Pages(data: Data) -> Data? {
-            guard let provider = CGDataProvider(data: data as CFData),
-                  let srcDoc   = CGPDFDocument(provider),
-                  let srcPage  = srcDoc.page(at: 1) else {
-                os_log("slicePDFToA4Pages: failed to open source PDF", log: logger, type: .error)
-                return nil
-            }
-
-            let srcBounds = srcPage.getBoxRect(.mediaBox)
-            let scale     = Self.a4ContentWidthPt / srcBounds.width
-            let scaledTotalHeight = srcBounds.height * scale
-
-            // No top/bottom margin: each page strip fills the full A4 height.
-            // This produces seamless content flow when viewed in continuous-scroll mode.
-            let pageH     = Self.a4HeightPt
-            let pageCount = Int(ceil(scaledTotalHeight / pageH))
-
-            let a4W        = Self.a4WidthPt
-            let sideMargin = Self.sideMarginPt
-
-            let outputData = NSMutableData()
-            var mediaBox = CGRect(x: 0, y: 0, width: a4W, height: pageH)
-            guard let consumer = CGDataConsumer(data: outputData as CFMutableData),
-                  let ctx = CGContext(consumer: consumer, mediaBox: &mediaBox, nil) else {
-                os_log("slicePDFToA4Pages: failed to create output context", log: logger, type: .error)
-                return nil
-            }
-
-            for pageIndex in 0 ..< pageCount {
-                // CGContext y=0 is bottom. We slice the scaled source from top to bottom.
-                // stripTopInScaled: distance from top of scaled doc to start of this slice.
-                // srcStripBottomY: corresponding y in unscaled src coords (y=0 at bottom).
-                let stripTopInScaled    = CGFloat(pageIndex) * pageH
-                let stripBottomInScaled = min(stripTopInScaled + pageH, scaledTotalHeight)
-                let srcStripBottomY     = (scaledTotalHeight - stripBottomInScaled) / scale
-
-                let pageBox = CGRect(x: 0, y: 0, width: a4W, height: pageH)
-                ctx.beginPDFPage(["MediaBox": pageBox] as CFDictionary)
-                ctx.clip(to: CGRect(x: sideMargin, y: 0,
-                                    width: Self.a4ContentWidthPt, height: pageH))
-                ctx.saveGState()
-                ctx.translateBy(x: sideMargin, y: 0)
-                ctx.scaleBy(x: scale, y: scale)
-                ctx.translateBy(x: 0, y: -srcStripBottomY)
-                ctx.drawPDFPage(srcPage)
-                ctx.restoreGState()
-                ctx.endPDFPage()
-            }
-
-            ctx.closePDF()
-            return outputData as Data
-        }
-        
         private func startFileMonitoring() {
             stopFileMonitoring()
 
