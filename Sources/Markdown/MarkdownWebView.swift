@@ -233,7 +233,7 @@ struct MarkdownWebView: NSViewRepresentable {
                   let win = webView.window,
                   win.isKeyWindow || win.windowController?.document === NSDocumentController.shared.currentDocument else { return }
 
-            let defaultFontSize = AppearancePreference.shared.baseFontSize
+            let effectiveFontSize = AppearancePreference.shared.baseFontSize * webView.pageZoom
 
             let panel = NSSavePanel()
             panel.allowedContentTypes = [.pdf]
@@ -242,7 +242,7 @@ struct MarkdownWebView: NSViewRepresentable {
                 panel.directoryURL = fileURL.deletingLastPathComponent()
             }
 
-            let accessory = PDFFontSizeAccessoryView(initialFontSize: defaultFontSize)
+            let accessory = PDFFontSizeAccessoryView(initialFontSize: effectiveFontSize)
             panel.accessoryView = accessory.view
 
             panel.begin { [weak self] response in
@@ -484,7 +484,7 @@ struct MarkdownWebView: NSViewRepresentable {
                 return
             }
 
-            let resolvedSize = fontSize ?? AppearancePreference.shared.baseFontSize
+            let resolvedSize = fontSize ?? (AppearancePreference.shared.baseFontSize * webView.pageZoom)
             let injectJS = "document.documentElement.style.setProperty('--print-font-size', '\(resolvedSize)px');"
             webView.evaluateJavaScript(injectJS) { [weak self] _, error in
                 if let error = error {
