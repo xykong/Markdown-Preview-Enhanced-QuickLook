@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Preview</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #ffffff; /* Default light */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+        }
+        
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: #0d1117;
+                color: #c9d1d9;
+            }
+        }
+
+        .markdown-body {
+            box-sizing: border-box;
+            min-width: 200px;
+            max-width: none;
+            margin: 0 auto;
+            padding: 45px;
+        }
+
+        @media (max-width: 767px) {
+            .markdown-body {
+                padding: 15px;
+            }
+        }
+        
+        #loading-status {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #586069;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            #loading-status {
+                color: #8b949e;
+            }
+        }
+
+        /* Link status bar — shown on hover when display text ≠ href */
+        #link-status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            max-width: 60%;
+            padding: 0 10px;
+            height: 22px;
+            line-height: 22px;
+            font-size: 11px;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Mono", "Menlo", monospace;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.12s ease;
+            z-index: 9999;
+            border-top-right-radius: 4px;
+            /* Light theme */
+            background: rgba(246, 248, 250, 0.93);
+            color: #24292f;
+            border-top: 1px solid rgba(0, 0, 0, 0.12);
+            border-right: 1px solid rgba(0, 0, 0, 0.12);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+        }
+
+        #link-status-bar.visible {
+            opacity: 1;
+        }
+
+        #link-status-bar .status-icon {
+            margin-right: 4px;
+            opacity: 0.7;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            #link-status-bar {
+                background: rgba(22, 27, 34, 0.93);
+                color: #c9d1d9;
+                border-top-color: rgba(255, 255, 255, 0.1);
+                border-right-color: rgba(255, 255, 255, 0.1);
+            }
+        }
+    </style>
+  <script type="module"  src="./assets/index-Ckxmcm85.js"></script>
+  <link rel="modulepreload"  href="./assets/mermaid-BwOw_mi0.js">
+  <link rel="stylesheet"  href="./assets/index-Dt45TuVj.css">
+</head>
+<body>
+    <div id="loading-status">Loading renderer...</div>
+    <div id="toc-container"></div>
+    <div id="search-container"></div>
+    <div id="markdown-preview" class="markdown-body"></div>
+    <div id="link-status-bar" aria-hidden="true"></div>
+</body>
+</html>

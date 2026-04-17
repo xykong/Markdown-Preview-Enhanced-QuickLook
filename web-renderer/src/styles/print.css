@@ -1,6 +1,6 @@
 @media print {
   @page {
-    margin: 0;
+    margin: 15mm 15mm 15mm 15mm;
     size: A4 portrait;
   }
 
@@ -13,6 +13,12 @@
   h1, h2, h3, h4, h5, h6 {
     page-break-after: avoid;
     page-break-inside: avoid;
+  }
+
+  p, li, blockquote {
+    page-break-inside: avoid;
+    orphans: 3;
+    widows: 3;
   }
 
   /*
