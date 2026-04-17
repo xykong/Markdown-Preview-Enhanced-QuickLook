@@ -122,11 +122,12 @@ final class CLIExporter: NSObject {
         }
         let safeArg = String(jsonArray.dropFirst().dropLast())
 
+        let fontSize = AppearancePreference.shared.baseFontSize
         let options: [String: Any] = [
             "context":            "app",
             "baseUrl":            inputURL.deletingLastPathComponent().path,
             "theme":              "light",
-            "fontSize":           16,
+            "fontSize":           fontSize,
             "codeHighlightTheme": "default",
             "enableMermaid":      true,
             "enableKatex":        true,
@@ -155,6 +156,14 @@ final class CLIExporter: NSObject {
     private func capturePDF() {
         fputs("Capturing PDF via NSPrintOperation…\n", stderr)
 
+        let fontSize = AppearancePreference.shared.baseFontSize
+        let injectJS = "document.documentElement.style.setProperty('--print-font-size', '\(fontSize)px');"
+        webView.evaluateJavaScript(injectJS) { [weak self] _, _ in
+            self?.runPrintOperation()
+        }
+    }
+
+    private func runPrintOperation() {
         let a4PaperSize = NSSize(width: 595.0, height: 842.0)
         let printInfo = NSPrintInfo()
         printInfo.paperSize = a4PaperSize

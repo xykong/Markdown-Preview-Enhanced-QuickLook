@@ -232,16 +232,22 @@ struct MarkdownWebView: NSViewRepresentable {
             guard let webView = currentWebView,
                   let win = webView.window,
                   win.isKeyWindow || win.windowController?.document === NSDocumentController.shared.currentDocument else { return }
-            
+
+            let defaultFontSize = AppearancePreference.shared.baseFontSize
+
             let panel = NSSavePanel()
             panel.allowedContentTypes = [.pdf]
             panel.nameFieldStringValue = defaultExportFilename(extension: "pdf")
             if let fileURL = currentFileURL {
                 panel.directoryURL = fileURL.deletingLastPathComponent()
             }
+
+            let accessory = PDFFontSizeAccessoryView(initialFontSize: defaultFontSize)
+            panel.accessoryView = accessory.view
+
             panel.begin { [weak self] response in
                 guard let self, response == .OK, let saveURL = panel.url else { return }
-                self.exportPDF(webView: webView, to: saveURL)
+                self.exportPDF(webView: webView, to: saveURL, fontSize: accessory.fontSize)
             }
         }
         
@@ -472,7 +478,24 @@ struct MarkdownWebView: NSViewRepresentable {
             }
         }
         
-        func exportPDF(webView: WKWebView, to destinationURL: URL) {
+        func exportPDF(webView: WKWebView, to destinationURL: URL, fontSize: Double? = nil) {
+            guard webView.window != nil else {
+                os_log("exportPDF: webView has no window", log: logger, type: .error)
+                return
+            }
+
+            let resolvedSize = fontSize ?? AppearancePreference.shared.baseFontSize
+            let injectJS = "document.documentElement.style.setProperty('--print-font-size', '\(resolvedSize)px');"
+            webView.evaluateJavaScript(injectJS) { [weak self] _, error in
+                if let error = error {
+                    os_log("exportPDF: failed to inject font-size variable: %{public}@",
+                           log: self?.logger ?? .default, type: .error, error.localizedDescription)
+                }
+                self?.runPrintOperation(webView: webView, to: destinationURL)
+            }
+        }
+
+        private func runPrintOperation(webView: WKWebView, to destinationURL: URL) {
             // Build a fresh NSPrintInfo — do NOT use NSPrintInfo.shared to avoid the
             // no-printer imageable-area scaling bug.
             let a4PaperSize = NSSize(width: 595.0, height: 842.0)
@@ -489,13 +512,8 @@ struct MarkdownWebView: NSViewRepresentable {
             printInfo.jobDisposition = .save
             printInfo.dictionary()[NSPrintInfo.AttributeKey.jobSavingURL] = destinationURL
 
-            guard webView.window != nil else {
-                os_log("exportPDF: webView has no window", log: logger, type: .error)
-                return
-            }
-
             let printOperation = webView.printOperation(with: printInfo)
-            printOperation.showsPrintPanel   = false
+            printOperation.showsPrintPanel    = false
             printOperation.showsProgressPanel = false
             printOperation.view?.frame = NSRect(origin: .zero, size: a4PaperSize)
 
@@ -734,6 +752,55 @@ class ResizableWKWebView: WKWebView {
 
 
 /// Thread-safe store for pending anchor fragments.
+// MARK: - PDF Export Accessory View
+
+final class PDFFontSizeAccessoryView {
+    let view: NSView
+    private let slider: NSSlider
+    private let valueLabel: NSTextField
+
+    var fontSize: Double { slider.doubleValue }
+
+    init(initialFontSize: Double) {
+        let clamped = max(8, min(72, initialFontSize))
+
+        let container = NSView(frame: NSRect(x: 0, y: 0, width: 380, height: 40))
+
+        let title = NSTextField(labelWithString: NSLocalizedString("Font Size:", comment: ""))
+        title.frame = NSRect(x: 16, y: 11, width: 76, height: 18)
+        title.alignment = .right
+
+        let sl = NSSlider(frame: NSRect(x: 100, y: 10, width: 200, height: 20))
+        sl.minValue = 8
+        sl.maxValue = 72
+        sl.doubleValue = clamped
+        sl.numberOfTickMarks = 0
+        sl.allowsTickMarkValuesOnly = false
+        sl.isContinuous = true
+
+        let valLabel = NSTextField(labelWithString: "\(Int(clamped)) px")
+        valLabel.frame = NSRect(x: 308, y: 11, width: 56, height: 18)
+        valLabel.alignment = .left
+
+        container.addSubview(title)
+        container.addSubview(sl)
+        container.addSubview(valLabel)
+
+        self.slider     = sl
+        self.valueLabel = valLabel
+        self.view       = container
+
+        sl.target = self
+        sl.action = #selector(sliderChanged(_:))
+    }
+
+    @objc private func sliderChanged(_ sender: NSSlider) {
+        valueLabel.stringValue = "\(Int(sender.doubleValue)) px"
+    }
+}
+
+// MARK: - Pending Anchor Store
+
 /// When the app opens a cross-file md link with an anchor (e.g. `notes.md#section`),
 /// the anchor is stored here keyed by file path. The target window's renderer
 /// consumes and clears it after the first successful render.
