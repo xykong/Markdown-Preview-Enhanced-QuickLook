@@ -204,7 +204,8 @@ struct MarkdownWebView: NSViewRepresentable {
         
         @objc func handleExportHTML() {
             guard let webView = currentWebView,
-                  webView.window?.isKeyWindow == true else { return }
+                  let win = webView.window,
+                  win.isKeyWindow || win == NSApp.mainWindow else { return }
             exportHTML(webView: webView) { [weak self] htmlString in
                 DispatchQueue.main.async {
                     guard let htmlString = htmlString else {
@@ -229,7 +230,8 @@ struct MarkdownWebView: NSViewRepresentable {
         
         @objc func handleExportPDF() {
             guard let webView = currentWebView,
-                  webView.window?.isKeyWindow == true else { return }
+                  let win = webView.window,
+                  win.isKeyWindow || win == NSApp.mainWindow else { return }
             
             let panel = NSSavePanel()
             panel.allowedContentTypes = [.pdf]
