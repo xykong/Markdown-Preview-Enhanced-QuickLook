@@ -1020,34 +1020,8 @@ window.showHelp = function() { if (helpOverlay) helpOverlay.show(); };
 window.hideHelp = function() { if (helpOverlay) helpOverlay.hide(); };
 window.toggleHelp = function() { if (helpOverlay) helpOverlay.toggle(); };
 
-// Apply --print-font-size CSS variable to #markdown-preview just before printing.
-// This fires synchronously before the print layout snapshot, so the font size
-// value set via evaluateJavaScript('...setProperty(--print-font-size, Xpx)') is
-// guaranteed to be picked up — avoiding the timing race with NSPrintOperation.
-let _prePrintFontSize: string | null = null;
-
-window.addEventListener('beforeprint', () => {
-    const size = getComputedStyle(document.documentElement)
-        .getPropertyValue('--print-font-size')
-        .trim();
-    if (size) {
-        const outputDiv = document.getElementById('markdown-preview');
-        if (outputDiv) {
-            _prePrintFontSize = outputDiv.style.fontSize;
-            outputDiv.style.fontSize = size;
-            logToSwift(`[Print] Applied font-size: ${size} to #markdown-preview`);
-        }
-    }
-});
-
 window.addEventListener('afterprint', () => {
-    if (_prePrintFontSize !== null) {
-        const outputDiv = document.getElementById('markdown-preview');
-        if (outputDiv) {
-            outputDiv.style.fontSize = _prePrintFontSize;
-        }
-        _prePrintFontSize = null;
-    }
+    document.documentElement.style.removeProperty('--print-font-size');
 });
 
 logToSwift("rendererReady");
