@@ -47,7 +47,9 @@ macOS QuickLook extension for Markdown files. Hybrid architecture: Native Swift 
 | **Rendering** | `web-renderer/src/index.ts` | Markdown parsing (see subdir AGENTS.md). |
 | **Rules** | `.clinerules` | TDD & Doc-first requirements. |
 | **Release Process** | `docs/release/RELEASE_PROCESS.md` | Complete PR handling and release workflow. |
-| **Homebrew Cask** | `../homebrew-tap/Casks/flux-markdown.rb` | Update version & SHA256 after each release. |
+| **Homebrew Cask (tap)** | `../homebrew-tap/Casks/flux-markdown.rb` | Full-featured version. Updated automatically by `update-homebrew-cask.sh`. |
+| **Homebrew Cask (official)** | `../homebrew-tap/Casks/flux-markdown-official.rb` | Official-compliant draft for homebrew/homebrew-cask submission. No formula deps. |
+| **Homebrew Submission Guide** | `docs/release/HOMEBREW_SUBMISSION.md` | How to submit and maintain the official cask. |
 
 ## ARCHITECTURE & PATTERNS
 - **Hybrid Bridge**: Swift loads `index.html`, calls `window.renderMarkdown(content)`. JS logs back via `window.webkit.messageHandlers.logger`.
@@ -57,9 +59,9 @@ macOS QuickLook extension for Markdown files. Hybrid architecture: Native Swift 
 - **Release Flow**: 
   1. **PR Merged**: Run `./scripts/analyze-pr.sh <PR_NUMBER>` to generate CHANGELOG entry, add to `[Unreleased]` section.
   2. **Release**: Run `make release [major|minor|patch]` → Updates `.version`, `CHANGELOG.md`, builds DMG, creates GitHub release.
-  3. **Homebrew**: Run `./scripts/update-homebrew-cask.sh <VERSION>` to update Homebrew Cask automatically.
+  3. **Homebrew**: Run `./scripts/update-homebrew-cask.sh` to update both tap and official cask files automatically.
   4. See `docs/release/RELEASE_PROCESS.md` for complete workflow.
-- **Homebrew Distribution**: After release, run `./scripts/update-homebrew-cask.sh <VERSION>` or manually update `../homebrew-tap/Casks/flux-markdown.rb`.
+- **Homebrew Distribution**: Two tracks — tap version (full features) and official homebrew-cask (compliant, no formula deps). See `docs/release/HOMEBREW_SUBMISSION.md`.
 
 ## CONVENTIONS
 - **TDD**: Write tests/metrics *before* implementation (see `.clinerules`).
@@ -130,5 +132,6 @@ make release [major|minor|patch] # Release new version
 ./install.sh                     # Build & install locally (clears QL cache)
 log stream --predicate 'subsystem == "com.markdownquicklook.app"' --level debug
 ./scripts/analyze-pr.sh <PR_NUM> # Analyze PR and generate CHANGELOG entry
-./scripts/update-homebrew-cask.sh <VERSION> # Update Homebrew Cask
+./scripts/update-homebrew-cask.sh # Update both tap and official Homebrew Cask
+./scripts/submit-to-homebrew.sh   # Submit official cask to homebrew/homebrew-cask
 ```
