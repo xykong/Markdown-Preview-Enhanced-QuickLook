@@ -68,10 +68,8 @@ jobs:
                 },
                 body: JSON.stringify({
                   model: 'gpt-5.4-nano',
-                  input: [
-                    { role: 'system', content: systemPrompt },
-                    { role: 'user',   content: userPrompt   }
-                  ],
+                  instructions: systemPrompt,
+                  input: userPrompt,
                   temperature: 0,
                   max_output_tokens: 200
                 })
