@@ -787,9 +787,9 @@ class ResizableWKWebView: WKWebView {
             if currentFrame.width < finalWidth * 0.9 || currentFrame.height < finalHeight * 0.9 {
                 let newFrame = NSRect(x: x, y: y, width: finalWidth, height: finalHeight)
                 window.setFrame(newFrame, display: true, animate: true)
-                window.minSize = NSSize(width: 800, height: 600)
+                window.minSize = NSSize(width: 320, height: 200)
             } else {
-                 window.minSize = NSSize(width: 800, height: 600)
+                 window.minSize = NSSize(width: 320, height: 200)
             }
         }
         hasSetInitialSize = true

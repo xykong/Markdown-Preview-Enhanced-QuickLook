@@ -175,8 +175,8 @@ struct MarkdownApp: App {
                     UpdateRestorationManager.shared.saveLastOpenedFile(url: fileURL)
                 }
             }
-            .frame(minWidth: 800, idealWidth: 1000, maxWidth: .infinity,
-                   minHeight: 600, idealHeight: 800, maxHeight: .infinity)
+            .frame(minWidth: 320, idealWidth: 1000, maxWidth: .infinity,
+                   minHeight: 200, idealHeight: 800, maxHeight: .infinity)
             .environmentObject(preference)
             .background(WindowAccessor())
         }
