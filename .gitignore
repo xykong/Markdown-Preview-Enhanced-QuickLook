@@ -55,8 +55,10 @@ test-base64.html
 .agents/skills/.DS_Store
 .agents/skills/*/.DS_Store
 
-# OpenCode directory
+# OpenCode directory (exclude runtime config, but track project skills)
 .opencode/
+!.opencode/skills/
+!.opencode/skills/**
 
 # Claude AI configuration
 .claude/
