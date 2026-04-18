@@ -1,5 +1,9 @@
 ## [Unreleased]
-_无待发布的变更_
+
+### Fixed
+- **CSS 样式丢失（macOS 26 Tahoe）**: 修复在 macOS 26 Tahoe 上预览时样式表完全失效的问题 (#19)
+  - 修复 `<base>` 标签插入导致样式表 URL 被重定向至用户文件目录的时序 bug
+  - 将样式表预加载从异步 `fetch()` 改为同步读取 `cssRules`，避免 WKWebView 安全策略拦截
 
 ## [1.23.297] - 2026-04-17
 
