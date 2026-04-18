@@ -225,6 +225,7 @@ import { TableOfContents } from './table-of-contents';
 import { SearchEngine } from './search';
 import { SearchUI } from './search-ui';
 import { HelpOverlay } from './help-overlay';
+import { detectRtlContent } from './rtl';
 
 function extractFrontMatter(text: string): { yaml: string | null; body: string } {
     if (!text.startsWith('---')) {
@@ -717,6 +718,12 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         });
 
         outputDiv.innerHTML = tempDiv.innerHTML;
+
+        if (detectRtlContent(renderBody)) {
+            outputDiv.setAttribute('dir', 'rtl');
+        } else {
+            outputDiv.removeAttribute('dir');
+        }
 
         if (mermaidBlocks.length > 0) {
             try {
