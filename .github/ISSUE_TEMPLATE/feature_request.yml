@@ -1,0 +1,41 @@
+name: Feature Request
+description: Suggest a new capability or improvement
+labels: ["feature-request"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which area does this feature belong to?
+      options:
+        - renderer (Markdown display, new syntax support)
+        - quicklook (QuickLook integration, gestures)
+        - pdf-export (export options)
+        - window (window behavior)
+        - install (distribution, update)
+        - other / not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      placeholder: "When I preview files with ..., I can't ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      placeholder: "It would be great if ..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false

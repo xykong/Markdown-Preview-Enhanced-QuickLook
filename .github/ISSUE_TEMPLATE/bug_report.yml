@@ -1,0 +1,68 @@
+name: Bug Report
+description: Something isn't working as expected
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of FluxMarkdown is affected?
+      options:
+        - renderer (Markdown display, syntax highlighting, Mermaid, KaTeX, RTL)
+        - quicklook (QuickLook extension, file watching, gestures, scroll)
+        - pdf-export (PDF / HTML export)
+        - window (window sizing, positioning, appearance)
+        - install (installation, auto-update, Homebrew)
+        - app-icon (application icon)
+        - not sure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: macOS Version
+      options:
+        - macOS 26 Tahoe
+        - macOS 15 Sequoia
+        - macOS 14 Sonoma
+        - macOS 13 Ventura
+        - Other / Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: app-version
+    attributes:
+      label: FluxMarkdown Version
+      placeholder: "e.g. 1.25.310"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug clearly. Include steps to reproduce.
+      placeholder: |
+        1. Open a file with ...
+        2. Press Space to preview
+        3. See error / unexpected behavior
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: false
+
+  - type: textarea
+    id: sample
+    attributes:
+      label: Sample Markdown (if applicable)
+      description: Paste minimal Markdown that triggers the issue
+      render: markdown
+    validations:
+      required: false

@@ -1,0 +1,173 @@
+name: Auto Label Issues
+
+on:
+  issues:
+    types: [opened, edited]
+  pull_request:
+    types: [closed]
+
+permissions:
+  issues: write
+  pull-requests: read
+
+jobs:
+  classify-issue:
+    name: Classify issue with AI
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues'
+    steps:
+      - name: Classify and label issue
+        uses: actions/github-script@v7
+        env:
+          AZURE_OPENAI_API_KEY: ${{ secrets.AZURE_OPENAI_API_KEY }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        with:
+          script: |
+            const title = process.env.ISSUE_TITLE || '';
+            const body = process.env.ISSUE_BODY || '';
+            const currentLabels = context.payload.issue.labels.map(l => l.name);
+
+            const systemPrompt = [
+              'You are a GitHub issue classifier for FluxMarkdown, a macOS QuickLook extension for Markdown files.',
+              '',
+              'Available labels:',
+              'TYPE (pick exactly one):',
+              '  bug            - Something is broken or not working as expected',
+              '  enhancement    - Improvement to existing functionality',
+              '  feature-request - Request for new functionality that does not exist yet',
+              '  question       - User asking how something works',
+              '',
+              'COMPONENT (pick all that apply, can be empty):',
+              '  renderer       - Markdown rendering (syntax highlighting, Mermaid, KaTeX, RTL, TOC, etc.)',
+              '  quicklook      - macOS QuickLook extension integration, file watching, scroll, gestures',
+              '  pdf-export     - PDF or HTML export functionality',
+              '  window         - Window sizing, positioning, appearance',
+              '  install        - Installation, auto-update, Homebrew, DMG',
+              '  app-icon       - Application icon and visual branding',
+              '',
+              'PLATFORM (pick all that apply, can be empty):',
+              '  platform: macOS Tahoe    - Only if issue explicitly mentions macOS 26 / Tahoe',
+              '  platform: macOS Sequoia  - Only if issue explicitly mentions macOS 15 / Sequoia',
+              '',
+              'Respond with ONLY valid JSON, no markdown, no explanation:',
+              '{ "type": "<label>", "components": ["<label>", ...], "platforms": ["<label>", ...] }'
+            ].join('\n');
+
+            const userPrompt = `Issue title: ${title}\nIssue body: ${body}`;
+
+            let labelsToAdd = [];
+
+            try {
+              const endpoint = 'https://animal-east-us2-resource.services.ai.azure.com/api/projects/animal-east-us2/openai/v1/responses';
+              const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'api-key': process.env.AZURE_OPENAI_API_KEY
+                },
+                body: JSON.stringify({
+                  model: 'gpt-5.4-nano',
+                  input: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user',   content: userPrompt   }
+                  ],
+                  temperature: 0,
+                  max_output_tokens: 200
+                })
+              });
+
+              if (!response.ok) {
+                const errText = await response.text();
+                throw new Error(`Azure OpenAI error ${response.status}: ${errText}`);
+              }
+
+              const data = await response.json();
+              const content = data.output[0].content[0].text.trim();
+              console.log('AI response:', content);
+
+              const jsonMatch = content.match(/\{[\s\S]*\}/);
+              if (!jsonMatch) throw new Error('No JSON in response: ' + content);
+              const classification = JSON.parse(jsonMatch[0]);
+
+              if (classification.type) labelsToAdd.push(classification.type);
+              if (Array.isArray(classification.components)) labelsToAdd.push(...classification.components);
+              if (Array.isArray(classification.platforms)) labelsToAdd.push(...classification.platforms);
+
+            } catch (err) {
+              console.error('AI classification failed:', err.message);
+              return;
+            }
+
+            const repoLabels = await github.rest.issues.listLabelsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            const validLabelNames = new Set(repoLabels.data.map(l => l.name));
+
+            const newLabels = labelsToAdd.filter(l =>
+              validLabelNames.has(l) && !currentLabels.includes(l)
+            );
+
+            if (newLabels.length === 0) {
+              console.log('No new labels to add.');
+              return;
+            }
+
+            console.log('Adding labels:', newLabels);
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              labels: newLabels
+            });
+
+  mark-done-on-merge:
+    name: Mark linked issues as done
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    steps:
+      - name: Add done label to linked issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prBody = context.payload.pull_request.body || '';
+            const prNumber = context.payload.pull_request.number;
+
+            const pattern = /(?:closes?|fixes?|resolves?)\s+#(\d+)/gi;
+            const matches = [...prBody.matchAll(pattern)];
+
+            if (matches.length === 0) {
+              console.log(`PR #${prNumber}: no linked issues found.`);
+              return;
+            }
+
+            for (const match of matches) {
+              const issueNumber = parseInt(match[1], 10);
+              console.log(`Marking issue #${issueNumber} as done`);
+
+              try {
+                const { data: issue } = await github.rest.issues.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber
+                });
+
+                if (issue.labels.some(l => l.name === 'done')) {
+                  console.log(`Issue #${issueNumber} already has 'done' label.`);
+                  continue;
+                }
+
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  labels: ['done']
+                });
+
+                console.log(`Added 'done' to issue #${issueNumber}`);
+              } catch (err) {
+                console.error(`Failed to label issue #${issueNumber}:`, err.message);
+              }
+            }
