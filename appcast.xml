@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.24.303</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.24.303</link>
+            <sparkle:version>303</sparkle:version>
+            <sparkle:shortVersionString>1.24.303</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 18 Apr 2026 02:03:24 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.24.303/FluxMarkdown.dmg"
+                sparkle:edSignature="KB1wB3Ci/I0HdZ8k2FhS1Lel0RXpHZB1OzxkMI4SlatxKOQLkRKX3ym22wQyOH38tu3C73OO0rMh7HKkGbd8CA=="
+                length="10011784"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Fixed</h3><ul><li><strong>CSS 样式丢失（macOS 26 Tahoe）</strong>: 修复在 macOS 26 Tahoe 上预览时样式表完全失效的问题 (#19)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;修复 <code><base></code> 标签插入导致样式表 URL 被重定向至用户文件目录的时序 bug</li><li>&nbsp;&nbsp;&nbsp;&nbsp;将样式表预加载从异步 <code>fetch()</code> 改为同步读取 <code>cssRules</code>，避免 WKWebView 安全策略拦截</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.24.303">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.23.297</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.23.297</link>
             <sparkle:version>297</sparkle:version>
