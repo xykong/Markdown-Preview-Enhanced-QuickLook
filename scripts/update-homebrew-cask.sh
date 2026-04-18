@@ -4,6 +4,7 @@ set -e
 VERSION_FILE=".version"
 DMG_PATH="build/artifacts/FluxMarkdown.dmg"
 CASK_FILE="../homebrew-tap/Casks/flux-markdown.rb"
+OFFICIAL_CASK_FILE="../homebrew-tap/Casks/flux-markdown-official.rb"
 
 if [ ! -f "$VERSION_FILE" ]; then
     echo "❌ Error: Version file not found: $VERSION_FILE"
@@ -31,8 +32,8 @@ SHA256=$(shasum -a 256 "$DMG_PATH" | awk '{print $1}')
 echo "✅ Calculated SHA256: $SHA256"
 echo ""
 
-CURRENT_VERSION=$(grep "version '" "$CASK_FILE" | head -1 | sed "s/.*version '\(.*\)'/\1/")
-CURRENT_SHA256=$(grep "sha256 '" "$CASK_FILE" | head -1 | sed "s/.*sha256 '\(.*\)'/\1/")
+CURRENT_VERSION=$(grep "version \"" "$CASK_FILE" | head -1 | sed 's/.*version "\(.*\)"/\1/')
+CURRENT_SHA256=$(grep "sha256 \"" "$CASK_FILE" | head -1 | sed 's/.*sha256 "\(.*\)"/\1/')
 
 echo "📊 Current Cask Info:"
 echo "   Version: $CURRENT_VERSION"
@@ -48,38 +49,37 @@ if [ "$CURRENT_VERSION" = "$VERSION" ] && [ "$CURRENT_SHA256" = "$SHA256" ]; the
     exit 0
 fi
 
-echo "🔧 Updating Cask file..."
+echo "🔧 Updating tap cask file..."
+sed -i '' "s/version \".*\"/version \"$VERSION\"/" "$CASK_FILE"
+sed -i '' "s/sha256 \".*\"/sha256 \"$SHA256\"/" "$CASK_FILE"
+echo "✅ Tap cask updated: $CASK_FILE"
 
-sed -i '' "s/version '.*'/version '$VERSION'/" "$CASK_FILE"
-sed -i '' "s/sha256 '.*'/sha256 '$SHA256'/" "$CASK_FILE"
-
-if ! grep -q "auto_updates true" "$CASK_FILE"; then
-    echo "🔧 Adding auto_updates configuration..."
-    sed -i '' "/homepage /a\\
-\\
-  auto_updates true\\
-\\
-  livecheck do\\
-    url \"https://raw.githubusercontent.com/xykong/flux-markdown/master/appcast.xml\"\\
-    strategy :sparkle, \&:short_version\\
-  end
-" "$CASK_FILE"
+if [ -f "$OFFICIAL_CASK_FILE" ]; then
+    echo "🔧 Updating official cask file..."
+    sed -i '' "s/version \".*\"/version \"$VERSION\"/" "$OFFICIAL_CASK_FILE"
+    sed -i '' "s/sha256 \".*\"/sha256 \"$SHA256\"/" "$OFFICIAL_CASK_FILE"
+    echo "✅ Official cask updated: $OFFICIAL_CASK_FILE"
 fi
 
-echo "✅ Cask file updated successfully"
 echo ""
 
 cd "$(dirname "$CASK_FILE")/.."
 
-if ! git diff --quiet Casks/flux-markdown.rb; then
-    echo "📝 Changes detected:"
-    git diff Casks/flux-markdown.rb
+CHANGED_FILES=()
+git diff --quiet Casks/flux-markdown.rb || CHANGED_FILES+=("Casks/flux-markdown.rb")
+git diff --quiet Casks/flux-markdown-official.rb 2>/dev/null || CHANGED_FILES+=("Casks/flux-markdown-official.rb")
+
+if [ ${#CHANGED_FILES[@]} -gt 0 ]; then
+    echo "📝 Changes detected in: ${CHANGED_FILES[*]}"
+    for f in "${CHANGED_FILES[@]}"; do
+        git diff "$f"
+    done
     echo ""
-    
+
     if [ -n "${CI:-}" ] || [ ! -t 0 ]; then
         echo "⚠️  Non-interactive mode: skipping commit/push. Please commit manually:"
         echo "   cd $(pwd)"
-        echo "   git add Casks/flux-markdown.rb"
+        echo "   git add ${CHANGED_FILES[*]}"
         echo "   git commit -m 'chore(cask): update flux-markdown to v$VERSION'"
         echo "   git push origin master"
     else
@@ -87,23 +87,25 @@ if ! git diff --quiet Casks/flux-markdown.rb; then
         echo ""
 
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            git add Casks/flux-markdown.rb
+            git add "${CHANGED_FILES[@]}"
             git commit -m "chore(cask): update flux-markdown to v$VERSION"
             git push origin master
             echo "✅ Changes committed and pushed to homebrew-tap"
         else
             echo "⚠️  Changes not committed. Please commit manually:"
             echo "   cd $(pwd)"
-            echo "   git add Casks/flux-markdown.rb"
+            echo "   git add ${CHANGED_FILES[*]}"
             echo "   git commit -m 'chore(cask): update flux-markdown to v$VERSION'"
             echo "   git push origin master"
         fi
     fi
 else
-    echo "ℹ️  No changes detected in Cask file"
+    echo "ℹ️  No changes detected in Cask files"
 fi
 
 echo ""
 echo "🎉 Done! Users can now install v$VERSION with:"
-echo "   brew update"
-echo "   brew upgrade flux-markdown"
+echo "   brew update && brew upgrade flux-markdown"
+echo ""
+echo "📋 To submit to official homebrew-cask:"
+echo "   ./scripts/submit-to-homebrew.sh"
