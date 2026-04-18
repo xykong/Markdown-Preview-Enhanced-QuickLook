@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.25.310</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.25.310</link>
+            <sparkle:version>310</sparkle:version>
+            <sparkle:shortVersionString>1.25.310</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sat, 18 Apr 2026 15:10:35 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.25.310/FluxMarkdown.dmg"
+                sparkle:edSignature="n227o8Zxo/kcs+TiYqUqxCR8RtgeV3qtTPQeDXV+tybeVR19o/dHE/33bdt0fDorFCatBusWOcbik2T/30SXBA=="
+                length="10700086"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Fixed</h3><ul><li><strong>窗口最小尺寸限制</strong>: 修复窗口无法缩小到 800×600 以下的问题 (#24)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;将最小宽度从 800 降低至 320，最小高度从 600 降低至 200</li><li>&nbsp;&nbsp;&nbsp;&nbsp;允许用户灵活布局多窗口工作区（如分屏并排显示）</li><li>&nbsp;&nbsp;&nbsp;&nbsp;修复两处硬编码的窗口最小尺寸：SwiftUI <code>.frame()</code> 和 <code>NSWindow.minSize</code> 设置</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.25.310">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.24.303</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.24.303</link>
             <sparkle:version>303</sparkle:version>
