@@ -971,6 +971,13 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
     }
 });
 
+document.addEventListener('wheel', (e: WheelEvent) => {
+    if (e.ctrlKey) {
+        e.preventDefault();
+        window.scrollBy(e.deltaX, e.deltaY);
+    }
+}, { passive: false });
+
 window.setFontSize = function(px: number) {
     const outputDiv = document.getElementById('markdown-preview');
     if (outputDiv) {
