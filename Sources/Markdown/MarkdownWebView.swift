@@ -763,7 +763,6 @@ class ResizableWKWebView: WKWebView {
     }
 
     private var hasSetInitialSize = false
-    private var currentZoomLevel: Double = 1.0
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "ResizableWKWebView")
     
     override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
