@@ -190,6 +190,7 @@ struct AppearanceSettingsView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(PlainButtonStyle())
+            .focusable(false)
 
             Rectangle()
                 .fill(isSelected ? Color.accentColor : Color.clear)
