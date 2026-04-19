@@ -1,4 +1,7 @@
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.27.349] - 2026-04-20
 
 ### Fixed
 - **Zoom: reset button hidden behind reload button**: Fixed `resetZoomButton` being invisible due to both `resetZoomButton` and `reloadButton` sharing the same layout constraint (`trailing = zoomOutButton.leading - 8`), causing them to stack on top of each other (#27)
