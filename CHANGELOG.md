@@ -1,5 +1,10 @@
 ## [Unreleased]
-_无待发布的变更_
+
+### Fixed
+- **Zoom: reset button hidden behind reload button**: Fixed `resetZoomButton` being invisible due to both `resetZoomButton` and `reloadButton` sharing the same layout constraint (`trailing = zoomOutButton.leading - 8`), causing them to stack on top of each other (#27)
+  - `reloadButton` now correctly anchors to `resetZoomButton.leadingAnchor - 8`, making both buttons visible
+- **Zoom: session-only zoom not working when QL reuses view controller**: Fixed zoom not resetting to 100% when QuickLook reuses the same `PreviewViewController` for a different file (#27)
+  - Added `webView.pageZoom = 1.0` reset at the start of `preparePreviewOfFile` to handle view controller reuse
 
 ## [1.26.343] - 2026-04-19
 
