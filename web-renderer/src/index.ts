@@ -970,12 +970,20 @@ document.addEventListener('mouseout', handleAnchorMouseOut);
 let currentZoomLevel = 1.0;
 
 window.setZoomLevel = function(level: number) {
-    currentZoomLevel = level;
+    const clamped = Math.max(0.5, Math.min(3.0, level));
+    currentZoomLevel = clamped;
     const outputDiv = document.getElementById('markdown-preview');
     if (outputDiv) {
-        outputDiv.style.transform = `scale(${level})`;
-        outputDiv.style.transformOrigin = 'top left';
-        outputDiv.style.width = `${100 / level}%`;
+        // 清除旧的 transform hack（会导致布局不重排，修复 Bug 6）
+        outputDiv.style.transform = '';
+        outputDiv.style.transformOrigin = '';
+        outputDiv.style.width = '';
+        // 通过 CSS 变量驱动缩放，浏览器会触发真正的重排
+        if (clamped === 1.0) {
+            document.documentElement.style.removeProperty('--zoom-scale');
+        } else {
+            document.documentElement.style.setProperty('--zoom-scale', String(clamped));
+        }
     }
 };
 
