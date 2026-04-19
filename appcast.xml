@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.28.360</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.28.360</link>
+            <sparkle:version>360</sparkle:version>
+            <sparkle:shortVersionString>1.28.360</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sun, 19 Apr 2026 19:05:32 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.28.360/FluxMarkdown.dmg"
+                sparkle:edSignature="3K/iCWz3KBBe9LETMTv1Npv0wXXTUsbXn4rSjjGxUfz1IbIDoJPa5bupppXwlAWHCBItTGx4o9I6sm67LDfIBQ=="
+                length="10705785"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Fixed</h3><ul><li><strong>App Zoom: no reset button in toolbar</strong> (#27): Added "Reset Zoom" button (arrow.uturn.backward) between Zoom Out and Zoom In buttons in the App window toolbar; <code>Cmd+0</code> shortcut also triggers reset</li><li><strong>App Zoom: zoom level persists across files</strong> (#27): Each document now opens at 100% zoom — zoom is session-only, not saved to UserDefaults, WKProcessPool isolated per window to prevent WebKit zoom state inheritance</li><li><strong>App Zoom: no upper zoom limit</strong> (#27): Zoom In is now capped at 300% (<code>min(3.0, ...)</code>)</li><li><strong>App Zoom: trackpad inertia triggers zoom</strong> (#27): <code>scrollWheel</code> handler now ignores <code>.mayBegin</code>, <code>.cancelled</code> phases and any non-zero <code>momentumPhase</code> events</li><li><strong>App Zoom: content overflow instead of reflow</strong> (#27): Switched from <code>webView.magnification</code> (visual-only scale) to <code>webView.pageZoom</code> (triggers proper layout reflow)</li><li><strong>App Zoom: zoom resets when switching files</strong> (#27): <code>Coordinator.render()</code> resets <code>pageZoom = 1.0</code> on each new document load</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.28.360">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.27.349</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.27.349</link>
             <sparkle:version>349</sparkle:version>
