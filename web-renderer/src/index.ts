@@ -806,7 +806,14 @@ window.renderSource = function(text: string, theme: string) {
 };
 
 window.updateTheme = function(theme: string) {
-    document.documentElement.setAttribute('data-theme', theme);
+    let normalizedTheme = theme;
+    if (theme === 'system') {
+        normalizedTheme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+            ? 'dark' : 'default';
+    } else if (theme === 'light') {
+        normalizedTheme = 'default';
+    }
+    document.documentElement.setAttribute('data-theme', normalizedTheme);
 };
 
 function compressMultipleHyphens(text: string): string {

@@ -22,9 +22,9 @@ describe('window.updateTheme', () => {
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 
-  test('sets data-theme="light" on documentElement when called with "light"', () => {
+  test('sets data-theme="default" on documentElement when called with "light" (normalized)', () => {
     window.updateTheme('light');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('default');
   });
 
   test('sets data-theme="default" on documentElement when called with "default"', () => {
@@ -54,11 +54,11 @@ describe('window.updateTheme', () => {
     expect(preview?.innerHTML).toBe(snapshot);
   });
 
-  test('updates theme from dark to light correctly', () => {
+  test('updates theme from dark to light correctly (normalized)', () => {
     window.updateTheme('dark');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
     window.updateTheme('light');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('default');
   });
 });
 
@@ -159,5 +159,42 @@ describe('renderSource CSS class assignment', () => {
     window.renderSource('# code', 'default');
     const el = document.querySelector('.source-view');
     expect(el?.classList.contains('source-view-light')).toBe(true);
+  });
+});
+
+describe('updateTheme edge cases', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="markdown-preview"></div>';
+    document.documentElement.removeAttribute('data-theme');
+  });
+
+  test('updateTheme("system") resolves to "default" in jsdom (light environment)', () => {
+    // jsdom 中 matchMedia 默认返回 false（light），system → default
+    window.updateTheme('system');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('default');
+  });
+
+  test('updateTheme("light") resolves to "default"', () => {
+    window.updateTheme('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('default');
+  });
+
+  test('updateTheme("dark") stays "dark"', () => {
+    window.updateTheme('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  test('renderMarkdown preserves h1 text content after updateTheme', async () => {
+    await window.renderMarkdown('# Persistent Title');
+    window.updateTheme('dark');
+    const h1 = document.querySelector('h1');
+    expect(h1?.textContent).toBe('Persistent Title');
+  });
+
+  test('data-theme persists correctly after renderSource then updateTheme', () => {
+    window.renderSource('# code', 'dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+    window.updateTheme('light');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('default');
   });
 });
