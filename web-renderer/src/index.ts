@@ -376,6 +376,8 @@ const HLJS_THEMES: Record<string, string> = {
     'atom-one-dark': `pre code.hljs{display:block;overflow-x:auto;padding:1em}code.hljs{padding:3px 5px}.hljs{color:#abb2bf;background:#282c34}.hljs-comment,.hljs-quote{color:#5c6370;font-style:italic}.hljs-doctag,.hljs-formula,.hljs-keyword{color:#c678dd}.hljs-deletion,.hljs-name,.hljs-section,.hljs-selector-tag,.hljs-subst{color:#e06c75}.hljs-literal{color:#56b6c2}.hljs-addition,.hljs-attribute,.hljs-meta .hljs-string,.hljs-regexp,.hljs-string{color:#98c379}.hljs-attr,.hljs-number,.hljs-selector-attr,.hljs-selector-class,.hljs-selector-pseudo,.hljs-template-variable,.hljs-type,.hljs-variable{color:#d19a66}.hljs-bullet,.hljs-link,.hljs-meta,.hljs-selector-id,.hljs-symbol,.hljs-title{color:#61aeee}.hljs-built_in,.hljs-class .hljs-title,.hljs-title.class_{color:#e6c07b}.hljs-emphasis{font-style:italic}.hljs-strong{font-weight:700}.hljs-link{text-decoration:underline}`,
 };
 
+const GITHUB_DARK_OVERRIDE = `[data-theme="dark"] .hljs{color:#c9d1d9;background:#0d1117}[data-theme="dark"] .hljs-doctag,[data-theme="dark"] .hljs-keyword,[data-theme="dark"] .hljs-meta .hljs-keyword,[data-theme="dark"] .hljs-template-tag,[data-theme="dark"] .hljs-template-variable,[data-theme="dark"] .hljs-type,[data-theme="dark"] .hljs-variable.language_{color:#ff7b72}[data-theme="dark"] .hljs-title,[data-theme="dark"] .hljs-title.class_,[data-theme="dark"] .hljs-title.class_.inherited__,[data-theme="dark"] .hljs-title.function_{color:#d2a8ff}[data-theme="dark"] .hljs-attr,[data-theme="dark"] .hljs-attribute,[data-theme="dark"] .hljs-literal,[data-theme="dark"] .hljs-meta,[data-theme="dark"] .hljs-number,[data-theme="dark"] .hljs-operator,[data-theme="dark"] .hljs-selector-attr,[data-theme="dark"] .hljs-selector-class,[data-theme="dark"] .hljs-selector-id,[data-theme="dark"] .hljs-variable{color:#79c0ff}[data-theme="dark"] .hljs-meta .hljs-string,[data-theme="dark"] .hljs-regexp,[data-theme="dark"] .hljs-string{color:#a5d6ff}[data-theme="dark"] .hljs-built_in,[data-theme="dark"] .hljs-symbol{color:#ffa657}[data-theme="dark"] .hljs-code,[data-theme="dark"] .hljs-comment,[data-theme="dark"] .hljs-formula{color:#8b949e}[data-theme="dark"] .hljs-name,[data-theme="dark"] .hljs-quote,[data-theme="dark"] .hljs-selector-pseudo,[data-theme="dark"] .hljs-selector-tag{color:#7ee787}[data-theme="dark"] .hljs-subst{color:#c9d1d9}[data-theme="dark"] .hljs-section{color:#1f6feb;font-weight:700}[data-theme="dark"] .hljs-bullet{color:#f2cc60}[data-theme="dark"] .hljs-emphasis{color:#c9d1d9;font-style:italic}[data-theme="dark"] .hljs-strong{color:#c9d1d9;font-weight:700}[data-theme="dark"] .hljs-addition{color:#aff5b4;background-color:#033a16}[data-theme="dark"] .hljs-deletion{color:#ffdcd7;background-color:#67060c}`;
+
 function applyCodeTheme(theme: string): void {
     const styleId = 'hljs-override-theme';
     let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
@@ -386,7 +388,8 @@ function applyCodeTheme(theme: string): void {
             styleEl.id = styleId;
             document.head.appendChild(styleEl);
         }
-        styleEl.textContent = css;
+        const darkOverride = theme === 'github' ? GITHUB_DARK_OVERRIDE : '';
+        styleEl.textContent = css + darkOverride;
     } else {
         styleEl?.remove();
     }

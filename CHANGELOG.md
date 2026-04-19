@@ -5,6 +5,15 @@
   - `reloadButton` now correctly anchors to `resetZoomButton.leadingAnchor - 8`, making both buttons visible
 - **Zoom: session-only zoom not working when QL reuses view controller**: Fixed zoom not resetting to 100% when QuickLook reuses the same `PreviewViewController` for a different file (#27)
   - Added `webView.pageZoom = 1.0` reset at the start of `preparePreviewOfFile` to handle view controller reuse
+- **App toolbar buttons invisible in dark mode (Bug3)**: Fixed toolbar buttons in the standalone App window being invisible in dark mode due to hardcoded `Color.black.opacity(0.1)` background (#26, thanks @Ctrl-Alb)
+  - Replaced with adaptive `Color(NSColor.windowBackgroundColor).opacity(0.85)` background and `Color(NSColor.labelColor)` foreground
+  - All 6 toolbar buttons are now clearly visible in both Light and Dark modes
+- **App theme switch causes full re-render (Bug2)**: Fixed theme toggle in the App window triggering a full page re-render, resetting scroll position (#26, thanks @Ctrl-Alb)
+  - Added `lastRenderedContent` tracking in `MarkdownWebView.Coordinator`; when only the appearance mode changes (content unchanged, preview mode), calls `window.updateTheme()` instead of `window.renderMarkdown()`
+  - Scroll position, TOC state, and DOM state are all preserved on theme switch in the App window
+- **Source View GitHub theme poor contrast in dark mode (Bug5)**: Fixed syntax highlighting in Source View having poor readability when using the GitHub theme in dark mode (#26, thanks @Ctrl-Alb)
+  - Added `GITHUB_DARK_OVERRIDE` CSS rules in `applyCodeTheme()` that inject `[data-theme="dark"]` scoped high-contrast token colors using the GitHub Dark palette
+  - Tokens (keywords, strings, functions, etc.) now use distinct, accessible colors in dark mode
 
 ## [1.26.343] - 2026-04-19
 

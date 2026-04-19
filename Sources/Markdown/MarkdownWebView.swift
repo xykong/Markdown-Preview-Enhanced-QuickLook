@@ -117,7 +117,6 @@ struct MarkdownWebView: NSViewRepresentable {
         private var monitoredFileDescriptor: Int32 = -1
         private var lastKnownFileSize: UInt64 = 0
         private var lastKnownFileModificationDate: Date?
-        // Cached render parameters for file-change re-render
         private var lastViewMode: ViewMode = .preview
         private var lastAppearanceMode: AppearanceMode = .light
         private var lastBaseFontSize: Double = 16
@@ -125,6 +124,7 @@ struct MarkdownWebView: NSViewRepresentable {
         private var lastEnableKatex: Bool = true
         private var lastEnableEmoji: Bool = true
         private var lastCodeHighlightTheme: String = "default"
+        private var lastRenderedContent: String = ""
         private var pollingTimer: Timer?
         private let pollingInterval: TimeInterval = 2.0
 
@@ -311,6 +311,25 @@ struct MarkdownWebView: NSViewRepresentable {
         }
 
         private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String) {
+            let onlyThemeChanged = (content == lastRenderedContent) && (viewMode == .preview)
+            if onlyThemeChanged {
+                let theme: String
+                switch appearanceMode {
+                case .dark:   theme = "dark"
+                case .light:  theme = "light"
+                case .system: theme = "system"
+                }
+                lastAppearanceMode = appearanceMode
+                webView.evaluateJavaScript("window.updateTheme('\(theme)');") { [weak self] _, error in
+                    if let error = error {
+                        os_log("JS updateTheme error: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)
+                    }
+                }
+                return
+            }
+
+            lastRenderedContent = content
+
             guard let contentData = try? JSONSerialization.data(withJSONObject: [content], options: []),
                   let contentJsonArray = String(data: contentData, encoding: .utf8) else {
                 os_log("Failed to encode content", log: logger, type: .error)

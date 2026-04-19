@@ -99,11 +99,11 @@ struct MarkdownApp: App {
                         NotificationCenter.default.post(name: .reloadFile, object: nil)
                     }) {
                         Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color(NSColor.labelColor))
                             .frame(width: 30, height: 30)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Color.black.opacity(0.1))
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
                     .help("Reload File (⌘R)")
 
@@ -111,11 +111,11 @@ struct MarkdownApp: App {
                         NotificationCenter.default.post(name: .zoomOut, object: nil)
                     }) {
                         Image(systemName: "textformat.size.smaller")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color(NSColor.labelColor))
                             .frame(width: 30, height: 30)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Color.black.opacity(0.1))
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
                     .help("Zoom Out")
 
@@ -123,11 +123,11 @@ struct MarkdownApp: App {
                         NotificationCenter.default.post(name: .zoomIn, object: nil)
                     }) {
                         Image(systemName: "textformat.size.larger")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color(NSColor.labelColor))
                             .frame(width: 30, height: 30)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Color.black.opacity(0.1))
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
                     .help("Zoom In")
 
@@ -135,11 +135,11 @@ struct MarkdownApp: App {
                         NotificationCenter.default.post(name: .toggleHelp, object: nil)
                     }) {
                         Image(systemName: "questionmark.circle")
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color(NSColor.labelColor))
                             .frame(width: 30, height: 30)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Color.black.opacity(0.1))
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
                     .help("Show Help")
 
@@ -147,11 +147,11 @@ struct MarkdownApp: App {
                         viewMode = (viewMode == .preview) ? .source : .preview
                     }) {
                         Image(systemName: viewMode == .source ? "eye.fill" : "doc.text.fill")
-                            .foregroundColor(viewMode == .source ? .blue : .secondary)
+                            .foregroundColor(viewMode == .source ? .blue : Color(NSColor.labelColor))
                             .frame(width: 30, height: 30)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Color.black.opacity(0.1))
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
                     .help(viewMode == .source ? "Show Preview" : "Show Source")
 
@@ -163,11 +163,11 @@ struct MarkdownApp: App {
                         }
                     }) {
                         Image(systemName: preference.currentMode == .light ? "sun.max.fill" : preference.currentMode == .dark ? "moon.fill" : "circle.lefthalf.filled")
-                            .foregroundColor(preference.currentMode == .light ? .yellow : .secondary)
+                            .foregroundColor(preference.currentMode == .light ? .yellow : Color(NSColor.labelColor))
                             .frame(width: 30, height: 30)
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .background(Color.black.opacity(0.1))
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
                     .help("Toggle Theme (System / Light / Dark)")
                 }
