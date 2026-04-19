@@ -1,6 +1,37 @@
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.25.327] - 2026-04-19
 
 _无待发布的变更_
+
+## [1.25.327] - 2026-04-19
+
+### Fixed
+- **Theme switching: non-destructive DOM updates**: Fixed theme toggle triggering a full re-render that reset scroll position and document state (#26, thanks @Ctrl-Alb)
+  - Implemented `window.updateTheme()` which only updates `data-theme` attribute, preserving entire DOM
+  - Scroll position, TOC expansion, open details blocks, and cursor position are all retained on theme switch
+- **Theme switching: system appearance sync**: Fixed QuickLook preview not following macOS system appearance (Light/Dark) in Finder (#26, thanks @Ctrl-Alb)
+  - Added KVO observer on `view.effectiveAppearance` in Swift to detect OS-level appearance changes
+  - Preview now automatically updates when user switches between Light and Dark in System Preferences
+- **Theme switching: button visibility**: Fixed theme toggle button invisible/hard to see in certain themes (#26, thanks @Ctrl-Alb)
+  - Changed button background from hard-coded `NSColor.black.withAlphaComponent(0.1)` to adaptive `NSColor.systemFill` which responds to both Light and Dark modes
+- **Theme switching: Show Source respects theme**: Fixed "Show Source" view not following manual theme switch (#26, thanks @Ctrl-Alb)
+  - `toggleTheme()` now calls unified `applyThemeToWebView()` which covers both rendered and source view modes
+- **Theme switching: source view dark mode contrast**: Fixed poor readability of source code in dark mode (#26, thanks @Ctrl-Alb)
+  - Rewrote `source-view.css` to use CSS variables (`--bg`, `--fg`, `--border`) that adapt to `[data-theme="dark"]`
+  - Dark mode now uses proper contrast colors instead of inheriting light-mode values
+- **Zoom: reset button**: Fixed missing zoom reset button in the toolbar (#27, thanks @Ctrl-Alb)
+  - Added a dedicated "Reset Zoom" button that restores zoom to 100%
+  - `Cmd+0` keyboard shortcut also triggers reset
+- **Zoom: not persisted across sessions**: Fixed zoom level being saved and restored across different files/sessions (#27, thanks @Ctrl-Alb)
+  - Zoom is now session-only; each file opens at 100% zoom
+- **Zoom: maximum cap**: Fixed zoom having no upper limit, allowing runaway zoom (#27, thanks @Ctrl-Alb)
+  - Zoom is now clamped to a maximum of 300%
+- **Zoom: inertia scroll mis-trigger**: Fixed trackpad inertia scroll (after fingers lifted) incorrectly triggering zoom (#27, thanks @Ctrl-Alb)
+  - Added `phase` check in `scrollWheel` handler; inertia events (`.mayBegin`, `.cancelled`) are now ignored for zoom
+- **Zoom: proper text reflow**: Fixed zoom not causing text to reflow — content overflowed instead of wrapping (#27, thanks @Ctrl-Alb)
+  - Replaced `transform: scale()` (visual-only) with CSS variable `--zoom-scale` applied to font-size, which triggers proper text layout reflow
 
 ## [1.25.310] - 2026-04-18
 
