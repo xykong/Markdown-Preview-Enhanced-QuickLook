@@ -135,3 +135,29 @@ describe('renderSource initializes data-theme', () => {
     expect(previewAfter).toBe(previewBefore);
   });
 });
+
+describe('renderSource CSS class assignment', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="markdown-preview"></div>';
+  });
+
+  test('source-view-dark class applied when theme is "dark"', () => {
+    window.renderSource('# code', 'dark');
+    const el = document.querySelector('.source-view');
+    expect(el?.classList.contains('source-view-dark')).toBe(true);
+    expect(el?.classList.contains('source-view-light')).toBe(false);
+  });
+
+  test('source-view-light class applied when theme is "light"', () => {
+    window.renderSource('# code', 'light');
+    const el = document.querySelector('.source-view');
+    expect(el?.classList.contains('source-view-light')).toBe(true);
+    expect(el?.classList.contains('source-view-dark')).toBe(false);
+  });
+
+  test('source-view-light class applied when theme is "default"', () => {
+    window.renderSource('# code', 'default');
+    const el = document.querySelector('.source-view');
+    expect(el?.classList.contains('source-view-light')).toBe(true);
+  });
+});
