@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.25.327</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.25.327</link>
+            <sparkle:version>327</sparkle:version>
+            <sparkle:shortVersionString>1.25.327</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sun, 19 Apr 2026 10:06:19 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.25.327/FluxMarkdown.dmg"
+                sparkle:edSignature="KtjmWCIHXQ4rK04T5mDgj/3oCblSlgL/e6+vIhmGtnVgvv4X6PdFyzqh1XG7hLJpQseofJYyZzMaI1yEZW12AQ=="
+                length="10707897"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><p>_无待发布的变更_</p><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.25.327">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.25.310</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.25.310</link>
             <sparkle:version>310</sparkle:version>
