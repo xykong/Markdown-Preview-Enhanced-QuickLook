@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.27.349</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.27.349</link>
+            <sparkle:version>349</sparkle:version>
+            <sparkle:shortVersionString>1.27.349</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sun, 19 Apr 2026 16:32:48 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.27.349/FluxMarkdown.dmg"
+                sparkle:edSignature="D7TB0EiO4RDCycHrEZLxbptiQNiCiCSJh1kqVHNcgilcqubTrPnMUU7ltDKJ4SiexLvfwwO2S5yxwKwgaw2ZCw=="
+                length="10720065"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Fixed</h3><ul><li><strong>Zoom: reset button hidden behind reload button</strong>: Fixed <code>resetZoomButton</code> being invisible due to both <code>resetZoomButton</code> and <code>reloadButton</code> sharing the same layout constraint (<code>trailing = zoomOutButton.leading - 8</code>), causing them to stack on top of each other (#27)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>reloadButton</code> now correctly anchors to <code>resetZoomButton.leadingAnchor - 8</code>, making both buttons visible</li><li><strong>Zoom: session-only zoom not working when QL reuses view controller</strong>: Fixed zoom not resetting to 100% when QuickLook reuses the same <code>PreviewViewController</code> for a different file (#27)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Added <code>webView.pageZoom = 1.0</code> reset at the start of <code>preparePreviewOfFile</code> to handle view controller reuse</li><li><strong>App toolbar buttons invisible in dark mode (Bug3)</strong>: Fixed toolbar buttons in the standalone App window being invisible in dark mode due to hardcoded <code>Color.black.opacity(0.1)</code> background (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Replaced with adaptive <code>Color(NSColor.windowBackgroundColor).opacity(0.85)</code> background and <code>Color(NSColor.labelColor)</code> foreground</li><li>&nbsp;&nbsp;&nbsp;&nbsp;All 6 toolbar buttons are now clearly visible in both Light and Dark modes</li><li><strong>App theme switch causes full re-render (Bug2)</strong>: Fixed theme toggle in the App window triggering a full page re-render, resetting scroll position (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Added <code>lastRenderedContent</code> tracking in <code>MarkdownWebView.Coordinator</code>; when only the appearance mode changes (content unchanged, preview mode), calls <code>window.updateTheme()</code> instead of <code>window.renderMarkdown()</code></li><li>&nbsp;&nbsp;&nbsp;&nbsp;Scroll position, TOC state, and DOM state are all preserved on theme switch in the App window</li><li><strong>Source View GitHub theme poor contrast in dark mode (Bug5)</strong>: Fixed syntax highlighting in Source View having poor readability when using the GitHub theme in dark mode (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Added <code>GITHUB_DARK_OVERRIDE</code> CSS rules in <code>applyCodeTheme()</code> that inject <code>[data-theme="dark"]</code> scoped high-contrast token colors using the GitHub Dark palette</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Tokens (keywords, strings, functions, etc.) now use distinct, accessible colors in dark mode</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.27.349">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.26.343</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.26.343</link>
             <sparkle:version>343</sparkle:version>
