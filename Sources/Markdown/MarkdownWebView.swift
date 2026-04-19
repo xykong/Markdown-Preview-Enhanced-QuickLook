@@ -127,6 +127,7 @@ struct MarkdownWebView: NSViewRepresentable {
         private var lastRenderedContent: String = ""
         private var pollingTimer: Timer?
         private let pollingInterval: TimeInterval = 2.0
+        private var hasAppliedInitialZoomReset: Bool = false
 
         override init() {
             super.init()
@@ -467,6 +468,13 @@ struct MarkdownWebView: NSViewRepresentable {
                     os_log("Coordinator: Renderer Handshake Received!", log: logger, type: .default)
                     if !isWebViewLoaded {
                         isWebViewLoaded = true
+                        if !hasAppliedInitialZoomReset {
+                            hasAppliedInitialZoomReset = true
+                            if let webView = message.webView {
+                                webView.pageZoom = 1.0
+                                os_log("🔵 Initial pageZoom reset to 1.0 at rendererReady", log: logger, type: .debug)
+                            }
+                        }
                         pendingRender?()
                         pendingRender = nil
                     }
