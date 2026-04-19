@@ -42,13 +42,14 @@ public class AppearancePreference: ObservableObject {
     private let sharedStore: SharedPreferenceStore
     private var pendingSyncWorkItem: DispatchWorkItem?
 
+    /// Backing store for currentMode — @Published ensures SwiftUI views (including
+    /// the Settings scene) reliably re-render when the value changes.
+    @Published private var _currentMode: AppearanceMode = .system
+
     public var currentMode: AppearanceMode {
-        get {
-            let raw = sharedStore.string(forKey: key) ?? AppearanceMode.system.rawValue
-            return AppearanceMode(rawValue: raw) ?? .system
-        }
+        get { _currentMode }
         set {
-            objectWillChange.send()
+            _currentMode = newValue
             sharedStore.set(newValue.rawValue, forKey: key)
             scheduleSyncToSharedStore()
         }
@@ -194,6 +195,10 @@ public class AppearancePreference: ObservableObject {
         // Migrate preferences from pre-Tahoe App Group UserDefaults on first launch.
         // Safe to call from extension too (no-op since canWrite is false).
         sharedStore.migrateFromAppGroupIfNeeded()
+
+        // Sync @Published backing store from disk so views have the correct initial value.
+        let raw = sharedStore.string(forKey: key) ?? AppearanceMode.system.rawValue
+        self._currentMode = AppearanceMode(rawValue: raw) ?? .system
     }
 
     /// Coalesces rapid preference changes into a single disk write.

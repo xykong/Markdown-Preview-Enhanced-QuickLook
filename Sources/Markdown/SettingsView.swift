@@ -190,6 +190,10 @@ struct AppearanceSettingsView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(PlainButtonStyle())
+            .overlay(
+                Rectangle()
+                    .stroke(Color.accentColor, lineWidth: isSelected ? 2 : 0)
+            )
         }
     }
 }
