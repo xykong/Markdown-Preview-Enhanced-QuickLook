@@ -120,6 +120,18 @@ struct MarkdownApp: App {
                     .help("Zoom Out")
 
                     Button(action: {
+                        NotificationCenter.default.post(name: .resetZoom, object: nil)
+                    }) {
+                        Image(systemName: "arrow.uturn.backward")
+                            .foregroundColor(Color(NSColor.labelColor))
+                            .frame(width: 30, height: 30)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
+                    .clipShape(Circle())
+                    .help("Reset Zoom (⌘0)")
+
+                    Button(action: {
                         NotificationCenter.default.post(name: .zoomIn, object: nil)
                     }) {
                         Image(systemName: "textformat.size.larger")
@@ -258,6 +270,11 @@ struct MarkdownApp: App {
                     Text(viewMode == .source ? "Show Preview" : "Show Source")
                 }
                 .keyboardShortcut("m", modifiers: [.command, .shift])
+
+                Button("Reset Zoom") {
+                    NotificationCenter.default.post(name: .resetZoom, object: nil)
+                }
+                .keyboardShortcut("0", modifiers: .command)
 
                 Divider()
 
