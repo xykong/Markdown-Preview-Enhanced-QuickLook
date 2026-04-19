@@ -20,7 +20,6 @@ struct MarkdownWebView: NSViewRepresentable {
     var enableEmoji: Bool = true
     var codeHighlightTheme: String = "default"
     
-    private static let sharedProcessPool = WKProcessPool()
     private let localSchemeHandler = LocalSchemeHandler()
     
     func makeCoordinator() -> Coordinator {
@@ -33,7 +32,8 @@ struct MarkdownWebView: NSViewRepresentable {
         let coordinator = context.coordinator
         
         let webConfiguration = WKWebViewConfiguration()
-        webConfiguration.processPool = MarkdownWebView.sharedProcessPool
+        webConfiguration.processPool = WKProcessPool()
+        webConfiguration.websiteDataStore = .nonPersistent()
         let userContentController = WKUserContentController()
         userContentController.add(coordinator, name: "logger")
         userContentController.add(coordinator, name: "linkClicked")
