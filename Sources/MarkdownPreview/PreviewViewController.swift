@@ -1012,7 +1012,12 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         DispatchQueue.main.async {
             self.logScreenEnvironment(context: "preparePreviewOfFile-ASYNC-START")
-            
+
+            // Reset zoom to 1.0 on every new preview (Bug 2 fix: session-only zoom).
+            // loadView() sets this once, but the view controller is reused across files.
+            self.webView.pageZoom = 1.0
+            os_log("🔵 Reset pageZoom to 1.0 for new file preview", log: self.logger, type: .debug)
+
             // Reset tracking to prevent capturing layout thrashing during display switching.
             // This is necessary because when QuickLook switches displays or reuses the view controller,
             // transient layout passes with incorrect sizes may occur.
