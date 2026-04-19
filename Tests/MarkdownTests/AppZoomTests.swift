@@ -15,11 +15,12 @@ final class AppZoomTests: XCTestCase {
         current: Double,
         delta: Double,
         modifiers: Bool,
-        phase: NSEvent.Phase
+        phase: NSEvent.Phase,
+        momentumPhase: NSEvent.Phase = []
     ) -> Double? {
-        guard modifiers else { return nil } // not a zoom event
-        // Bug 4 fix: ignore inertia phases
+        guard modifiers else { return nil }
         if phase == .mayBegin || phase == .cancelled { return nil }
+        if momentumPhase != [] { return nil }
         guard abs(delta) > 0.1 else { return nil }
         let updated = (current + delta * 0.01).clamped(to: 0.5...3.0)
         return updated
@@ -91,6 +92,11 @@ final class AppZoomTests: XCTestCase {
     func testScrollZoom_cancelledPhase_returnsNil() {
         let result = applyScrollZoom(current: 1.0, delta: 5.0, modifiers: true, phase: .cancelled)
         XCTAssertNil(result, "cancelled phase must be ignored")
+    }
+
+    func testScrollZoom_momentumPhase_returnsNil() {
+        let result = applyScrollZoom(current: 1.0, delta: 5.0, modifiers: true, phase: .changed, momentumPhase: .changed)
+        XCTAssertNil(result, "momentum phase must be ignored")
     }
 
     func testScrollZoom_activePhase_appliesZoom() {

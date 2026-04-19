@@ -778,9 +778,13 @@ class ResizableWKWebView: WKWebView {
     
     override func scrollWheel(with event: NSEvent) {
         if event.modifierFlags.contains(.command) {
-            // Bug 4 fix: ignore inertia-only phases (mayBegin/cancelled = Cmd touch without real scroll)
+            // Bug 4 fix: ignore inertia-only phases and momentum scroll events
             let phase = event.phase
             if phase == .mayBegin || phase == .cancelled {
+                super.scrollWheel(with: event)
+                return
+            }
+            if event.momentumPhase != [] {
                 super.scrollWheel(with: event)
                 return
             }
