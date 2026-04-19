@@ -548,7 +548,12 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     
     @objc private func toggleTheme() {
         let current = AppearancePreference.shared.currentMode
-        let newMode: AppearanceMode = (current == .dark) ? .light : .dark
+        let newMode: AppearanceMode
+        switch current {
+        case .system: newMode = .light
+        case .light:  newMode = .dark
+        case .dark:   newMode = .system
+        }
         
         AppearancePreference.shared.currentMode = newMode
         AppearancePreference.shared.apply(to: self.view)
@@ -560,10 +565,20 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     }
     
     private func updateThemeButtonState() {
-        let isDark = (currentThemeString() == "dark")
-        let iconName = isDark ? "sun.max.fill" : "moon.fill"
-        let iconColor = isDark ? NSColor.systemYellow : NSColor.labelColor
-        
+        let mode = AppearancePreference.shared.currentMode
+        let iconName: String
+        let iconColor: NSColor
+        switch mode {
+        case .system:
+            iconName = "circle.lefthalf.filled"
+            iconColor = NSColor.labelColor
+        case .light:
+            iconName = "sun.max.fill"
+            iconColor = NSColor.systemYellow
+        case .dark:
+            iconName = "moon.fill"
+            iconColor = NSColor.labelColor
+        }
         if let image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Toggle Theme") {
             themeButton.image = image
             themeButton.contentTintColor = iconColor

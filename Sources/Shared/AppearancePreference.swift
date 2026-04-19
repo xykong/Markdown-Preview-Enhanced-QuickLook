@@ -44,8 +44,8 @@ public class AppearancePreference: ObservableObject {
 
     public var currentMode: AppearanceMode {
         get {
-            let raw = sharedStore.string(forKey: key) ?? AppearanceMode.light.rawValue
-            return AppearanceMode(rawValue: raw) ?? .light
+            let raw = sharedStore.string(forKey: key) ?? AppearanceMode.system.rawValue
+            return AppearanceMode(rawValue: raw) ?? .system
         }
         set {
             objectWillChange.send()
