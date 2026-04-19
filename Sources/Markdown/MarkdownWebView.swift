@@ -168,6 +168,12 @@ struct MarkdownWebView: NSViewRepresentable {
             )
             NotificationCenter.default.addObserver(
                 self,
+                selector: #selector(handleResetZoom),
+                name: .resetZoom,
+                object: nil
+            )
+            NotificationCenter.default.addObserver(
+                self,
                 selector: #selector(handleReloadFile),
                 name: .reloadFile,
                 object: nil
@@ -199,15 +205,20 @@ struct MarkdownWebView: NSViewRepresentable {
         @objc func handleZoomIn() {
             guard let webView = currentWebView,
                   webView.window?.isKeyWindow == true else { return }
-            webView.pageZoom += 0.1
-            AppearancePreference.shared.zoomLevel = webView.pageZoom
+            webView.pageZoom = min(3.0, webView.pageZoom + 0.1)
         }
 
         @objc func handleZoomOut() {
             guard let webView = currentWebView,
                   webView.window?.isKeyWindow == true else { return }
             webView.pageZoom = max(0.5, webView.pageZoom - 0.1)
-            AppearancePreference.shared.zoomLevel = webView.pageZoom
+        }
+
+        @objc func handleResetZoom() {
+            guard let webView = currentWebView,
+                  webView.window?.isKeyWindow == true else { return }
+            webView.pageZoom = 1.0
+            os_log("🔵 pageZoom reset to 1.0", log: logger, type: .debug)
         }
 
         @objc func handleReloadFile() {
@@ -767,15 +778,21 @@ class ResizableWKWebView: WKWebView {
     
     override func scrollWheel(with event: NSEvent) {
         if event.modifierFlags.contains(.command) {
+            // Bug 4 fix: ignore inertia-only phases (mayBegin/cancelled = Cmd touch without real scroll)
+            let phase = event.phase
+            if phase == .mayBegin || phase == .cancelled {
+                super.scrollWheel(with: event)
+                return
+            }
             let delta = event.scrollingDeltaY
-            guard abs(delta) > 0.1 else { return }
-
-            currentZoomLevel += delta * 0.01
-            currentZoomLevel = max(0.5, min(3.0, currentZoomLevel))
-
-            self.magnification = currentZoomLevel
-            AppearancePreference.shared.zoomLevel = currentZoomLevel
-            os_log("🔵 Cmd+scroll zoom: %.2f (delta: %.2f)", log: logger, type: .debug, currentZoomLevel, delta)
+            guard abs(delta) > 0.1 else {
+                super.scrollWheel(with: event)
+                return
+            }
+            // Bug 6 fix: use pageZoom (text reflow) instead of magnification (visual-only scale)
+            let newZoom = min(3.0, max(0.5, self.pageZoom + delta * 0.01))
+            self.pageZoom = newZoom
+            os_log("🔵 Cmd+scroll pageZoom: %.2f", log: logger, type: .debug, newZoom)
             return
         }
         super.scrollWheel(with: event)
@@ -814,10 +831,7 @@ class ResizableWKWebView: WKWebView {
         hasSetInitialSize = true
         
         self.allowsMagnification = true
-        let savedZoom = AppearancePreference.shared.zoomLevel
-        if savedZoom > 0 {
-            self.pageZoom = savedZoom
-        }
+        self.pageZoom = 1.0   // Bug 2 fix: zoom is session-only, always start at 1.0
     }
 }
 
