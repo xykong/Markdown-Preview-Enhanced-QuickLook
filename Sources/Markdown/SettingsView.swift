@@ -1,4 +1,28 @@
 import SwiftUI
+import AppKit
+
+// MARK: - Helpers
+
+private struct NoFocusRingContainer<Content: View>: NSViewRepresentable {
+    let content: Content
+
+    func makeNSView(context: Context) -> NSHostingView<Content> {
+        let host = NSHostingView(rootView: content)
+        host.focusRingType = .none
+        return host
+    }
+
+    func updateNSView(_ nsView: NSHostingView<Content>, context: Context) {
+        nsView.rootView = content
+    }
+}
+
+private extension View {
+    func noFocusRing() -> some View {
+        NoFocusRingContainer(content: self)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+}
 
 // MARK: - Models
 
@@ -123,6 +147,7 @@ struct AppearanceSettingsView: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color(NSColor.separatorColor), lineWidth: 1)
             )
+            .noFocusRing()
 
             SettingsSectionHeader(title: "Language", description: "Interface language for the help panel")
 
@@ -177,25 +202,23 @@ struct AppearanceSettingsView: View {
             } else {
                 Color(NSColor.controlBackgroundColor)
             }
-            Button(action: action) {
-                VStack(spacing: 6) {
-                    Image(systemName: icon)
-                        .font(.system(size: 18))
-                    Text(label)
-                        .font(.system(size: 12))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 14)
-                .foregroundColor(isSelected ? .accentColor : .secondary)
-                .contentShape(Rectangle())
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 18))
+                Text(label)
+                    .font(.system(size: 12))
             }
-            .buttonStyle(PlainButtonStyle())
-            .focusable(false)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .foregroundColor(isSelected ? .accentColor : .secondary)
+            .contentShape(Rectangle())
+            .onTapGesture { action() }
 
             Rectangle()
                 .fill(isSelected ? Color.accentColor : Color.clear)
                 .frame(height: 2)
         }
+        .noFocusRing()
     }
 }
 
