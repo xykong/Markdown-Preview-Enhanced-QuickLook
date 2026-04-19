@@ -13,14 +13,36 @@ description: |
 
 通过截图 + AI 分析实现 macOS 原生 App 的 UI 自我验证，无需用户手动测试。
 
+## 工具选型结论（实测验证）
+
+### 推荐优先级
+
+| 优先级 | 工具 | 适用场景 | 可靠性 |
+|--------|------|---------|--------|
+| ✅ **首选** | Swift AX API (`ax_click`) | 有 label/desc 的按钮 | 最高，不依赖坐标 |
+| ✅ **次选** | `osascript click at {x,y}` | 无名称的控件（checkbox、slider） | 高，在 AX 层执行 |
+| ❌ **禁用** | `cliclick c:x,y` | — | 全部失败（第一次点击只激活窗口） |
+| ❌ **不引入** | Appium mac2 | — | SwiftUI Settings 窗口坐标全零，实际失效 |
+| ❌ **不引入** | Macaca macOS | — | 本质是 osascript 封装，2023 停维 |
+
+### 为什么 cliclick 失败？
+
+cliclick 发送硬件级鼠标事件（CGEvent）。macOS 规定：点击 inactive 窗口的**第一次点击只激活窗口**，不传递到控件。
+`osascript click at` 在 System Events 进程内直接触发 AX Press action，完全绕过窗口激活流程。
+
+### 为什么 Appium mac2 对 Settings 失效？
+
+SwiftUI `Settings` scene 是辅助窗口（secondary window），WDA 只扫 active 主窗口，Settings 窗口的所有控件坐标返回 `{y:982, x:0, w:0, h:0}`。
+
 ## 核心工具链
 
 | 工具 | 作用 |
 |------|------|
 | `screencapture -l <windowID>` | 精确截取指定窗口（不受其他窗口遮挡影响） |
 | Swift + CGWindowList | 获取窗口 ID |
-| `osascript` | 键盘操作、打开窗口、Accessibility API |
-| `cliclick c:x,y` | 鼠标点击（需 Accessibility 权限） |
+| Swift AX API (`ax_click`) | 按名称点击控件（最可靠） |
+| `osascript click at {x,y}` | 按坐标点击（无名称控件的备选方案） |
+| `osascript` | 键盘操作、打开窗口 |
 | `look_at` | AI 分析截图内容 |
 
 ## 标准验证循环
@@ -192,24 +214,18 @@ swiftc /tmp/ax_tree.swift -o /tmp/ax_tree 2>/dev/null
 osascript -e 'tell application "System Events" to keystroke "," using {command down}'
 ```
 
-### 坐标点击（备选，AX 找不到时用）
+### 坐标点击（次选：无名称控件，如 checkbox/slider）
 
 ```bash
-cliclick c:<x>,<y>   # 需要终端有辅助功能权限
+# ⚠️ 不要用 cliclick！它只激活窗口，不触发按钮。
+# 必须用 osascript click at（在 AX 层执行，绕过窗口激活流程）
+osascript -e 'tell application "System Events" to tell process "FluxMarkdown" to click at {975, 519}'
 sleep 0.5
 ```
 
-### 鼠标点击
+坐标来源：先用 `ax_tree` 获取控件坐标，中心点 = `pos_x + width/2, pos_y + height/2`。
 
-```bash
-cliclick c:<x>,<y>
-sleep 0.5
-```
-
-> ⚠️ `cliclick` 需要在「系统偏好设置 → 隐私 → 辅助功能」中授权终端。
-> 若无效，改用 `osascript` 的 `click at {x, y}`。
-
-### 键盘操作（更可靠）
+### 键盘操作
 
 ```bash
 osascript -e 'tell application "System Events" to keystroke "," using {command down}'
@@ -293,11 +309,12 @@ screencapture -l $WIN_ID /tmp/flux_settings_verify.png
 
 | 问题 | 原因 | 解决 |
 |------|------|------|
-| `cliclick` 无效 | 无辅助功能权限 | 系统设置授权，或改用 `osascript click at` |
+| `cliclick` 无效 | 第一次点击只激活窗口，不触发控件 | **改用 `osascript click at {x,y}`**，永远不用 cliclick |
 | 截到错误窗口 | 未用 `-l` 指定窗口 ID | 必须用 `screencapture -l <ID>` |
-| `look_at` 分析错标签 | 截图时标签未切换完成 | `delay` 延长到 1.5s，或先确认标签再截图 |
-| 窗口 ID 变了 | 窗口重新打开 | 每次操作前重新运行 `findwin` |
-| 侧边栏点击不到 | 坐标偏移 | 用 Accessibility API 获取实时坐标 |
+| `look_at` 分析错标签 | 截图时标签未切换完成 | `sleep 0.5` 后再截图 |
+| 窗口 ID 变了 | 窗口重新打开后 ID 会变 | 每次操作前重新运行 `findwin` |
+| ax_click 找不到控件 | 控件没有 desc/label | 改用 `osascript click at` + `ax_tree` 获取坐标 |
+| Appium/WDA 坐标全零 | SwiftUI Settings 是辅助窗口，WDA 不可见 | 不要用 Appium 操作 Settings；用 AX API |
 
 ## 验证结论撰写规范
 
