@@ -1,6 +1,16 @@
 ## [Unreleased]
 _无待发布的变更_
 
+## [1.28.360] - 2026-04-20
+
+### Fixed
+- **App Zoom: no reset button in toolbar** (#27): Added "Reset Zoom" button (arrow.uturn.backward) between Zoom Out and Zoom In buttons in the App window toolbar; `Cmd+0` shortcut also triggers reset
+- **App Zoom: zoom level persists across files** (#27): Each document now opens at 100% zoom — zoom is session-only, not saved to UserDefaults, WKProcessPool isolated per window to prevent WebKit zoom state inheritance
+- **App Zoom: no upper zoom limit** (#27): Zoom In is now capped at 300% (`min(3.0, ...)`)
+- **App Zoom: trackpad inertia triggers zoom** (#27): `scrollWheel` handler now ignores `.mayBegin`, `.cancelled` phases and any non-zero `momentumPhase` events
+- **App Zoom: content overflow instead of reflow** (#27): Switched from `webView.magnification` (visual-only scale) to `webView.pageZoom` (triggers proper layout reflow)
+- **App Zoom: zoom resets when switching files** (#27): `Coordinator.render()` resets `pageZoom = 1.0` on each new document load
+
 ## [1.27.349] - 2026-04-20
 
 ### Fixed
