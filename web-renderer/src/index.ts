@@ -396,6 +396,7 @@ declare global {
     interface Window {
         renderMarkdown: (text: string, options?: RenderOptions) => Promise<void>;
         renderSource: (text: string, theme: string) => void;
+        updateTheme: (theme: string) => void;
         exportHTML: () => string;
         setZoomLevel: (level: number) => void;
         setFontSize: (px: number) => void;
@@ -799,6 +800,10 @@ window.renderSource = function(text: string, theme: string) {
             outputDiv.innerHTML = `<div style="color:red;padding:20px;border:1px solid red;border-radius:5px;"><h3>Source Rendering Error</h3><pre>${e}</pre></div>`;
         }
     }
+};
+
+window.updateTheme = function(theme: string) {
+    document.documentElement.setAttribute('data-theme', theme);
 };
 
 function compressMultipleHyphens(text: string): string {
