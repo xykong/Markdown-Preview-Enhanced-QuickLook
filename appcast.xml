@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.26.343</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.26.343</link>
+            <sparkle:version>343</sparkle:version>
+            <sparkle:shortVersionString>1.26.343</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Sun, 19 Apr 2026 14:42:25 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.26.343/FluxMarkdown.dmg"
+                sparkle:edSignature="VgGDkffopabrSEpQfKB67lsLxHaXA0emFzCZ9hSEB3hcW78vsp5Mkl74x192kY14MDILon/hGq18VVY6tjW7CA=="
+                length="10718953"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Fixed</h3><ul><li><strong>Theme switching: non-destructive DOM updates</strong>: Fixed theme toggle triggering a full re-render that reset scroll position and document state (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Implemented <code>window.updateTheme()</code> which only updates <code>data-theme</code> attribute, preserving entire DOM</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Scroll position, TOC expansion, open details blocks, and cursor position are all retained on theme switch</li><li><strong>Theme switching: system appearance sync</strong>: Fixed QuickLook preview not following macOS system appearance (Light/Dark) in Finder (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Added KVO observer on <code>view.effectiveAppearance</code> in Swift to detect OS-level appearance changes</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Preview now automatically updates when user switches between Light and Dark in System Preferences</li><li><strong>Theme switching: button visibility</strong>: Fixed theme toggle button invisible/hard to see in certain themes (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Changed button background from hard-coded <code>NSColor.black.withAlphaComponent(0.1)</code> to adaptive <code>NSColor.systemFill</code> which responds to both Light and Dark modes</li><li><strong>Theme switching: Show Source respects theme</strong>: Fixed "Show Source" view not following manual theme switch (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>toggleTheme()</code> now calls unified <code>applyThemeToWebView()</code> which covers both rendered and source view modes</li><li><strong>Theme switching: source view dark mode contrast</strong>: Fixed poor readability of source code in dark mode (#26, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Rewrote <code>source-view.css</code> to use CSS variables (<code>--bg</code>, <code>--fg</code>, <code>--border</code>) that adapt to <code>[data-theme="dark"]</code></li><li>&nbsp;&nbsp;&nbsp;&nbsp;Dark mode now uses proper contrast colors instead of inheriting light-mode values</li><li><strong>Zoom: reset button</strong>: Fixed missing zoom reset button in the toolbar (#27, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Added a dedicated "Reset Zoom" button that restores zoom to 100%</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>Cmd+0</code> keyboard shortcut also triggers reset</li><li><strong>Zoom: not persisted across sessions</strong>: Fixed zoom level being saved and restored across different files/sessions (#27, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Zoom is now session-only; each file opens at 100% zoom</li><li><strong>Zoom: maximum cap</strong>: Fixed zoom having no upper limit, allowing runaway zoom (#27, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Zoom is now clamped to a maximum of 300%</li><li><strong>Zoom: inertia scroll mis-trigger</strong>: Fixed trackpad inertia scroll (after fingers lifted) incorrectly triggering zoom (#27, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Added <code>phase</code> check in <code>scrollWheel</code> handler; inertia events (<code>.mayBegin</code>, <code>.cancelled</code>) are now ignored for zoom</li><li><strong>Zoom: proper text reflow</strong>: Fixed zoom not causing text to reflow — content overflowed instead of wrapping (#27, thanks -Alb)</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Replaced <code>transform: scale()</code> (visual-only) with CSS variable <code>--zoom-scale</code> applied to font-size, which triggers proper text layout reflow</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.26.343">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.25.310</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.25.310</link>
             <sparkle:version>310</sparkle:version>
