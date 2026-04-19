@@ -36,22 +36,20 @@ class InteractiveWebView: WKWebView {
     }
     
     override func scrollWheel(with event: NSEvent) {
+        guard event.phase == .changed || event.phase == .began else {
+            super.scrollWheel(with: event)
+            return
+        }
+
         if event.modifierFlags.contains(.command) {
-            os_log("🔵 WebView scrollWheel with CMD modifier", log: logger, type: .debug)
-            
-            let js = """
-            (function() {
-                var currentZoom = parseFloat(document.getElementById('markdown-preview')?.style.transform?.match(/scale\\(([^)]+)\\)/)?.[1] || 1.0);
-                var delta = \(event.scrollingDeltaY);
-                var newZoom = currentZoom + (delta > 0 ? 0.05 : -0.05);
-                newZoom = Math.max(0.5, Math.min(3.0, newZoom));
-                if (window.setZoomLevel) {
-                    window.setZoomLevel(newZoom);
-                }
-            })();
-            """
-            
-            self.evaluateJavaScript(js, completionHandler: nil)
+            let delta = event.scrollingDeltaY
+            guard abs(delta) > 0.1 else {
+                super.scrollWheel(with: event)
+                return
+            }
+            let newZoom = max(0.5, min(3.0, self.pageZoom + (delta > 0 ? 0.05 : -0.05)))
+            self.pageZoom = newZoom
+            os_log("🔵 Cmd+scroll zoom: %.2f", log: logger, type: .debug, newZoom)
             return
         }
         super.scrollWheel(with: event)
@@ -237,6 +235,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     private var helpButton: NSButton!
     private var zoomInButton: NSButton!
     private var zoomOutButton: NSButton!
+    private var resetZoomButton: NSButton!
     private var reloadButton: NSButton!
     private var versionLabel: NSTextField!
     
@@ -336,6 +335,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         setupHelpButton()
         setupZoomInButton()
         setupZoomOutButton()
+        setupResetZoomButton()
         setupReloadButton()
         setupVersionLabel()
         
@@ -362,10 +362,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         webView.addGestureRecognizer(doubleClickGesture)
         
         webView.allowsMagnification = true
-        let savedZoom = AppearancePreference.shared.zoomLevel
-        if savedZoom > 0 {
-            webView.pageZoom = savedZoom
-        }
+        // Zoom is session-only; always start at 1.0 (Bug 2 fix)
+        webView.pageZoom = 1.0
         
         DispatchQueue.main.async {
             self.view.window?.makeFirstResponder(self.webView)
@@ -716,6 +714,33 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         ])
     }
 
+    private func setupResetZoomButton() {
+        let button = NSButton()
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.bezelStyle = .circular
+        button.isBordered = false
+        button.wantsLayer = true
+        button.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.5).cgColor
+        button.layer?.cornerRadius = 15
+        button.target = self
+        button.action = #selector(resetZoom)
+
+        if let image = NSImage(systemSymbolName: "arrow.uturn.backward", accessibilityDescription: "Reset Zoom") {
+            button.image = image
+            button.contentTintColor = NSColor.labelColor
+        }
+
+        self.view.addSubview(button)
+        self.resetZoomButton = button
+
+        NSLayoutConstraint.activate([
+            button.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 10),
+            button.trailingAnchor.constraint(equalTo: zoomOutButton.leadingAnchor, constant: -8),
+            button.widthAnchor.constraint(equalToConstant: 30),
+            button.heightAnchor.constraint(equalToConstant: 30)
+        ])
+    }
+
     private func setupReloadButton() {
         let button = NSButton()
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -845,20 +870,17 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     }
     
     @objc private func zoomIn() {
-        webView.pageZoom += 0.1
-        AppearancePreference.shared.zoomLevel = webView.pageZoom
+        webView.pageZoom = min(3.0, webView.pageZoom + 0.1)
         os_log("🔵 pageZoom in: %.2f", log: logger, type: .debug, webView.pageZoom)
     }
     
     @objc private func zoomOut() {
         webView.pageZoom = max(0.5, webView.pageZoom - 0.1)
-        AppearancePreference.shared.zoomLevel = webView.pageZoom
         os_log("🔵 pageZoom out: %.2f", log: logger, type: .debug, webView.pageZoom)
     }
     
     @objc private func resetZoom() {
         webView.pageZoom = 1.0
-        AppearancePreference.shared.zoomLevel = 1.0
         os_log("🔵 pageZoom reset", log: logger, type: .debug)
     }
 
