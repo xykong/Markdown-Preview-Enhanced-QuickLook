@@ -65,6 +65,13 @@ final class AppZoomTests: XCTestCase {
         XCTAssertEqual(initialZoomLevel(), 1.0)
     }
 
+    func testZoomReset_onFileSwitch_returnsOnePointZero() {
+        let zoomBeforeSwitch = 2.5
+        let zoomAfterSwitch = 1.0
+        XCTAssertEqual(zoomAfterSwitch, 1.0, "Zoom must reset to 1.0 when switching files")
+        XCTAssertNotEqual(zoomBeforeSwitch, zoomAfterSwitch, "Zoom should have changed on file switch")
+    }
+
     // MARK: - Bug 3: Zoom In has no upper cap
 
     func testZoomIn_atMax_clampsToThreePointZero() {

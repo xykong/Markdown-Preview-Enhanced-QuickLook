@@ -293,6 +293,7 @@ struct MarkdownWebView: NSViewRepresentable {
             if fileURL != currentFileURL {
                 currentFileURL = fileURL
                 startFileMonitoring()
+                webView.pageZoom = 1.0
             }
 
             if let url = fileURL {
