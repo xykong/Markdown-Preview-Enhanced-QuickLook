@@ -171,7 +171,7 @@ struct AppearanceSettingsView: View {
 
     private func ThemeOptionButton(mode: AppearanceMode, icon: String, label: String, current: AppearanceMode, action: @escaping () -> Void) -> some View {
         let isSelected = current == mode
-        return ZStack {
+        return ZStack(alignment: .bottom) {
             if isSelected {
                 Color.accentColor.opacity(0.12)
             } else {
@@ -190,10 +190,10 @@ struct AppearanceSettingsView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(PlainButtonStyle())
-            .overlay(
-                Rectangle()
-                    .stroke(Color.accentColor, lineWidth: isSelected ? 2 : 0)
-            )
+
+            Rectangle()
+                .fill(isSelected ? Color.accentColor : Color.clear)
+                .frame(height: 2)
         }
     }
 }
