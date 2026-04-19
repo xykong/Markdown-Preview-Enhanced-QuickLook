@@ -1,4 +1,7 @@
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.26.343] - 2026-04-19
 
 ### Fixed
 - **Theme switching: non-destructive DOM updates**: Fixed theme toggle triggering a full re-render that reset scroll position and document state (#26, thanks @Ctrl-Alb)
