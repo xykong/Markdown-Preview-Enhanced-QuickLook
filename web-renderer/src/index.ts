@@ -632,6 +632,7 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         currentTheme = 'default';
     }
     const mermaidTheme = currentTheme === 'dark' ? 'dark' : 'default';
+    document.documentElement.setAttribute('data-theme', currentTheme);
 
     try {
         if (!toc) {
@@ -780,6 +781,8 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
 };
 
 window.renderSource = function(text: string, theme: string) {
+    const normalizedTheme = (theme === 'light') ? 'default' : theme;
+    document.documentElement.setAttribute('data-theme', normalizedTheme);
     const outputDiv = document.getElementById('markdown-preview');
     const loadingDiv = document.getElementById('loading-status');
 
