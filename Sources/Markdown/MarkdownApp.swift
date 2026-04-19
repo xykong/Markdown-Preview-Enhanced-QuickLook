@@ -156,17 +156,20 @@ struct MarkdownApp: App {
                     .help(viewMode == .source ? "Show Preview" : "Show Source")
 
                     Button(action: {
-                        let current = preference.currentMode
-                        preference.currentMode = (current == .dark) ? .light : .dark
+                        switch preference.currentMode {
+                        case .system: preference.currentMode = .light
+                        case .light:  preference.currentMode = .dark
+                        case .dark:   preference.currentMode = .system
+                        }
                     }) {
-                        Image(systemName: preference.currentMode == .dark ? "sun.max.fill" : "moon.fill")
-                            .foregroundColor(preference.currentMode == .dark ? .yellow : .secondary)
+                        Image(systemName: preference.currentMode == .light ? "sun.max.fill" : preference.currentMode == .dark ? "moon.fill" : "circle.lefthalf.filled")
+                            .foregroundColor(preference.currentMode == .light ? .yellow : .secondary)
                             .frame(width: 30, height: 30)
                     }
                     .buttonStyle(PlainButtonStyle())
                     .background(Color.black.opacity(0.1))
                     .clipShape(Circle())
-                    .help(preference.currentMode == .dark ? "Light Mode" : "Dark Mode")
+                    .help("Toggle Theme (System / Light / Dark)")
                 }
                 .padding([.top, .trailing], 10)
             }
