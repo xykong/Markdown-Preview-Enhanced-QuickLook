@@ -155,6 +155,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     
     private let logger = OSLog(subsystem: "com.markdownquicklook.app", category: "MarkdownPreview")
     
+    private var appearanceObservation: NSKeyValueObservation?
+    
     private let maxPreviewSizeBytes: UInt64 = 500 * 1024 // 500KB limit
     
     private func logScreenEnvironment(context: String) {
@@ -412,6 +414,13 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         super.viewDidAppear()
         logScreenEnvironment(context: "viewDidAppear")
         
+        appearanceObservation = view.observe(\.effectiveAppearance, options: [.new]) { [weak self] _, _ in
+            guard let self = self else { return }
+            os_log("🌓 [effectiveAppearance KVO] System appearance changed", log: self.logger, type: .default)
+            self.applyThemeToWebView()
+            self.updateThemeButtonState()
+        }
+        
         DispatchQueue.main.async { [weak self] in
             self?.view.window?.makeFirstResponder(self)
             os_log("🔵 Attempted to make view controller first responder", 
@@ -423,6 +432,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         super.viewWillDisappear()
         logScreenEnvironment(context: "viewWillDisappear")
 
+        appearanceObservation?.invalidate()
+        appearanceObservation = nil
         stopFileMonitoring()
 
         os_log("📊 [viewWillDisappear] trackingEnabled=%{public}@ didUserResize=%{public}@ currentSize=%{public}@",
@@ -519,7 +530,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         button.bezelStyle = .circular
         button.isBordered = false
         button.wantsLayer = true
-        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.5).cgColor
         button.layer?.cornerRadius = 15
         button.target = self
         button.action = #selector(toggleTheme)
@@ -546,15 +557,14 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         updateThemeButtonState()
         
-        if isWebViewLoaded {
-            renderPendingMarkdown()
-        }
+        // 使用 updateTheme() 而非 renderPendingMarkdown()，避免 DOM 重建导致状态丢失（Bug 2）
+        applyThemeToWebView()
     }
     
     private func updateThemeButtonState() {
-        let isDark = AppearancePreference.shared.currentMode == .dark
+        let isDark = (currentThemeString() == "dark")
         let iconName = isDark ? "sun.max.fill" : "moon.fill"
-        let iconColor = isDark ? NSColor.yellow : NSColor.darkGray
+        let iconColor = isDark ? NSColor.systemYellow : NSColor.labelColor
         
         if let image = NSImage(systemSymbolName: iconName, accessibilityDescription: "Toggle Theme") {
             themeButton.image = image
@@ -568,7 +578,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         button.bezelStyle = .circular
         button.isBordered = false
         button.wantsLayer = true
-        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.5).cgColor
         button.layer?.cornerRadius = 15
         button.target = self
         button.action = #selector(toggleViewMode)
@@ -627,7 +637,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         button.bezelStyle = .circular
         button.isBordered = false
         button.wantsLayer = true
-        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.5).cgColor
         button.layer?.cornerRadius = 15
         button.target = self
         button.action = #selector(toggleHelp)
@@ -658,7 +668,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         button.bezelStyle = .circular
         button.isBordered = false
         button.wantsLayer = true
-        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.5).cgColor
         button.layer?.cornerRadius = 15
         button.target = self
         button.action = #selector(zoomIn)
@@ -685,7 +695,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         button.bezelStyle = .circular
         button.isBordered = false
         button.wantsLayer = true
-        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.5).cgColor
         button.layer?.cornerRadius = 15
         button.target = self
         button.action = #selector(zoomOut)
@@ -712,7 +722,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         button.bezelStyle = .circular
         button.isBordered = false
         button.wantsLayer = true
-        button.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.1).cgColor
+        button.layer?.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.5).cgColor
         button.layer?.cornerRadius = 15
         button.target = self
         button.action = #selector(reloadFileManually)
@@ -753,6 +763,37 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         ])
     }
 
+    /// 根据当前 effectiveAppearance 返回 "dark" / "light" / "system"
+    private func currentThemeString() -> String {
+        let appearanceName = self.view.effectiveAppearance.name
+        if appearanceName == .darkAqua || appearanceName == .vibrantDark ||
+           appearanceName == .accessibilityHighContrastDarkAqua ||
+           appearanceName == .accessibilityHighContrastVibrantDark {
+            return "dark"
+        } else if appearanceName == .aqua || appearanceName == .vibrantLight ||
+                  appearanceName == .accessibilityHighContrastAqua ||
+                  appearanceName == .accessibilityHighContrastVibrantLight {
+            return "light"
+        }
+        return "system"
+    }
+
+    /// 调用 JS window.updateTheme()，不重新渲染文档（避免 DOM 重建）
+    private func applyThemeToWebView() {
+        guard isWebViewLoaded else { return }
+        let theme = currentThemeString()
+        let js = """
+        if (typeof window.updateTheme === 'function') {
+            window.updateTheme('\(theme)');
+        }
+        """
+        webView.evaluateJavaScript(js) { _, error in
+            if let error = error {
+                os_log("🔴 updateTheme JS error: %{public}@", log: self.logger, type: .error, error.localizedDescription)
+            }
+        }
+    }
+
     private func renderCurrentMode() {
         if currentViewMode == .preview {
             renderPendingMarkdown()
@@ -782,13 +823,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         let safeContentArg = String(contentJsonArray.dropFirst().dropLast())
         
-        let appearanceName = self.view.effectiveAppearance.name
-        var theme = "system"
-        if appearanceName == .darkAqua || appearanceName == .vibrantDark || appearanceName == .accessibilityHighContrastDarkAqua || appearanceName == .accessibilityHighContrastVibrantDark {
-            theme = "dark"
-        } else if appearanceName == .aqua || appearanceName == .vibrantLight || appearanceName == .accessibilityHighContrastAqua || appearanceName == .accessibilityHighContrastVibrantLight {
-            theme = "light"
-        }
+        let theme = currentThemeString()
         
         let callJs = """
         try {
@@ -1032,13 +1067,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         let safeContentArg = String(contentJsonArray.dropFirst().dropLast())
         
-        let appearanceName = self.view.effectiveAppearance.name
-        var theme = "system"
-        if appearanceName == .darkAqua || appearanceName == .vibrantDark || appearanceName == .accessibilityHighContrastDarkAqua || appearanceName == .accessibilityHighContrastVibrantDark {
-            theme = "dark"
-        } else if appearanceName == .aqua || appearanceName == .vibrantLight || appearanceName == .accessibilityHighContrastAqua || appearanceName == .accessibilityHighContrastVibrantLight {
-            theme = "light"
-        }
+        let theme = currentThemeString()
         
         let capturedURL = self.currentURL
         
