@@ -615,7 +615,13 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             
             let scrollY = (result as? Double) ?? 0.0
             
+            let prevMode = self.currentViewMode
             self.currentViewMode = (self.currentViewMode == .preview) ? .source : .preview
+            os_log("🔵 toggleViewMode: %{public}@ → %{public}@ isWebViewLoaded=%{public}@",
+                   log: self.logger, type: .default,
+                   prevMode == .preview ? "preview" : "source",
+                   self.currentViewMode == .preview ? "preview" : "source",
+                   self.isWebViewLoaded ? "true" : "false")
             self.updateSourceButtonState()
             
             if self.isWebViewLoaded {
@@ -630,6 +636,10 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                         }
                     }
                 }
+            } else {
+                os_log("🔴 toggleViewMode: isWebViewLoaded=false, renderCurrentMode skipped! Mode toggled to %{public}@ but content NOT updated.",
+                       log: self.logger, type: .error,
+                       self.currentViewMode == .preview ? "preview" : "source")
             }
         }
     }
@@ -1077,7 +1087,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 self.lastKnownFileSize = fileSize
                 self.lastKnownFileModificationDate = fileMtime
                 if self.isWebViewLoaded {
-                    self.renderPendingMarkdown()
+                    self.renderCurrentMode()
                 }
                 
                 self.startFileMonitoring()
@@ -1136,21 +1146,20 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 return
             }
             
-            let callJs = """
-            try {
-                window.renderMarkdown(\(safeContentArg), \(optionsJson));
-                "success"
-            } catch(e) {
-                "error: " + e.toString()
-            }
-            """
+            let callJs = "return window.renderMarkdown(\(safeContentArg), \(optionsJson));"
             
             await MainActor.run {
-                self.webView.evaluateJavaScript(callJs) { (innerResult, innerError) in
-                    if let innerError = innerError {
-                        os_log("🔴 JS Execution Error: %{public}@", log: self.logger, type: .error, innerError.localizedDescription)
-                    } else if let res = innerResult as? String {
-                        os_log("🔵 JS Execution Result: %{public}@", log: self.logger, type: .debug, res)
+                self.webView.callAsyncJavaScript(
+                    callJs,
+                    arguments: [:],
+                    in: nil,
+                    in: WKContentWorld.page
+                ) { result in
+                    switch result {
+                    case .failure(let error):
+                        os_log("🔴 JS Execution Error (renderMarkdown): %{public}@", log: self.logger, type: .error, error.localizedDescription)
+                    case .success(let value):
+                        os_log("🔵 renderMarkdown completed successfully, result: %{public}@", log: self.logger, type: .debug, String(describing: value))
                     }
                     
                     if let url = self.currentURL,
@@ -1266,7 +1275,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 cancelHandshakeTimeout()
                 
                 isWebViewLoaded = true
-                renderPendingMarkdown()
+                renderCurrentMode()
             }
         } else if message.name == "linkClicked", let href = message.body as? String {
             os_log("🔵 Link clicked from JS: %{public}@", log: logger, type: .default, href)

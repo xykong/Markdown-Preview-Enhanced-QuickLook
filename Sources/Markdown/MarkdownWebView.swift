@@ -96,6 +96,7 @@ struct MarkdownWebView: NSViewRepresentable {
     }
 
     func updateNSView(_ webView: WKWebView, context: Context) {
+        print("🔵 updateNSView called with viewMode=\(viewMode)")
         if let appearance = appearanceMode.nsAppearance {
             webView.appearance = appearance
         } else {
@@ -285,7 +286,7 @@ struct MarkdownWebView: NSViewRepresentable {
         }
         
         func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool) {
-            lastViewMode = viewMode
+            print("🟢 Coordinator.render called with viewMode=\(viewMode)")
             lastAppearanceMode = appearanceMode
             lastBaseFontSize = baseFontSize
             lastEnableMermaid = enableMermaid
@@ -326,8 +327,9 @@ struct MarkdownWebView: NSViewRepresentable {
         }
 
         private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool) {
-            let onlyThemeChanged = (content == lastRenderedContent) && (viewMode == .preview) && (collapseBlockquotesByDefault == lastCollapseBlockquotesByDefault)
+            let onlyThemeChanged = (content == lastRenderedContent) && (viewMode == .preview) && (viewMode == lastViewMode) && (collapseBlockquotesByDefault == lastCollapseBlockquotesByDefault)
             if onlyThemeChanged {
+                os_log("🔵 FAST PATH: only theme changed, viewMode=%{public}@ lastViewMode=%{public}@", log: logger, type: .debug, String(describing: viewMode), String(describing: lastViewMode))
                 let theme: String
                 switch appearanceMode {
                 case .dark:   theme = "dark"
@@ -343,7 +345,9 @@ struct MarkdownWebView: NSViewRepresentable {
                 return
             }
 
+            os_log("🟡 FULL RENDER: viewMode=%{public}@ lastViewMode was=%{public}@", log: logger, type: .debug, String(describing: viewMode), String(describing: lastViewMode))
             lastRenderedContent = content
+            lastViewMode = viewMode
             lastCollapseBlockquotesByDefault = collapseBlockquotesByDefault
 
             guard let contentData = try? JSONSerialization.data(withJSONObject: [content], options: []),
@@ -393,8 +397,10 @@ struct MarkdownWebView: NSViewRepresentable {
                     }
                 }
                 js = "window.renderSource(\(safeContentArg), \"\(themeStr)\");"
+                os_log("🔴 Calling renderSource", log: logger, type: .debug)
             } else {
                 js = "window.renderMarkdown(\(safeContentArg), \(optionsJson));"
+                os_log("🟢 Calling renderMarkdown", log: logger, type: .debug)
             }
             
             webView.evaluateJavaScript(js) { [weak self] _, error in

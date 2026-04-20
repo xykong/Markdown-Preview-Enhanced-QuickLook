@@ -593,6 +593,8 @@ ${clone.innerHTML}
 };
 
 window.renderMarkdown = async function (text: string, options: RenderOptions = {}) {
+    const callId = Date.now();
+    logToSwift(`[renderMarkdown:${callId}] START textLen=${text.length}`);
     const outputDiv = document.getElementById('markdown-preview');
     const loadingDiv = document.getElementById('loading-status');
 
@@ -733,7 +735,9 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
             }
         });
 
+        logToSwift(`[renderMarkdown:${callId}] UPDATING DOM innerHTML`);
         outputDiv.innerHTML = tempDiv.innerHTML;
+        logToSwift(`[renderMarkdown:${callId}] DOM UPDATED successfully`);
 
         if (blockquoteCollapse) {
             blockquoteCollapse.setInitialState(options.collapseBlockquotes === true);
@@ -790,8 +794,9 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
             }
         }, 0);
 
+        logToSwift(`[renderMarkdown:${callId}] COMPLETE`);
     } catch (e) {
-        logToSwift("JS Error during render: " + e);
+        logToSwift(`[renderMarkdown:${callId}] ERROR: ` + e);
         if (outputDiv) {
             outputDiv.innerHTML = `<div style="color:red;padding:20px;border:1px solid red;border-radius:5px;"><h3>Rendering Error</h3><pre>${e}</pre></div>`;
         }
@@ -799,6 +804,7 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
 };
 
 window.renderSource = function(text: string, theme: string) {
+    logToSwift(`[renderSource] START textLen=${text.length} theme=${theme}`);
     const normalizedTheme = (theme === 'light') ? 'default' : theme;
     document.documentElement.setAttribute('data-theme', normalizedTheme);
     const outputDiv = document.getElementById('markdown-preview');
