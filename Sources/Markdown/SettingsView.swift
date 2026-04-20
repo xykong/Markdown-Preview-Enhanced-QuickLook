@@ -252,6 +252,13 @@ struct RenderingSettingsView: View {
                     icon: "face.smiling",
                     isOn: Binding(get: { preference.enableEmoji }, set: { preference.enableEmoji = $0 })
                 )
+                Divider().padding(.leading, 52)
+                FeatureToggleRow(
+                    title: "Collapse Blockquotes by Default",
+                    subtitle: "Collapse blockquote sections when opening a document",
+                    icon: "text.quote",
+                    isOn: Binding(get: { preference.collapseBlockquotesByDefault }, set: { preference.collapseBlockquotesByDefault = $0 })
+                )
             }
             .background(Color(NSColor.controlBackgroundColor))
             .cornerRadius(8)

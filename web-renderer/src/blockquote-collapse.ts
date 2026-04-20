@@ -46,15 +46,44 @@ export class BlockquoteCollapse {
         return this.collapsed;
     }
 
+    private targets(): NodeListOf<HTMLElement> {
+        return this.preview.querySelectorAll<HTMLElement>('blockquote, .markdown-alert');
+    }
+
+    private collapseAll(): void {
+        this.targets().forEach(el => {
+            const placeholder = this.createPlaceholder(el);
+            el.before(placeholder);
+            el.style.display = 'none';
+        });
+        this.button.setAttribute('aria-label', 'Expand blockquotes');
+        this.button.classList.add('active');
+    }
+
+    private expandAll(): void {
+        this.preview.querySelectorAll<HTMLElement>('.blockquote-placeholder').forEach(p => p.remove());
+        this.targets().forEach(el => {
+            el.style.display = '';
+        });
+        this.button.setAttribute('aria-label', 'Collapse blockquotes');
+        this.button.classList.remove('active');
+    }
+
+    private createPlaceholder(target: HTMLElement): HTMLElement {
+        const ph = document.createElement('div');
+        ph.className = 'blockquote-placeholder';
+        ph.addEventListener('click', () => {
+            target.style.display = '';
+            ph.remove();
+        });
+        return ph;
+    }
+
     private applyState(): void {
         if (this.collapsed) {
-            this.preview.classList.add('blockquotes-collapsed');
-            this.button.setAttribute('aria-label', 'Expand blockquotes');
-            this.button.classList.add('active');
+            this.collapseAll();
         } else {
-            this.preview.classList.remove('blockquotes-collapsed');
-            this.button.setAttribute('aria-label', 'Collapse blockquotes');
-            this.button.classList.remove('active');
+            this.expandAll();
         }
     }
 }

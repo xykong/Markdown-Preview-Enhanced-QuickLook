@@ -1118,11 +1118,12 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         }
 
         let capturedUILanguage = AppearancePreference.shared.uiLanguage
+        let capturedCollapseBlockquotes = AppearancePreference.shared.collapseBlockquotesByDefault
 
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
             
-            var options: [String: Any] = ["theme": theme, "context": "quicklook", "uiLanguage": capturedUILanguage]
+            var options: [String: Any] = ["theme": theme, "context": "quicklook", "uiLanguage": capturedUILanguage, "collapseBlockquotes": capturedCollapseBlockquotes]
             if let url = capturedURL {
                 options["baseUrl"] = url.deletingLastPathComponent().path
             }

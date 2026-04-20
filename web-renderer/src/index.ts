@@ -670,10 +670,6 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
                 logToSwift("JS Warning: BlockquoteCollapse initialization failed: " + e);
             }
         }
-        if (blockquoteCollapse) {
-            blockquoteCollapse.setInitialState(options.collapseBlockquotes === true);
-        }
-
         const { yaml, body } = extractFrontMatter(text);
         const frontMatterHtml = yaml ? renderFrontMatterHtml(yaml) : '';
 
@@ -738,6 +734,10 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         });
 
         outputDiv.innerHTML = tempDiv.innerHTML;
+
+        if (blockquoteCollapse) {
+            blockquoteCollapse.setInitialState(options.collapseBlockquotes === true);
+        }
 
         if (detectRtlContent(renderBody)) {
             outputDiv.setAttribute('dir', 'rtl');

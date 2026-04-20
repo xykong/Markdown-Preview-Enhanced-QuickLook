@@ -83,7 +83,8 @@ struct MarkdownApp: App {
                     enableMermaid: preference.enableMermaid,
                     enableKatex: preference.enableKatex,
                     enableEmoji: preference.enableEmoji,
-                    codeHighlightTheme: preference.codeHighlightTheme
+                    codeHighlightTheme: preference.codeHighlightTheme,
+                    collapseBlockquotesByDefault: preference.collapseBlockquotesByDefault
                 )
 
                 if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {

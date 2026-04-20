@@ -1,5 +1,8 @@
 ## [Unreleased]
-_无待发布的变更_
+
+### Added
+- **Collapse Blockquotes by Default (Settings)**: Added "Collapse Blockquotes by Default" toggle in Settings → Rendering, allowing users to auto-collapse all blockquote/alert sections when opening a document
+- **Blockquote placeholder bar**: When blockquotes are collapsed, each is replaced by a compact placeholder bar (with `▶` arrow) instead of a gradient-truncated preview; clicking any placeholder individually expands that block without affecting others
 
 ## [1.28.360] - 2026-04-20
 

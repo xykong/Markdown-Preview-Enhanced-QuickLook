@@ -112,6 +112,7 @@ public class AppearancePreference: ObservableObject {
     private let enableMermaidKey = "enableMermaid"
     private let enableKatexKey = "enableKatex"
     private let enableEmojiKey = "enableEmoji"
+    private let collapseBlockquotesByDefaultKey = "collapseBlockquotesByDefault"
     private let uiLanguageKey = "uiLanguage"
 
     public var baseFontSize: Double {
@@ -167,6 +168,18 @@ public class AppearancePreference: ObservableObject {
         set {
             objectWillChange.send()
             sharedStore.set(newValue, forKey: enableEmojiKey)
+            scheduleSyncToSharedStore()
+        }
+    }
+
+    public var collapseBlockquotesByDefault: Bool {
+        get {
+            guard sharedStore.object(forKey: collapseBlockquotesByDefaultKey) != nil else { return false }
+            return sharedStore.bool(forKey: collapseBlockquotesByDefaultKey)
+        }
+        set {
+            objectWillChange.send()
+            sharedStore.set(newValue, forKey: collapseBlockquotesByDefaultKey)
             scheduleSyncToSharedStore()
         }
     }

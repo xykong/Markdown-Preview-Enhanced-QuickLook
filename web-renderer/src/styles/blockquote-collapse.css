@@ -1,6 +1,3 @@
-/* web-renderer/src/styles/blockquote-collapse.css */
-
-/* ── Toggle button ── */
 .blockquote-collapse-toggle {
     position: fixed;
     top: 115px;
@@ -36,30 +33,34 @@
     color: #0969da;
 }
 
-/* ── Collapsed state ── */
-#markdown-preview.blockquotes-collapsed blockquote,
-#markdown-preview.blockquotes-collapsed .markdown-alert {
-    max-height: 2.4em;
-    overflow: hidden;
-    position: relative;
+.blockquote-placeholder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    margin: 4px 0;
+    border-left: 3px solid #d0d7de;
+    border-radius: 0 4px 4px 0;
+    background-color: #f6f8fa;
+    color: #57606a;
+    font-size: 0.85em;
     cursor: pointer;
-    transition: max-height 0.25s ease;
+    user-select: none;
+    transition: background-color 0.15s ease;
 }
 
-/* Fade-out gradient at bottom of collapsed blockquote */
-#markdown-preview.blockquotes-collapsed blockquote::after,
-#markdown-preview.blockquotes-collapsed .markdown-alert::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 1.2em;
-    background: linear-gradient(transparent, #ffffff);
-    pointer-events: none;
+.blockquote-placeholder:hover {
+    background-color: #eaeef2;
+    color: #24292f;
 }
 
-/* ── Dark mode ── */
+.blockquote-placeholder::before {
+    content: '▶';
+    font-size: 0.7em;
+    opacity: 0.6;
+    flex-shrink: 0;
+}
+
 @media (prefers-color-scheme: dark) {
     .blockquote-collapse-toggle {
         border-color: #30363d;
@@ -77,13 +78,18 @@
         color: #58a6ff;
     }
 
-    #markdown-preview.blockquotes-collapsed blockquote::after,
-    #markdown-preview.blockquotes-collapsed .markdown-alert::after {
-        background: linear-gradient(transparent, #0d1117);
+    .blockquote-placeholder {
+        border-left-color: #30363d;
+        background-color: #161b22;
+        color: #8b949e;
+    }
+
+    .blockquote-placeholder:hover {
+        background-color: #1c2128;
+        color: #c9d1d9;
     }
 }
 
-/* data-theme attribute support (for explicit theme switching) */
 [data-theme="dark"] .blockquote-collapse-toggle {
     border-color: #30363d;
     background-color: #0d1117;
@@ -100,30 +106,32 @@
     color: #58a6ff;
 }
 
-[data-theme="dark"] #markdown-preview.blockquotes-collapsed blockquote::after,
-[data-theme="dark"] #markdown-preview.blockquotes-collapsed .markdown-alert::after {
-    background: linear-gradient(transparent, #0d1117);
+[data-theme="dark"] .blockquote-placeholder {
+    border-left-color: #30363d;
+    background-color: #161b22;
+    color: #8b949e;
 }
 
-/* ── Print: always show full content ── */
+[data-theme="dark"] .blockquote-placeholder:hover {
+    background-color: #1c2128;
+    color: #c9d1d9;
+}
+
 @media print {
     .blockquote-collapse-toggle {
         display: none !important;
     }
 
-    #markdown-preview.blockquotes-collapsed blockquote,
-    #markdown-preview.blockquotes-collapsed .markdown-alert {
-        max-height: none !important;
-        overflow: visible !important;
+    .blockquote-placeholder {
+        display: none !important;
     }
 
-    #markdown-preview.blockquotes-collapsed blockquote::after,
-    #markdown-preview.blockquotes-collapsed .markdown-alert::after {
-        display: none !important;
+    blockquote,
+    .markdown-alert {
+        display: block !important;
     }
 }
 
-/* ── Hide at narrow widths (matches TOC behavior) ── */
 @media (max-width: 1200px) {
     .blockquote-collapse-toggle {
         display: none;

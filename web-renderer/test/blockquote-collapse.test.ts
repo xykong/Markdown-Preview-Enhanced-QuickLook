@@ -44,28 +44,26 @@ describe('BlockquoteCollapse', () => {
     test('setInitialState(true) collapses preview on load', () => {
         const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
         bc.setInitialState(true);
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(true);
         expect(bc.isCollapsed()).toBe(true);
     });
 
     test('setInitialState(false) leaves preview expanded', () => {
         const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
         bc.setInitialState(false);
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(false);
         expect(bc.isCollapsed()).toBe(false);
     });
 
-    test('toggle() adds blockquotes-collapsed class when expanded', () => {
+    test('toggle() collapses when expanded', () => {
         const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
         bc.toggle();
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(true);
+        expect(bc.isCollapsed()).toBe(true);
     });
 
-    test('toggle() removes blockquotes-collapsed class when collapsed', () => {
+    test('toggle() expands when collapsed', () => {
         const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
         bc.setInitialState(true);
         bc.toggle();
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(false);
+        expect(bc.isCollapsed()).toBe(false);
     });
 
     test('toggle() updates isCollapsed() state', () => {
@@ -103,16 +101,7 @@ describe('BlockquoteCollapse', () => {
         const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
         bc.setInitialState(true);
         const para = preview.querySelector('p');
-        expect(para?.classList.contains('blockquotes-collapsed')).toBeFalsy();
-    });
-
-    // CSS class behavior tests
-    test('blockquotes-collapsed class is on preview element (not on blockquote itself)', () => {
-        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
-        bc.toggle();
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(true);
-        const bq = preview.querySelector('blockquote');
-        expect(bq?.classList.contains('blockquotes-collapsed')).toBeFalsy();
+        expect(para?.style.display).not.toBe('none');
     });
 
     test('button has active class when collapsed', () => {
@@ -123,5 +112,70 @@ describe('BlockquoteCollapse', () => {
         expect(button.classList.contains('active')).toBe(true);
         bc.toggle();
         expect(button.classList.contains('active')).toBe(false);
+    });
+
+    // ── Placeholder behaviour ──
+
+    test('collapsing hides blockquote elements (display:none)', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        const bq = preview.querySelector('blockquote') as HTMLElement;
+        expect(bq.style.display).toBe('none');
+    });
+
+    test('collapsing hides markdown-alert elements (display:none)', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        const alert = preview.querySelector('.markdown-alert') as HTMLElement;
+        expect(alert.style.display).toBe('none');
+    });
+
+    test('collapsing inserts a placeholder for each collapsed element', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        const placeholders = preview.querySelectorAll('.blockquote-placeholder');
+        expect(placeholders.length).toBe(2);
+    });
+
+    test('expanding removes all placeholders', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        bc.toggle();
+        const placeholders = preview.querySelectorAll('.blockquote-placeholder');
+        expect(placeholders.length).toBe(0);
+    });
+
+    test('expanding restores blockquote visibility', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        bc.toggle();
+        const bq = preview.querySelector('blockquote') as HTMLElement;
+        expect(bq.style.display).not.toBe('none');
+    });
+
+    test('clicking placeholder expands that individual block', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        const placeholder = preview.querySelector('.blockquote-placeholder') as HTMLElement;
+        placeholder.click();
+        const bq = preview.querySelector('blockquote') as HTMLElement;
+        expect(bq.style.display).not.toBe('none');
+        expect(preview.querySelectorAll('.blockquote-placeholder').length).toBe(1);
+    });
+
+    test('clicking placeholder removes only that placeholder', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        const placeholders = preview.querySelectorAll('.blockquote-placeholder');
+        (placeholders[0] as HTMLElement).click();
+        expect(preview.querySelectorAll('.blockquote-placeholder').length).toBe(1);
+    });
+
+    test('placeholder is inserted adjacent to its collapsed element', () => {
+        const bc = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+        bc.toggle();
+        const bq = preview.querySelector('blockquote') as HTMLElement;
+        const placeholder = bq.previousElementSibling;
+        expect(placeholder?.classList.contains('blockquote-placeholder')).toBe(true);
     });
 });

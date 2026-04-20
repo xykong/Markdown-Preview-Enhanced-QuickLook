@@ -19,6 +19,7 @@ struct MarkdownWebView: NSViewRepresentable {
     var enableKatex: Bool = true
     var enableEmoji: Bool = true
     var codeHighlightTheme: String = "default"
+    var collapseBlockquotesByDefault: Bool = false
     
     private let localSchemeHandler = LocalSchemeHandler()
     
@@ -101,7 +102,7 @@ struct MarkdownWebView: NSViewRepresentable {
             webView.appearance = nil
         }
 
-        context.coordinator.render(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme)
+        context.coordinator.render(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme, collapseBlockquotesByDefault: collapseBlockquotesByDefault)
     }
 
     class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
@@ -124,6 +125,7 @@ struct MarkdownWebView: NSViewRepresentable {
         private var lastEnableKatex: Bool = true
         private var lastEnableEmoji: Bool = true
         private var lastCodeHighlightTheme: String = "default"
+        private var lastCollapseBlockquotesByDefault: Bool = false
         private var lastRenderedContent: String = ""
         private var pollingTimer: Timer?
         private let pollingInterval: TimeInterval = 2.0
@@ -282,7 +284,7 @@ struct MarkdownWebView: NSViewRepresentable {
             return fileURL.deletingPathExtension().lastPathComponent + ".\(ext)"
         }
         
-        func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String) {
+        func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool) {
             lastViewMode = viewMode
             lastAppearanceMode = appearanceMode
             lastBaseFontSize = baseFontSize
@@ -312,7 +314,7 @@ struct MarkdownWebView: NSViewRepresentable {
             }
 
             pendingRender = { [weak self] in
-                self?.executeRender(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme)
+                self?.executeRender(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme, collapseBlockquotesByDefault: collapseBlockquotesByDefault)
             }
 
             if isWebViewLoaded {
@@ -323,8 +325,8 @@ struct MarkdownWebView: NSViewRepresentable {
             }
         }
 
-        private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String) {
-            let onlyThemeChanged = (content == lastRenderedContent) && (viewMode == .preview)
+        private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool) {
+            let onlyThemeChanged = (content == lastRenderedContent) && (viewMode == .preview) && (collapseBlockquotesByDefault == lastCollapseBlockquotesByDefault)
             if onlyThemeChanged {
                 let theme: String
                 switch appearanceMode {
@@ -342,6 +344,7 @@ struct MarkdownWebView: NSViewRepresentable {
             }
 
             lastRenderedContent = content
+            lastCollapseBlockquotesByDefault = collapseBlockquotesByDefault
 
             guard let contentData = try? JSONSerialization.data(withJSONObject: [content], options: []),
                   let contentJsonArray = String(data: contentData, encoding: .utf8) else {
@@ -372,6 +375,7 @@ struct MarkdownWebView: NSViewRepresentable {
             options["enableMermaid"] = enableMermaid
             options["enableKatex"] = enableKatex
             options["enableEmoji"] = enableEmoji
+            options["collapseBlockquotes"] = collapseBlockquotesByDefault
             options["uiLanguage"] = AppearancePreference.shared.uiLanguage
             
             guard let optionsData = try? JSONSerialization.data(withJSONObject: options, options: []),
@@ -693,7 +697,8 @@ struct MarkdownWebView: NSViewRepresentable {
                     enableMermaid: lastEnableMermaid,
                     enableKatex: lastEnableKatex,
                     enableEmoji: lastEnableEmoji,
-                    codeHighlightTheme: lastCodeHighlightTheme
+                    codeHighlightTheme: lastCodeHighlightTheme,
+                    collapseBlockquotesByDefault: lastCollapseBlockquotesByDefault
                 )
                 os_log("🟢 Reloaded from disk: %{public}@", log: logger, type: .default, url.lastPathComponent)
             } catch {

@@ -17,21 +17,23 @@ describe('BlockquoteCollapse integration with renderMarkdown', () => {
         expect(button).toBeTruthy();
     });
 
-    test('collapseBlockquotes: true option collapses preview on initial render', async () => {
+    test('collapseBlockquotes: true option inserts placeholder and hides blockquote', async () => {
         await window.renderMarkdown('> A blockquote', { collapseBlockquotes: true });
         const preview = document.getElementById('markdown-preview')!;
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(true);
+        const bq = preview.querySelector('blockquote') as HTMLElement;
+        expect(bq.style.display).toBe('none');
+        expect(preview.querySelector('.blockquote-placeholder')).toBeTruthy();
     });
 
-    test('collapseBlockquotes: false (default) leaves preview expanded', async () => {
+    test('collapseBlockquotes: false (default) leaves blockquote visible', async () => {
         await window.renderMarkdown('> A blockquote', { collapseBlockquotes: false });
         const preview = document.getElementById('markdown-preview')!;
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(false);
+        expect(preview.querySelector('.blockquote-placeholder')).toBeFalsy();
     });
 
     test('collapseBlockquotes defaults to false when option omitted', async () => {
         await window.renderMarkdown('> A blockquote');
         const preview = document.getElementById('markdown-preview')!;
-        expect(preview.classList.contains('blockquotes-collapsed')).toBe(false);
+        expect(preview.querySelector('.blockquote-placeholder')).toBeFalsy();
     });
 });
