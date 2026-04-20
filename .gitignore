@@ -63,6 +63,9 @@ test-base64.html
 # Claude AI configuration
 .claude/
 
+# Git worktrees
+.worktrees/
+
 # Backup files
 *.backup
 
