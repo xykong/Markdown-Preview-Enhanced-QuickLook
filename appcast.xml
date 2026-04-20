@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.29.368</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.29.368</link>
+            <sparkle:version>368</sparkle:version>
+            <sparkle:shortVersionString>1.29.368</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Mon, 20 Apr 2026 15:51:21 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.29.368/FluxMarkdown.dmg"
+                sparkle:edSignature="La09b/9nV1Px9l0gb0AKYdRnyIsPpzL9IhZVrUZiu3jU3ulg7egYJFzpJhm0nylbAzNrUGYGpF6/7ojcSKoXBQ=="
+                length="10716349"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Added</h3><ul><li><strong>Collapse Blockquotes by Default (Settings)</strong>: Added "Collapse Blockquotes by Default" toggle in Settings → Rendering, allowing users to auto-collapse all blockquote/alert sections when opening a document</li><li><strong>Blockquote placeholder bar</strong>: When blockquotes are collapsed, each is replaced by a compact placeholder bar (with <code>▶</code> arrow) instead of a gradient-truncated preview; clicking any placeholder individually expands that block without affecting others</li></ul><h3>Fixed</h3><ul><li><strong>Source↔Preview toggle not restoring rendered content (App)</strong>: Fixed clicking "Show Preview" after "Show Source" leaving the window stuck on source code view</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Root cause: <code>onlyThemeChanged</code> fast-path in <code>MarkdownWebView.executeRender</code> incorrectly fired when content was unchanged and mode was <code>.preview</code>, skipping the <code>renderMarkdown</code> call entirely</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Fix: added <code>viewMode == lastViewMode</code> guard so that any mode transition always triggers a full render; moved <code>lastViewMode</code> tracking into <code>executeRender</code> so the previous mode is available at comparison time</li><li><strong>QuickLook source↔preview race condition</strong>: Fixed <code>renderSource</code> overwriting a pending async <code>renderMarkdown</code> result in the QuickLook extension</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Replaced <code>evaluateJavaScript</code> with <code>callAsyncJavaScript(in: WKContentWorld.page)</code> to properly await the async Promise before completion</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Switched <code>rendererReady</code> and <code>providePreview</code> callbacks from <code>renderPendingMarkdown</code> to <code>renderCurrentMode</code> so WebView reloads restore the correct view mode</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.29.368">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.28.360</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.28.360</link>
             <sparkle:version>360</sparkle:version>
