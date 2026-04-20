@@ -1,8 +1,20 @@
 ## [Unreleased]
 
+_无待发布的变更_
+
+## [1.29.368] - 2026-04-20
+
 ### Added
 - **Collapse Blockquotes by Default (Settings)**: Added "Collapse Blockquotes by Default" toggle in Settings → Rendering, allowing users to auto-collapse all blockquote/alert sections when opening a document
 - **Blockquote placeholder bar**: When blockquotes are collapsed, each is replaced by a compact placeholder bar (with `▶` arrow) instead of a gradient-truncated preview; clicking any placeholder individually expands that block without affecting others
+
+### Fixed
+- **Source↔Preview toggle not restoring rendered content (App)**: Fixed clicking "Show Preview" after "Show Source" leaving the window stuck on source code view
+  - Root cause: `onlyThemeChanged` fast-path in `MarkdownWebView.executeRender` incorrectly fired when content was unchanged and mode was `.preview`, skipping the `renderMarkdown` call entirely
+  - Fix: added `viewMode == lastViewMode` guard so that any mode transition always triggers a full render; moved `lastViewMode` tracking into `executeRender` so the previous mode is available at comparison time
+- **QuickLook source↔preview race condition**: Fixed `renderSource` overwriting a pending async `renderMarkdown` result in the QuickLook extension
+  - Replaced `evaluateJavaScript` with `callAsyncJavaScript(in: WKContentWorld.page)` to properly await the async Promise before completion
+  - Switched `rendererReady` and `providePreview` callbacks from `renderPendingMarkdown` to `renderCurrentMode` so WebView reloads restore the correct view mode
 
 ## [1.28.360] - 2026-04-20
 
