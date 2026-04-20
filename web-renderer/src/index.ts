@@ -88,6 +88,7 @@ import './styles/source-view.css';
 import './styles/callouts.css';
 import './styles/print.css';
 import './styles/help-overlay.css';
+import './styles/blockquote-collapse.css';
 
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js/lib/core';
@@ -225,6 +226,7 @@ import { TableOfContents } from './table-of-contents';
 import { SearchEngine } from './search';
 import { SearchUI } from './search-ui';
 import { HelpOverlay } from './help-overlay';
+import { BlockquoteCollapse } from './blockquote-collapse';
 import { detectRtlContent } from './rtl';
 
 function extractFrontMatter(text: string): { yaml: string | null; body: string } {
@@ -348,6 +350,7 @@ let toc: TableOfContents | null = null;
 let searchEngine: SearchEngine | null = null;
 let searchUI: SearchUI | null = null;
 let helpOverlay: HelpOverlay | null = null;
+let blockquoteCollapse: BlockquoteCollapse | null = null;
 let mermaidInstance: typeof import('mermaid')['default'] | null = null;
 let mermaidCurrentTheme: string | null = null;
 let katexPlugin: ((md: MarkdownIt) => void) | null = null;
@@ -366,6 +369,7 @@ interface RenderOptions {
     enableEmoji?: boolean;
     context?: 'quicklook' | 'app';
     uiLanguage?: string;
+    collapseBlockquotes?: boolean;
 }
 
 let currentContext: 'quicklook' | 'app' = 'app';
@@ -657,6 +661,17 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
             } catch (e) {
                 logToSwift("JS Warning: HelpOverlay initialization failed: " + e);
             }
+        }
+        if (!blockquoteCollapse || !document.getElementById('collapse-btn-container')?.contains(document.querySelector('.blockquote-collapse-toggle'))) {
+            blockquoteCollapse = null;
+            try {
+                blockquoteCollapse = new BlockquoteCollapse('collapse-btn-container', 'markdown-preview');
+            } catch (e) {
+                logToSwift("JS Warning: BlockquoteCollapse initialization failed: " + e);
+            }
+        }
+        if (blockquoteCollapse) {
+            blockquoteCollapse.setInitialState(options.collapseBlockquotes === true);
         }
 
         const { yaml, body } = extractFrontMatter(text);
