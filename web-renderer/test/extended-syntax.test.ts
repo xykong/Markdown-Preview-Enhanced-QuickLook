@@ -105,8 +105,7 @@ describe('Extended Syntax', () => {
             const md = '# Hello\n\nThis is **bold**.';
             window.renderSource(md, 'light');
             const preview = document.getElementById('markdown-preview')!;
-            expect(preview.querySelector('.source-view')).toBeTruthy();
-            expect(preview.querySelector('pre')).toBeTruthy();
+            expect(preview.querySelector('.source-diff-wrap')).toBeTruthy();
         });
 
         test('applies dark class when theme is dark', () => {

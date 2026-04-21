@@ -346,6 +346,8 @@ struct MarkdownWebView: NSViewRepresentable {
             }
 
             os_log("🟡 FULL RENDER: viewMode=%{public}@ lastViewMode was=%{public}@", log: logger, type: .debug, String(describing: viewMode), String(describing: lastViewMode))
+            // Capture previous content for diff animation before overwriting
+            let previousContent = lastRenderedContent
             lastRenderedContent = content
             lastViewMode = viewMode
             lastCollapseBlockquotesByDefault = collapseBlockquotesByDefault
@@ -381,6 +383,10 @@ struct MarkdownWebView: NSViewRepresentable {
             options["enableEmoji"] = enableEmoji
             options["collapseBlockquotes"] = collapseBlockquotesByDefault
             options["uiLanguage"] = AppearancePreference.shared.uiLanguage
+
+            if !previousContent.isEmpty && previousContent != content {
+                options["prevContent"] = previousContent
+            }
             
             guard let optionsData = try? JSONSerialization.data(withJSONObject: options, options: []),
                   let optionsJson = String(data: optionsData, encoding: .utf8) else {
@@ -396,7 +402,14 @@ struct MarkdownWebView: NSViewRepresentable {
                         themeStr = "dark"
                     }
                 }
-                js = "window.renderSource(\(safeContentArg), \"\(themeStr)\");"
+                if !previousContent.isEmpty && previousContent != content,
+                   let prevData = try? JSONSerialization.data(withJSONObject: [previousContent]),
+                   let prevJson = String(data: prevData, encoding: .utf8) {
+                    let safePrevArg = String(prevJson.dropFirst().dropLast())
+                    js = "window.renderSource(\(safeContentArg), \"\(themeStr)\", \(safePrevArg));"
+                } else {
+                    js = "window.renderSource(\(safeContentArg), \"\(themeStr)\");"
+                }
                 os_log("🔴 Calling renderSource", log: logger, type: .debug)
             } else {
                 js = "window.renderMarkdown(\(safeContentArg), \(optionsJson));"

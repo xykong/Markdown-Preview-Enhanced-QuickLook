@@ -93,15 +93,10 @@ export class DiffAnimator {
         el.style.animationDelay = `${staggerIdx * 30}ms`;
         staggerIdx++;
       } else if (diff.type === 'modified') {
+        // Only add the amber pulse class — do NOT inject char diffs into rendered HTML,
+        // as oldContent/newContent are raw markdown text that would corrupt the rendered DOM.
         el.classList.add('render-diff-block-modified');
-        this._injectCharDiff(el, diff.oldContent, diff.newContent);
       }
-    }
-  }
-
-  private _injectCharDiff(el: HTMLElement, oldText: string, newText: string): void {
-    if (el.children.length === 0 || (el.tagName === 'P' && el.children.length <= 1)) {
-      el.innerHTML = renderCharDiffHtml(oldText, newText);
     }
   }
 }

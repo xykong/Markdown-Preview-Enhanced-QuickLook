@@ -59,13 +59,13 @@ describe('DiffAnimator.annotateRenderDOM', () => {
     expect(p2?.classList.contains('render-diff-block-enter')).toBe(true);
   });
 
-  test('elements with modified source lines get char spans injected', () => {
+  test('modified source lines get amber pulse class without corrupting rendered HTML', () => {
     const container = document.getElementById('markdown-preview')!;
     container.innerHTML = `<p data-source-line="1">hello world</p>`;
     const diffs = computeLineDiff('hello world', 'hello earth');
     animator.annotateRenderDOM(container, diffs);
     const p = container.querySelector('p')!;
-    expect(p.innerHTML).toContain('diff-char-removed');
-    expect(p.innerHTML).toContain('diff-char-added');
+    expect(p.classList.contains('render-diff-block-modified')).toBe(true);
+    expect(p.innerHTML).toBe('hello world');
   });
 });

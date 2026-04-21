@@ -66,6 +66,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     var statusLabel: NSTextField!
     var webView: InteractiveWebView!
     var pendingMarkdown: String?
+    private var prevMarkdown: String? = nil
     var currentURL: URL?
     var isWebViewLoaded = false
     var currentZoomLevel: Double = 1.0
@@ -875,14 +876,32 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
         
         let theme = currentThemeString()
         
-        let callJs = """
-        try {
-            window.renderSource(\(safeContentArg), "\(theme)");
-            "success"
-        } catch(e) {
-            "error: " + e.toString()
+        let capturedPrevForSource = self.prevMarkdown
+        self.prevMarkdown = nil
+
+        var callJs: String
+        if let prev = capturedPrevForSource, !prev.isEmpty,
+           let prevData = try? JSONSerialization.data(withJSONObject: [prev]),
+           let prevJson = String(data: prevData, encoding: .utf8) {
+            let safePrevArg = String(prevJson.dropFirst().dropLast())
+            callJs = """
+            try {
+                window.renderSource(\(safeContentArg), "\(theme)", \(safePrevArg));
+                "success"
+            } catch(e) {
+                "error: " + e.toString()
+            }
+            """
+        } else {
+            callJs = """
+            try {
+                window.renderSource(\(safeContentArg), "\(theme)");
+                "success"
+            } catch(e) {
+                "error: " + e.toString()
+            }
+            """
         }
-        """
         
         self.webView.evaluateJavaScript(callJs) { (innerResult, innerError) in
             if let innerError = innerError {
@@ -1129,6 +1148,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
 
         let capturedUILanguage = AppearancePreference.shared.uiLanguage
         let capturedCollapseBlockquotes = AppearancePreference.shared.collapseBlockquotesByDefault
+        let capturedPrevMarkdown = self.prevMarkdown
+        self.prevMarkdown = nil
 
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
@@ -1136,6 +1157,9 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             var options: [String: Any] = ["theme": theme, "context": "quicklook", "uiLanguage": capturedUILanguage, "collapseBlockquotes": capturedCollapseBlockquotes]
             if let url = capturedURL {
                 options["baseUrl"] = url.deletingLastPathComponent().path
+            }
+            if let prev = capturedPrevMarkdown, !prev.isEmpty {
+                options["prevContent"] = prev
             }
             
             guard let optionsData = try? JSONSerialization.data(withJSONObject: options, options: []),
@@ -1704,6 +1728,10 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
                 content = "```mermaid\n\(content)\n```"
             }
 
+            // Capture previous content for diff animation
+            if let existing = pendingMarkdown, !existing.isEmpty {
+                prevMarkdown = existing
+            }
             pendingMarkdown = content
             lastKnownFileSize = newSize
             lastKnownFileModificationDate = newMtime

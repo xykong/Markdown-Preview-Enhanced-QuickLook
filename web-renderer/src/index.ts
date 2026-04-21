@@ -89,6 +89,7 @@ import './styles/callouts.css';
 import './styles/print.css';
 import './styles/help-overlay.css';
 import './styles/blockquote-collapse.css';
+import './styles/diff-animations.css';
 
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js/lib/core';
@@ -228,6 +229,8 @@ import { SearchUI } from './search-ui';
 import { HelpOverlay } from './help-overlay';
 import { BlockquoteCollapse } from './blockquote-collapse';
 import { detectRtlContent } from './rtl';
+import { DiffAnimator } from './diff-animator';
+import { computeLineDiff } from './diff-engine';
 
 function extractFrontMatter(text: string): { yaml: string | null; body: string } {
     if (!text.startsWith('---')) {
@@ -337,10 +340,20 @@ function buildMd(): MarkdownIt {
         return defaultImageRender(tokens, idx, options, env, self);
     };
 
+    const defaultRenderToken = instance.renderer.renderToken.bind(instance.renderer);
+    instance.renderer.renderToken = function(tokens: any[], idx: number, options: any): string {
+        const token = tokens[idx];
+        if (token.map && token.map.length >= 2 && (token.nesting === 1 || token.nesting === 0)) {
+            token.attrSet('data-source-line', String(token.map[0] + 1));
+        }
+        return defaultRenderToken(tokens, idx, options);
+    };
+
     return instance;
 }
 
 let md: MarkdownIt = buildMd();
+const diffAnimator = new DiffAnimator();
 
 function rebuildMd(): void {
     md = buildMd();
@@ -370,6 +383,7 @@ interface RenderOptions {
     context?: 'quicklook' | 'app';
     uiLanguage?: string;
     collapseBlockquotes?: boolean;
+    prevContent?: string;
 }
 
 let currentContext: 'quicklook' | 'app' = 'app';
@@ -402,7 +416,7 @@ function applyCodeTheme(theme: string): void {
 declare global {
     interface Window {
         renderMarkdown: (text: string, options?: RenderOptions) => Promise<void>;
-        renderSource: (text: string, theme: string) => void;
+        renderSource: (text: string, theme: string, prevContent?: string) => void;
         updateTheme: (theme: string) => void;
         exportHTML: () => string;
         setZoomLevel: (level: number) => void;
@@ -739,6 +753,11 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         outputDiv.innerHTML = tempDiv.innerHTML;
         logToSwift(`[renderMarkdown:${callId}] DOM UPDATED successfully`);
 
+        if (options.prevContent && options.prevContent.length > 0) {
+            const diffs = computeLineDiff(options.prevContent, text);
+            diffAnimator.annotateRenderDOM(outputDiv, diffs);
+        }
+
         if (blockquoteCollapse) {
             blockquoteCollapse.setInitialState(options.collapseBlockquotes === true);
         }
@@ -803,7 +822,7 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
     }
 };
 
-window.renderSource = function(text: string, theme: string) {
+window.renderSource = function(text: string, theme: string, prevContent?: string) {
     logToSwift(`[renderSource] START textLen=${text.length} theme=${theme}`);
     const normalizedTheme = (theme === 'light') ? 'default' : theme;
     document.documentElement.setAttribute('data-theme', normalizedTheme);
@@ -818,8 +837,9 @@ window.renderSource = function(text: string, theme: string) {
     }
 
     try {
-        const highlighted = hljs.highlight(text, { language: 'markdown', ignoreIllegals: true });
-        outputDiv.innerHTML = `<div class="source-view ${theme === 'dark' ? 'source-view-dark' : 'source-view-light'}"><pre class="source-pre"><code class="hljs language-markdown">${highlighted.value}</code></pre></div>`;
+        const oldText = (prevContent && prevContent.length > 0) ? prevContent : '';
+        const diffs = computeLineDiff(oldText, text);
+        outputDiv.innerHTML = diffAnimator.buildSourceHTML(diffs, theme);
         logToSwift(`[Source View] Rendered ${text.length} characters with theme: ${theme}`);
     } catch (e) {
         logToSwift("JS Error during source rendering: " + e);

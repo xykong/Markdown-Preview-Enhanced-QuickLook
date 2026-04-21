@@ -113,14 +113,14 @@ describe('renderSource initializes data-theme', () => {
 
   test('source-view-dark class is present when theme is "dark"', () => {
     window.renderSource('const x = 1;', 'dark');
-    const sourceView = document.querySelector('.source-view');
+    const sourceView = document.querySelector('.source-diff-wrap');
     expect(sourceView?.classList.contains('source-view-dark')).toBe(true);
     expect(sourceView?.classList.contains('source-view-light')).toBe(false);
   });
 
   test('source-view-light class is present when theme is "light"', () => {
     window.renderSource('const x = 1;', 'light');
-    const sourceView = document.querySelector('.source-view');
+    const sourceView = document.querySelector('.source-diff-wrap');
     expect(sourceView?.classList.contains('source-view-light')).toBe(true);
     expect(sourceView?.classList.contains('source-view-dark')).toBe(false);
   });
@@ -143,21 +143,21 @@ describe('renderSource CSS class assignment', () => {
 
   test('source-view-dark class applied when theme is "dark"', () => {
     window.renderSource('# code', 'dark');
-    const el = document.querySelector('.source-view');
+    const el = document.querySelector('.source-diff-wrap');
     expect(el?.classList.contains('source-view-dark')).toBe(true);
     expect(el?.classList.contains('source-view-light')).toBe(false);
   });
 
   test('source-view-light class applied when theme is "light"', () => {
     window.renderSource('# code', 'light');
-    const el = document.querySelector('.source-view');
+    const el = document.querySelector('.source-diff-wrap');
     expect(el?.classList.contains('source-view-light')).toBe(true);
     expect(el?.classList.contains('source-view-dark')).toBe(false);
   });
 
   test('source-view-light class applied when theme is "default"', () => {
     window.renderSource('# code', 'default');
-    const el = document.querySelector('.source-view');
+    const el = document.querySelector('.source-diff-wrap');
     expect(el?.classList.contains('source-view-light')).toBe(true);
   });
 });
