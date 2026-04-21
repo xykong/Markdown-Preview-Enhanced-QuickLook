@@ -1,0 +1,198 @@
+/* ═══════════════════════════════════════════
+   FluxMarkdown Diff Animations
+   Drives both source-view and render-view diffs
+   ═══════════════════════════════════════════ */
+
+/* ─── Line-level: deleted line collapses upward ─── */
+@keyframes diff-line-exit {
+  0%   { opacity: 1; max-height: 120px; background-color: var(--diff-del-bg-bright); }
+  40%  { opacity: 0.5; }
+  100% { opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; margin-bottom: 0; }
+}
+
+/* ─── Line-level: new line slides down from above ─── */
+@keyframes diff-line-enter {
+  0%   { opacity: 0; transform: translateY(-6px); }
+  60%  { opacity: 1; transform: translateY(1px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Added line: green pulse that fades out ─── */
+@keyframes diff-add-pulse {
+  0%   { background-color: var(--diff-add-bg-bright); }
+  100% { background-color: transparent; }
+}
+
+/* ─── Modified block (render view): amber flash ─── */
+@keyframes diff-mod-pulse {
+  0%   { background-color: var(--diff-mod-bg); }
+  100% { background-color: transparent; }
+}
+
+/* ─── Char highlight: fade out after 3s ─── */
+@keyframes diff-char-fade {
+  0%   { background-color: inherit; opacity: 1; }
+  80%  { opacity: 0.4; }
+  100% { background-color: transparent; opacity: 1; text-decoration: none; }
+}
+
+/* ─── Gutter badge pop-in then fade ─── */
+@keyframes diff-badge-appear { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+@keyframes diff-badge-fade   { from { opacity: 1; } to   { opacity: 0; } }
+
+/* ══════════════════════════════════════
+   CSS Variables (theme-aware)
+   ══════════════════════════════════════ */
+:root {
+  --diff-add-bg:        rgba(46, 160, 67, 0.12);
+  --diff-add-bg-bright: rgba(46, 160, 67, 0.28);
+  --diff-add-char-bg:   rgba(46, 160, 67, 0.38);
+  --diff-add-border:    #2ea043;
+  --diff-del-bg:        rgba(248, 81, 73, 0.12);
+  --diff-del-bg-bright: rgba(248, 81, 73, 0.28);
+  --diff-del-char-bg:   rgba(248, 81, 73, 0.38);
+  --diff-del-border:    #f85149;
+  --diff-mod-bg:        rgba(210, 153, 34, 0.10);
+  --diff-mod-border:    #d29922;
+}
+
+[data-theme="dark"] {
+  --diff-add-bg:        rgba(46, 160, 67, 0.15);
+  --diff-add-bg-bright: rgba(46, 160, 67, 0.32);
+  --diff-add-char-bg:   rgba(74, 222, 128, 0.30);
+  --diff-del-bg:        rgba(248, 81, 73, 0.15);
+  --diff-del-bg-bright: rgba(248, 81, 73, 0.32);
+  --diff-del-char-bg:   rgba(248, 81, 73, 0.38);
+  --diff-mod-bg:        rgba(210, 153, 34, 0.13);
+}
+
+/* ══════════════════════════════════════
+   Source View — line wrappers
+   ══════════════════════════════════════ */
+
+.source-diff-wrap {
+  display: flex;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.source-diff-gutter {
+  flex-shrink: 0;
+  width: 52px;
+  padding: 0;
+  text-align: right;
+  user-select: none;
+  border-right: 1px solid var(--diff-gutter-border, rgba(128,128,128,0.2));
+}
+
+.source-diff-line-num {
+  display: block;
+  padding: 0 8px;
+  height: 1.5em;
+  line-height: 1.5em;
+  font-size: 11px;
+  color: rgba(128,128,128,0.5);
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s, color 0.2s;
+  position: relative;
+}
+
+.source-diff-line-num.diff-added    { border-left-color: var(--diff-add-border); color: #3fb950; }
+.source-diff-line-num.diff-removed  { border-left-color: var(--diff-del-border); color: #f85149; }
+.source-diff-line-num.diff-modified { border-left-color: var(--diff-mod-border); color: #d29922; }
+
+.source-diff-line-num .diff-gutter-badge {
+  display: inline-block;
+  font-size: 9px;
+  margin-left: 2px;
+  animation:
+    diff-badge-appear 0.25s ease-out forwards,
+    diff-badge-fade   0.8s 3.2s ease-out forwards;
+}
+
+.source-diff-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.source-diff-line {
+  display: block;
+  padding: 0 16px;
+  height: 1.5em;
+  line-height: 1.5em;
+  white-space: pre;
+  overflow: hidden;
+}
+
+.source-diff-line.diff-exiting,
+.source-diff-line-num.diff-exiting {
+  overflow: hidden;
+  animation: diff-line-exit 320ms ease-in forwards;
+}
+
+.source-diff-line.diff-entering {
+  animation:
+    diff-line-enter 280ms ease-out forwards,
+    diff-add-pulse  2.8s  280ms ease-out forwards;
+}
+.source-diff-line-num.diff-entering {
+  animation: diff-line-enter 280ms ease-out forwards;
+}
+
+/* ══════════════════════════════════════
+   Render View — block-level animations
+   ══════════════════════════════════════ */
+
+.render-diff-block-exit {
+  overflow: hidden;
+  animation: diff-line-exit 300ms ease-in forwards;
+  pointer-events: none;
+}
+
+.render-diff-block-enter {
+  animation:
+    diff-line-enter 280ms ease-out forwards,
+    diff-add-pulse  2.8s  280ms ease-out forwards;
+}
+
+.render-diff-block-modified {
+  animation: diff-mod-pulse 3.2s ease-out forwards;
+}
+
+/* ══════════════════════════════════════
+   Inline char-level highlights
+   ══════════════════════════════════════ */
+
+.diff-char-added {
+  background-color: var(--diff-add-char-bg);
+  border-radius: 2px;
+  animation: diff-char-fade 3.2s 0.6s ease-out forwards;
+}
+
+.diff-char-removed {
+  background-color: var(--diff-del-char-bg);
+  border-radius: 2px;
+  text-decoration: line-through;
+  text-decoration-color: rgba(248, 81, 73, 0.65);
+  animation: diff-char-fade 3.2s 0.6s ease-out forwards;
+}
+
+/* ══════════════════════════════════════
+   Reduced motion: disable animations
+   ══════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  .source-diff-line.diff-exiting,
+  .source-diff-line.diff-entering,
+  .source-diff-line-num.diff-exiting,
+  .source-diff-line-num.diff-entering,
+  .render-diff-block-exit,
+  .render-diff-block-enter,
+  .render-diff-block-modified,
+  .diff-char-added,
+  .diff-char-removed {
+    animation: none !important;
+    transition: none !important;
+  }
+}
