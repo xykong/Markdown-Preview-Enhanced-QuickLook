@@ -182,6 +182,12 @@ struct MarkdownWebView: NSViewRepresentable {
                 name: .reloadFile,
                 object: nil
             )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleOpenInExternalEditor),
+                name: .openInExternalEditor,
+                object: nil
+            )
         }
         
         deinit {
@@ -231,7 +237,21 @@ struct MarkdownWebView: NSViewRepresentable {
             currentWebView?.evaluateJavaScript("window.clearDiffMarks && window.clearDiffMarks();", completionHandler: nil)
             reloadFromDisk(url: url)
         }
-        
+
+        @objc func handleOpenInExternalEditor() {
+            guard let webView = currentWebView,
+                  webView.window?.isKeyWindow == true,
+                  let url = currentFileURL else { return }
+            let task = Process()
+            task.launchPath = "/usr/bin/open"
+            task.arguments = ["-t", url.path]
+            do {
+                try task.run()
+            } catch {
+                os_log("Failed to open in external editor: %{public}@", log: logger, type: .error, error.localizedDescription)
+            }
+        }
+
         @objc func handleExportHTML() {
             guard let webView = currentWebView,
                   let win = webView.window,

@@ -204,6 +204,12 @@ struct MarkdownApp: App {
                     Text(NSLocalizedString("Reload File", comment: "Reload file menu item"))
                 }
                 .keyboardShortcut("r", modifiers: [.command])
+                Button(action: {
+                    NotificationCenter.default.post(name: .openInExternalEditor, object: nil)
+                }) {
+                    Text(NSLocalizedString("Open in External Editor", comment: "Open in external editor menu item"))
+                }
+                .keyboardShortcut("e", modifiers: [.command, .option])
                 Divider()
                 Button(action: {
                     NotificationCenter.default.post(name: .exportHTML, object: nil)
