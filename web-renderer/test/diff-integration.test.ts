@@ -123,4 +123,26 @@ describe('Task 6: renderMarkdown with prevContent diff annotation', () => {
       window.renderMarkdown('# Test', { prevContent: 'old content' })
     ).resolves.not.toThrow();
   });
+
+  test('renderMarkdown with YAML front matter only animates changed body blocks', async () => {
+    const oldContent = '---\ntitle: Test\n---\n\n# Heading\n\nOld paragraph';
+    const newContent = '---\ntitle: Test\n---\n\n# Heading\n\nNew paragraph';
+
+    await window.renderMarkdown(newContent, { prevContent: oldContent });
+    const preview = document.getElementById('markdown-preview')!;
+
+    const heading = preview.querySelector('h1');
+    expect(heading?.classList.contains('render-diff-block-enter')).toBe(false);
+    expect(heading?.classList.contains('render-diff-block-modified')).toBe(false);
+
+    const modified = preview.querySelectorAll('.render-diff-block-modified, .render-diff-block-enter');
+    expect(modified.length).toBeGreaterThan(0);
+  });
+
+  test('rendered block elements have data-source-line-end attribute', async () => {
+    await window.renderMarkdown('# Heading\n\nParagraph text');
+    const preview = document.getElementById('markdown-preview')!;
+    const heading = preview.querySelector('h1');
+    expect(heading?.getAttribute('data-source-line-end')).toBeTruthy();
+  });
 });

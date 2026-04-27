@@ -25,10 +25,11 @@ describe('DiffAnimator.buildSourceHTML', () => {
     expect(html).toContain('diff-entering');
   });
 
-  test('removed line gets diff-removed class', () => {
+  test('removed line gets diff-removed and diff-exiting classes', () => {
     const diffs = computeLineDiff('hello\nworld', 'hello');
     const html = animator.buildSourceHTML(diffs, 'light');
     expect(html).toContain('diff-removed');
+    expect(html).toContain('diff-exiting');
   });
 
   test('modified line contains char diff spans', () => {
@@ -67,5 +68,51 @@ describe('DiffAnimator.annotateRenderDOM', () => {
     const p = container.querySelector('p')!;
     expect(p.classList.contains('render-diff-block-modified')).toBe(true);
     expect(p.innerHTML).toBe('hello world');
+  });
+
+  test('multi-line block gets animated when change is on non-first line', () => {
+    const container = document.getElementById('markdown-preview')!;
+    container.innerHTML = `<p data-source-line="1" data-source-line-end="3">Multi\nline\nblock</p>`;
+    const diffs = computeLineDiff('Multi\nline\nold', 'Multi\nline\nnew');
+    animator.annotateRenderDOM(container, diffs);
+    const p = container.querySelector('p')!;
+    expect(p.classList.contains('render-diff-block-modified')).toBe(true);
+  });
+
+  test('block spanning multiple lines does not animate when no change in its range', () => {
+    const container = document.getElementById('markdown-preview')!;
+    container.innerHTML = `
+      <p data-source-line="1" data-source-line-end="2">Unchanged block</p>
+      <p data-source-line="3" data-source-line-end="3">Changed block</p>
+    `;
+    const diffs = computeLineDiff('Unchanged block\n\nOld line', 'Unchanged block\n\nNew line');
+    animator.annotateRenderDOM(container, diffs);
+    const p1 = container.querySelectorAll('p')[0];
+    const p2 = container.querySelectorAll('p')[1];
+    expect(p1.classList.contains('render-diff-block-modified')).toBe(false);
+    expect(p1.classList.contains('render-diff-block-enter')).toBe(false);
+    expect(p2.classList.contains('render-diff-block-modified')).toBe(true);
+  });
+
+  test('deleted lines cause a marker chip to appear before the following surviving block', () => {
+    const container = document.getElementById('markdown-preview')!;
+    const oldDoc = 'Keep\nGone\nAlso gone\nSurvives';
+    const newDoc = 'Keep\nSurvives';
+    container.innerHTML = `
+      <p data-source-line="1" data-source-line-end="1">Keep</p>
+      <p data-source-line="2" data-source-line-end="2">Survives</p>
+    `;
+    const diffs = computeLineDiff(oldDoc, newDoc);
+    animator.annotateRenderDOM(container, diffs);
+    const markers = container.querySelectorAll('.render-diff-deleted-marker');
+    expect(markers.length).toBeGreaterThan(0);
+  });
+
+  test('no deleted marker when no lines are removed', () => {
+    const container = document.getElementById('markdown-preview')!;
+    container.innerHTML = `<p data-source-line="1">Hello</p>`;
+    const diffs = computeLineDiff('Hello', 'Hello world');
+    animator.annotateRenderDOM(container, diffs);
+    expect(container.querySelector('.render-diff-deleted-marker')).toBeNull();
   });
 });

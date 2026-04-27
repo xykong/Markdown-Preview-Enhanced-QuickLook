@@ -6,7 +6,8 @@
   "scripts": {
     "build": "vite build --logLevel silent && sed -i '' 's/crossorigin//g' dist/index.html",
     "preview": "vite preview",
-    "test": "jest"
+    "test": "jest",
+    "playground": "vite --port 5174 --open /playground.html"
   },
   "dependencies": {
     "@hpcc-js/wasm-graphviz": "^1.21.0",

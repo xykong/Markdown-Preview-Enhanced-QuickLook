@@ -228,6 +228,7 @@ struct MarkdownWebView: NSViewRepresentable {
         @objc func handleReloadFile() {
             guard let url = currentFileURL else { return }
             os_log("🔄 Manual reload triggered: %{public}@", log: logger, type: .default, url.lastPathComponent)
+            currentWebView?.evaluateJavaScript("window.clearDiffMarks && window.clearDiffMarks();", completionHandler: nil)
             reloadFromDisk(url: url)
         }
         
@@ -416,6 +417,7 @@ struct MarkdownWebView: NSViewRepresentable {
                 os_log("🟢 Calling renderMarkdown", log: logger, type: .debug)
             }
             
+            webView.evaluateJavaScript("window.clearDiffMarks && window.clearDiffMarks();", completionHandler: nil)
             webView.evaluateJavaScript(js) { [weak self] _, error in
                 if let error = error {
                     os_log("JS Error: %{public}@", log: self?.logger ?? .default, type: .error, error.localizedDescription)

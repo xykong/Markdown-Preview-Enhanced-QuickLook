@@ -863,7 +863,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             os_log("🟡 renderSourceView called but WebView not ready", log: logger, type: .debug)
             return
         }
-        
+
+        webView.evaluateJavaScript("window.clearDiffMarks && window.clearDiffMarks();", completionHandler: nil)
         os_log("🔵 renderSourceView called with content length: %d", log: logger, type: .debug, content.count)
         
         guard let contentData = try? JSONSerialization.data(withJSONObject: [content], options: []),
@@ -1127,7 +1128,8 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
             os_log("🟡 renderPendingMarkdown called but WebView not ready (handshake pending), queuing...", log: logger, type: .debug)
             return
         }
-        
+
+        webView.evaluateJavaScript("window.clearDiffMarks && window.clearDiffMarks();", completionHandler: nil)
         os_log("🔵 renderPendingMarkdown called with content length: %d", log: logger, type: .debug, content.count)
         
         guard let contentData = try? JSONSerialization.data(withJSONObject: [content], options: []),

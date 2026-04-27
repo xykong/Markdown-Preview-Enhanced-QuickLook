@@ -345,6 +345,7 @@ function buildMd(): MarkdownIt {
         const token = tokens[idx];
         if (token.map && token.map.length >= 2 && (token.nesting === 1 || token.nesting === 0)) {
             token.attrSet('data-source-line', String(token.map[0] + 1));
+            token.attrSet('data-source-line-end', String(token.map[1]));
         }
         return defaultRenderToken(tokens, idx, options);
     };
@@ -417,6 +418,7 @@ declare global {
     interface Window {
         renderMarkdown: (text: string, options?: RenderOptions) => Promise<void>;
         renderSource: (text: string, theme: string, prevContent?: string) => void;
+        clearDiffMarks: () => void;
         updateTheme: (theme: string) => void;
         exportHTML: () => string;
         setZoomLevel: (level: number) => void;
@@ -754,7 +756,8 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         logToSwift(`[renderMarkdown:${callId}] DOM UPDATED successfully`);
 
         if (options.prevContent && options.prevContent.length > 0) {
-            const diffs = computeLineDiff(options.prevContent, text);
+            const prevBody = extractFrontMatter(options.prevContent).body;
+            const diffs = computeLineDiff(prevBody, renderBody);
             diffAnimator.annotateRenderDOM(outputDiv, diffs);
         }
 
@@ -840,6 +843,7 @@ window.renderSource = function(text: string, theme: string, prevContent?: string
         const oldText = (prevContent && prevContent.length > 0) ? prevContent : '';
         const diffs = computeLineDiff(oldText, text);
         outputDiv.innerHTML = diffAnimator.buildSourceHTML(diffs, theme);
+        diffAnimator.attachSourceMarkListeners(outputDiv);
         logToSwift(`[Source View] Rendered ${text.length} characters with theme: ${theme}`);
     } catch (e) {
         logToSwift("JS Error during source rendering: " + e);
@@ -847,6 +851,24 @@ window.renderSource = function(text: string, theme: string, prevContent?: string
             outputDiv.innerHTML = `<div style="color:red;padding:20px;border:1px solid red;border-radius:5px;"><h3>Source Rendering Error</h3><pre>${e}</pre></div>`;
         }
     }
+};
+
+window.clearDiffMarks = function() {
+    const outputDiv = document.getElementById('markdown-preview');
+    if (!outputDiv) return;
+    outputDiv.querySelectorAll<HTMLElement>('.render-diff-deleted-marker').forEach(el => el.remove());
+    const animClasses = ['diff-entering', 'diff-exiting', 'render-diff-block-enter', 'render-diff-block-modified'];
+    for (const cls of animClasses) {
+        outputDiv.querySelectorAll<HTMLElement>(`.${cls}`).forEach(el => {
+            el.classList.remove(cls);
+            el.style.backgroundColor = '';
+            el.style.animation = '';
+        });
+    }
+    outputDiv.querySelectorAll<HTMLElement>('[style*="background-color"]').forEach(el => {
+        el.style.backgroundColor = '';
+        if (!el.style.cssText.trim()) el.removeAttribute('style');
+    });
 };
 
 window.updateTheme = function(theme: string) {

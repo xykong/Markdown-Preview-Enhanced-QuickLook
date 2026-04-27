@@ -9,6 +9,9 @@ export default defineConfig({
     sourcemap: false,
     emptyOutDir: true,
     rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
       output: {
         manualChunks: {
           mermaid: ['mermaid'],

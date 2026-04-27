@@ -96,3 +96,5 @@ docs/superpowers/
 
 # Test PDF exports (from manual export testing)
 README*.pdf
+playground.html
+playground.ts

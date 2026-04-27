@@ -17,53 +17,54 @@
   100% { opacity: 1; transform: translateY(0); }
 }
 
-/* ─── Added line: green pulse that fades out ─── */
+/* ─── Added line: green flash, then settles to persistent tint ─── */
 @keyframes diff-add-pulse {
   0%   { background-color: var(--diff-add-bg-bright); }
-  100% { background-color: transparent; }
+  100% { background-color: var(--diff-add-bg); }
 }
 
-/* ─── Modified block (render view): amber flash ─── */
+/* ─── Modified block (render view): amber flash, then settles ─── */
 @keyframes diff-mod-pulse {
-  0%   { background-color: var(--diff-mod-bg); }
-  100% { background-color: transparent; }
+  0%   { background-color: var(--diff-mod-bg-bright); }
+  100% { background-color: var(--diff-mod-bg); }
 }
 
-/* ─── Char highlight: fade out after 3s ─── */
-@keyframes diff-char-fade {
-  0%   { background-color: inherit; opacity: 1; }
-  80%  { opacity: 0.4; }
-  100% { background-color: transparent; opacity: 1; text-decoration: none; }
+/* ─── Char highlight: flash to persistent tint ─── */
+@keyframes diff-char-enter {
+  0%   { background-color: inherit; opacity: 0; }
+  30%  { opacity: 1; }
+  100% { opacity: 1; }
 }
 
-/* ─── Gutter badge pop-in then fade ─── */
+/* ─── Gutter badge pop-in (no fade-out) ─── */
 @keyframes diff-badge-appear { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
-@keyframes diff-badge-fade   { from { opacity: 1; } to   { opacity: 0; } }
 
 /* ══════════════════════════════════════
    CSS Variables (theme-aware)
    ══════════════════════════════════════ */
 :root {
-  --diff-add-bg:        rgba(46, 160, 67, 0.12);
-  --diff-add-bg-bright: rgba(46, 160, 67, 0.28);
-  --diff-add-char-bg:   rgba(46, 160, 67, 0.38);
-  --diff-add-border:    #2ea043;
-  --diff-del-bg:        rgba(248, 81, 73, 0.12);
-  --diff-del-bg-bright: rgba(248, 81, 73, 0.28);
-  --diff-del-char-bg:   rgba(248, 81, 73, 0.38);
-  --diff-del-border:    #f85149;
-  --diff-mod-bg:        rgba(210, 153, 34, 0.10);
-  --diff-mod-border:    #d29922;
+  --diff-add-bg:           rgba(46, 160, 67, 0.12);
+  --diff-add-bg-bright:    rgba(46, 160, 67, 0.28);
+  --diff-add-char-bg:      rgba(46, 160, 67, 0.38);
+  --diff-add-border:       #2ea043;
+  --diff-del-bg:           rgba(248, 81, 73, 0.12);
+  --diff-del-bg-bright:    rgba(248, 81, 73, 0.28);
+  --diff-del-char-bg:      rgba(248, 81, 73, 0.38);
+  --diff-del-border:       #f85149;
+  --diff-mod-bg:           rgba(210, 153, 34, 0.10);
+  --diff-mod-bg-bright:    rgba(210, 153, 34, 0.26);
+  --diff-mod-border:       #d29922;
 }
 
 [data-theme="dark"] {
-  --diff-add-bg:        rgba(46, 160, 67, 0.15);
-  --diff-add-bg-bright: rgba(46, 160, 67, 0.32);
-  --diff-add-char-bg:   rgba(74, 222, 128, 0.30);
-  --diff-del-bg:        rgba(248, 81, 73, 0.15);
-  --diff-del-bg-bright: rgba(248, 81, 73, 0.32);
-  --diff-del-char-bg:   rgba(248, 81, 73, 0.38);
-  --diff-mod-bg:        rgba(210, 153, 34, 0.13);
+  --diff-add-bg:           rgba(46, 160, 67, 0.15);
+  --diff-add-bg-bright:    rgba(46, 160, 67, 0.32);
+  --diff-add-char-bg:      rgba(74, 222, 128, 0.30);
+  --diff-del-bg:           rgba(248, 81, 73, 0.15);
+  --diff-del-bg-bright:    rgba(248, 81, 73, 0.32);
+  --diff-del-char-bg:      rgba(248, 81, 73, 0.38);
+  --diff-mod-bg:           rgba(210, 153, 34, 0.13);
+  --diff-mod-bg-bright:    rgba(210, 153, 34, 0.30);
 }
 
 /* ══════════════════════════════════════
@@ -107,9 +108,7 @@
   display: inline-block;
   font-size: 9px;
   margin-left: 2px;
-  animation:
-    diff-badge-appear 0.25s ease-out forwards,
-    diff-badge-fade   0.8s 3.2s ease-out forwards;
+  animation: diff-badge-appear 0.25s ease-out forwards;
 }
 
 .source-diff-content {
@@ -120,18 +119,20 @@
 .source-diff-line {
   display: block;
   padding: 0 16px;
-  height: 1.5em;
+  min-height: 1.5em;
   line-height: 1.5em;
   white-space: pre;
-  overflow: hidden;
 }
 
+/* ── Exit animation (deleted lines collapse) ── */
 .source-diff-line.diff-exiting,
 .source-diff-line-num.diff-exiting {
   overflow: hidden;
+  max-height: 120px;
   animation: diff-line-exit 320ms ease-in forwards;
 }
 
+/* ── Enter animation (added/modified lines slide in) ── */
 .source-diff-line.diff-entering {
   animation:
     diff-line-enter 280ms ease-out forwards,
@@ -141,14 +142,45 @@
   animation: diff-line-enter 280ms ease-out forwards;
 }
 
+
+
 /* ══════════════════════════════════════
    Render View — block-level animations
    ══════════════════════════════════════ */
 
-.render-diff-block-exit {
-  overflow: hidden;
-  animation: diff-line-exit 300ms ease-in forwards;
-  pointer-events: none;
+/* ── Deleted-content indicator chip (render view) ── */
+@keyframes diff-del-marker-appear {
+  0%   { opacity: 0; transform: scaleX(0.8); }
+  60%  { opacity: 1; transform: scaleX(1.02); }
+  100% { opacity: 1; transform: scaleX(1); }
+}
+
+.render-diff-deleted-marker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border-left: 3px solid var(--diff-del-border);
+  background: var(--diff-del-bg);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  color: #f85149;
+  user-select: none;
+  /* Appears once and stays — cleared by clearDiffMarks() */
+  animation: diff-del-marker-appear 0.25s ease-out forwards;
+}
+
+.render-diff-deleted-marker::before {
+  content: '−';
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.render-diff-deleted-marker::after {
+  content: 'deleted';
+  opacity: 0.7;
 }
 
 .render-diff-block-enter {
@@ -168,7 +200,7 @@
 .diff-char-added {
   background-color: var(--diff-add-char-bg);
   border-radius: 2px;
-  animation: diff-char-fade 3.2s 0.6s ease-out forwards;
+  animation: diff-char-enter 0.4s 0.1s ease-out forwards;
 }
 
 .diff-char-removed {
@@ -176,7 +208,7 @@
   border-radius: 2px;
   text-decoration: line-through;
   text-decoration-color: rgba(248, 81, 73, 0.65);
-  animation: diff-char-fade 3.2s 0.6s ease-out forwards;
+  animation: diff-char-enter 0.4s 0.1s ease-out forwards;
 }
 
 /* ══════════════════════════════════════
@@ -187,9 +219,9 @@
   .source-diff-line.diff-entering,
   .source-diff-line-num.diff-exiting,
   .source-diff-line-num.diff-entering,
-  .render-diff-block-exit,
   .render-diff-block-enter,
   .render-diff-block-modified,
+  .render-diff-deleted-marker,
   .diff-char-added,
   .diff-char-removed {
     animation: none !important;
