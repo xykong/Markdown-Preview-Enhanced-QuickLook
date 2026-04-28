@@ -1,6 +1,9 @@
 ## [Unreleased]
 
-_无待发布的变更_
+### Added
+- **Line Numbers in Rendered Preview** (#30): Display source-file line numbers in a left gutter for all block elements (headings, paragraphs, lists, blockquotes, code blocks) in the rendered Markdown preview. Numbers correspond to the original source file line, making it easy to locate any section. Enabled by default; toggle off in Settings → Rendering → "Line Numbers in Code Blocks".
+- **Line Numbers in Source View**: The Source View already displays line numbers via the built-in diff gutter; the gutter is hidden when line numbers are disabled in Settings.
+- **Settings toggle**: Added "Line Numbers" toggle in Settings → Rendering section.
 
 ## [1.29.368] - 2026-04-20
 
