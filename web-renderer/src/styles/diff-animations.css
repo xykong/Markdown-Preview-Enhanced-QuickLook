@@ -76,6 +76,7 @@
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Monaco, Consolas, monospace;
   font-size: 13px;
   line-height: 1.5;
+  --line-row-height: calc(13px * 1.5);
   overflow-x: auto;
 }
 
@@ -91,8 +92,8 @@
 .source-diff-line-num {
   display: block;
   padding: 0 8px;
-  height: 1.5em;
-  line-height: 1.5em;
+  height: var(--line-row-height, 19.5px);
+  line-height: var(--line-row-height, 19.5px);
   font-size: 11px;
   color: rgba(128,128,128,0.5);
   border-left: 3px solid transparent;
@@ -119,8 +120,8 @@
 .source-diff-line {
   display: block;
   padding: 0 16px;
-  min-height: 1.5em;
-  line-height: 1.5em;
+  min-height: var(--line-row-height, 19.5px);
+  line-height: var(--line-row-height, 19.5px);
   white-space: pre;
 }
 

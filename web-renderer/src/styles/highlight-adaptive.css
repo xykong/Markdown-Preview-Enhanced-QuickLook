@@ -97,6 +97,45 @@
   background-color: #ffeef0;
 }
 
+/* --- Line Numbers --- */
+pre.hljs.line-numbers {
+  position: relative;
+  padding-left: 3.8em;
+}
+
+pre.hljs.line-numbers code {
+  counter-reset: line-number;
+}
+
+pre.hljs.line-numbers .code-line {
+  display: block;
+  position: relative;
+  min-height: 1.4em;
+}
+
+pre.hljs.line-numbers .code-line::before {
+  counter-increment: line-number;
+  content: attr(data-line);
+  position: absolute;
+  left: -3.3em;
+  width: 2.5em;
+  text-align: right;
+  color: #8b949e;
+  font-size: inherit;
+  line-height: inherit;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+pre.hljs.line-numbers .code-line:only-child::before {
+  display: none;
+}
+
+[data-theme="dark"] pre.hljs.line-numbers .code-line::before {
+  color: #6e7681;
+}
+
 /* --- GitHub Dark (System Dark Mode) --- */
 @media (prefers-color-scheme: dark) {
   .hljs {
@@ -189,5 +228,9 @@
   .hljs-deletion {
     color: #ffdcd7;
     background-color: #67060c;
+  }
+
+  pre.hljs.line-numbers .code-line::before {
+    color: #6e7681;
   }
 }
