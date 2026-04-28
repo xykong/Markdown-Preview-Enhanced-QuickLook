@@ -84,7 +84,8 @@ struct MarkdownApp: App {
                     enableKatex: preference.enableKatex,
                     enableEmoji: preference.enableEmoji,
                     codeHighlightTheme: preference.codeHighlightTheme,
-                    collapseBlockquotesByDefault: preference.collapseBlockquotesByDefault
+                    collapseBlockquotesByDefault: preference.collapseBlockquotesByDefault,
+                    showLineNumbers: preference.showLineNumbers
                 )
 
                 if let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String {

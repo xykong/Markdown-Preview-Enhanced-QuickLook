@@ -259,6 +259,13 @@ struct RenderingSettingsView: View {
                     icon: "text.quote",
                     isOn: Binding(get: { preference.collapseBlockquotesByDefault }, set: { preference.collapseBlockquotesByDefault = $0 })
                 )
+                Divider().padding(.leading, 52)
+                FeatureToggleRow(
+                    title: "Line Numbers in Code Blocks",
+                    subtitle: "Show line numbers in rendered code blocks",
+                    icon: "list.number",
+                    isOn: Binding(get: { preference.showLineNumbers }, set: { preference.showLineNumbers = $0 })
+                )
             }
             .background(Color(NSColor.controlBackgroundColor))
             .cornerRadius(8)

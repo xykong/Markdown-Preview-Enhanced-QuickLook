@@ -810,7 +810,7 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
 
         NSLayoutConstraint.activate([
             label.topAnchor.constraint(equalTo: zoomOutButton.bottomAnchor, constant: 8),
-            label.trailingAnchor.constraint(equalTo: reloadButton.leadingAnchor, constant: -8)
+            label.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -72)
         ])
     }
 
@@ -1150,13 +1150,14 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
 
         let capturedUILanguage = AppearancePreference.shared.uiLanguage
         let capturedCollapseBlockquotes = AppearancePreference.shared.collapseBlockquotesByDefault
+        let capturedShowLineNumbers = AppearancePreference.shared.showLineNumbers
         let capturedPrevMarkdown = self.prevMarkdown
         self.prevMarkdown = nil
 
         Task.detached(priority: .userInitiated) { [weak self] in
             guard let self = self else { return }
             
-            var options: [String: Any] = ["theme": theme, "context": "quicklook", "uiLanguage": capturedUILanguage, "collapseBlockquotes": capturedCollapseBlockquotes]
+            var options: [String: Any] = ["theme": theme, "context": "quicklook", "uiLanguage": capturedUILanguage, "collapseBlockquotes": capturedCollapseBlockquotes, "showLineNumbers": capturedShowLineNumbers]
             if let url = capturedURL {
                 options["baseUrl"] = url.deletingLastPathComponent().path
             }
