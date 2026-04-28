@@ -1,5 +1,12 @@
 ## [Unreleased]
-_无待发布的变更_
+
+### Added
+- **全局 UI 语言切换** (#34, thanks [@timokox](https://github.com/timokox)): 设置中的语言选择器现在控制整个应用界面语言，而不仅限于帮助面板
+  - 新增 `LocalizationManager`：通过运行时替换 `Bundle.main` 子类，使所有 `NSLocalizedString` 调用在不重启的情况下即时切换语言
+  - `AppearancePreference.uiLanguage` setter 调用 `apply()` 以触发 SwiftUI 视图重新渲染
+  - AppKit 原生菜单栏（文件/编辑等）、`Settings` 场景标题、Sparkle 更新窗口等通过 `AppleLanguages` 在下次启动时切换，Settings 页面新增"立即重启"提示
+  - 新增 **Deutsch（德语）** 和 **Français（法语）** 语言选项；补全所有 UI 字符串的 `en` / `zh-Hans` / `de` / `fr` 本地化
+  - Help overlay（`?` 面板）扩展支持 `de` / `fr`，并包含 `navigator.language` fallback 逻辑
 
 ## [1.31.398] - 2026-04-28
 
