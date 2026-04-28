@@ -20,6 +20,7 @@ struct MarkdownWebView: NSViewRepresentable {
     var enableEmoji: Bool = true
     var codeHighlightTheme: String = "default"
     var collapseBlockquotesByDefault: Bool = false
+    var showLineNumbers: Bool = true
     
     private let localSchemeHandler = LocalSchemeHandler()
     
@@ -103,7 +104,7 @@ struct MarkdownWebView: NSViewRepresentable {
             webView.appearance = nil
         }
 
-        context.coordinator.render(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme, collapseBlockquotesByDefault: collapseBlockquotesByDefault)
+        context.coordinator.render(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme, collapseBlockquotesByDefault: collapseBlockquotesByDefault, showLineNumbers: showLineNumbers)
     }
 
     class Coordinator: NSObject, WKNavigationDelegate, WKScriptMessageHandler {
@@ -127,6 +128,7 @@ struct MarkdownWebView: NSViewRepresentable {
         private var lastEnableEmoji: Bool = true
         private var lastCodeHighlightTheme: String = "default"
         private var lastCollapseBlockquotesByDefault: Bool = false
+        private var lastShowLineNumbers: Bool = true
         private var lastRenderedContent: String = ""
         private var pollingTimer: Timer?
         private let pollingInterval: TimeInterval = 2.0
@@ -286,7 +288,7 @@ struct MarkdownWebView: NSViewRepresentable {
             return fileURL.deletingPathExtension().lastPathComponent + ".\(ext)"
         }
         
-        func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool) {
+        func render(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool, showLineNumbers: Bool = false) {
             print("🟢 Coordinator.render called with viewMode=\(viewMode)")
             lastAppearanceMode = appearanceMode
             lastBaseFontSize = baseFontSize
@@ -294,6 +296,7 @@ struct MarkdownWebView: NSViewRepresentable {
             lastEnableKatex = enableKatex
             lastEnableEmoji = enableEmoji
             lastCodeHighlightTheme = codeHighlightTheme
+            lastShowLineNumbers = showLineNumbers
 
             if fileURL != currentFileURL {
                 currentFileURL = fileURL
@@ -316,7 +319,7 @@ struct MarkdownWebView: NSViewRepresentable {
             }
 
             pendingRender = { [weak self] in
-                self?.executeRender(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme, collapseBlockquotesByDefault: collapseBlockquotesByDefault)
+                self?.executeRender(webView: webView, content: content, fileURL: fileURL, viewMode: viewMode, appearanceMode: appearanceMode, baseFontSize: baseFontSize, enableMermaid: enableMermaid, enableKatex: enableKatex, enableEmoji: enableEmoji, codeHighlightTheme: codeHighlightTheme, collapseBlockquotesByDefault: collapseBlockquotesByDefault, showLineNumbers: showLineNumbers)
             }
 
             if isWebViewLoaded {
@@ -327,8 +330,8 @@ struct MarkdownWebView: NSViewRepresentable {
             }
         }
 
-        private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool) {
-            let onlyThemeChanged = (content == lastRenderedContent) && (viewMode == .preview) && (viewMode == lastViewMode) && (collapseBlockquotesByDefault == lastCollapseBlockquotesByDefault)
+        private func executeRender(webView: WKWebView, content: String, fileURL: URL?, viewMode: ViewMode, appearanceMode: AppearanceMode, baseFontSize: Double, enableMermaid: Bool, enableKatex: Bool, enableEmoji: Bool, codeHighlightTheme: String, collapseBlockquotesByDefault: Bool, showLineNumbers: Bool = false) {
+            let onlyThemeChanged = (content == lastRenderedContent) && (viewMode == .preview) && (viewMode == lastViewMode) && (collapseBlockquotesByDefault == lastCollapseBlockquotesByDefault) && (showLineNumbers == lastShowLineNumbers)
             if onlyThemeChanged {
                 os_log("🔵 FAST PATH: only theme changed, viewMode=%{public}@ lastViewMode=%{public}@", log: logger, type: .debug, String(describing: viewMode), String(describing: lastViewMode))
                 let theme: String
@@ -383,6 +386,7 @@ struct MarkdownWebView: NSViewRepresentable {
             options["enableKatex"] = enableKatex
             options["enableEmoji"] = enableEmoji
             options["collapseBlockquotes"] = collapseBlockquotesByDefault
+            options["showLineNumbers"] = showLineNumbers
             options["uiLanguage"] = AppearancePreference.shared.uiLanguage
 
             if !previousContent.isEmpty && previousContent != content {
@@ -719,7 +723,8 @@ struct MarkdownWebView: NSViewRepresentable {
                     enableKatex: lastEnableKatex,
                     enableEmoji: lastEnableEmoji,
                     codeHighlightTheme: lastCodeHighlightTheme,
-                    collapseBlockquotesByDefault: lastCollapseBlockquotesByDefault
+                    collapseBlockquotesByDefault: lastCollapseBlockquotesByDefault,
+                    showLineNumbers: lastShowLineNumbers
                 )
                 os_log("🟢 Reloaded from disk: %{public}@", log: logger, type: .default, url.lastPathComponent)
             } catch {
