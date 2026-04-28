@@ -35,9 +35,9 @@ enum SettingsTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .appearance: return "Appearance"
-        case .rendering: return "Rendering"
-        case .editor: return "Editor"
+        case .appearance: return NSLocalizedString("Appearance", comment: "Appearance settings tab")
+        case .rendering: return NSLocalizedString("Rendering", comment: "Rendering settings tab")
+        case .editor: return NSLocalizedString("Editor", comment: "Editor settings tab")
         }
     }
 
@@ -126,18 +126,27 @@ struct AppearanceSettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SettingsSectionHeader(title: "Theme", description: "Choose your preferred interface style")
+            SettingsSectionHeader(
+                title: NSLocalizedString("Theme", comment: "Theme section title"),
+                description: NSLocalizedString("Choose your preferred interface style", comment: "Theme section description")
+            )
 
             HStack(spacing: 0) {
-                ThemeOptionButton(mode: .light, icon: "sun.max", label: "Light", current: preference.currentMode) {
+                ThemeOptionButton(mode: .light, icon: "sun.max",
+                                  label: NSLocalizedString("Light", comment: "Light appearance mode"),
+                                  current: preference.currentMode) {
                     preference.currentMode = .light
                 }
                 Divider()
-                ThemeOptionButton(mode: .dark, icon: "moon.fill", label: "Dark", current: preference.currentMode) {
+                ThemeOptionButton(mode: .dark, icon: "moon.fill",
+                                  label: NSLocalizedString("Dark", comment: "Dark appearance mode"),
+                                  current: preference.currentMode) {
                     preference.currentMode = .dark
                 }
                 Divider()
-                ThemeOptionButton(mode: .system, icon: "circle.lefthalf.filled", label: "System", current: preference.currentMode) {
+                ThemeOptionButton(mode: .system, icon: "circle.lefthalf.filled",
+                                  label: NSLocalizedString("System", comment: "System appearance mode"),
+                                  current: preference.currentMode) {
                     preference.currentMode = .system
                 }
             }
@@ -149,15 +158,27 @@ struct AppearanceSettingsView: View {
             )
             .noFocusRing()
 
-            SettingsSectionHeader(title: "Language", description: "Interface language for the help panel")
+            SettingsSectionHeader(
+                title: NSLocalizedString("Language", comment: "Language section title"),
+                description: NSLocalizedString("Interface language for the entire app", comment: "Language section description")
+            )
 
             VStack(spacing: 0) {
-                LanguageOptionRow(label: "System Default", value: "system", current: preference.uiLanguage) {
+                LanguageOptionRow(label: NSLocalizedString("System Default", comment: "Follow OS language"),
+                                  value: "system", current: preference.uiLanguage) {
                     preference.uiLanguage = "system"
                 }
                 Divider().padding(.leading, 12)
                 LanguageOptionRow(label: "English", value: "en", current: preference.uiLanguage) {
                     preference.uiLanguage = "en"
+                }
+                Divider().padding(.leading, 12)
+                LanguageOptionRow(label: "Deutsch", value: "de", current: preference.uiLanguage) {
+                    preference.uiLanguage = "de"
+                }
+                Divider().padding(.leading, 12)
+                LanguageOptionRow(label: "Français", value: "fr", current: preference.uiLanguage) {
+                    preference.uiLanguage = "fr"
                 }
                 Divider().padding(.leading, 12)
                 LanguageOptionRow(label: "中文", value: "zh", current: preference.uiLanguage) {
@@ -229,40 +250,43 @@ struct RenderingSettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            SettingsSectionHeader(title: "Features", description: "Enable or disable rendering capabilities")
+            SettingsSectionHeader(
+                title: NSLocalizedString("Features", comment: "Features section title"),
+                description: NSLocalizedString("Enable or disable rendering capabilities", comment: "Features section description")
+            )
 
             VStack(spacing: 0) {
                 FeatureToggleRow(
-                    title: "Mermaid Diagrams",
-                    subtitle: "Flowcharts, sequence diagrams, and more",
+                    title: NSLocalizedString("Mermaid Diagrams", comment: "Mermaid toggle title"),
+                    subtitle: NSLocalizedString("Flowcharts, sequence diagrams, and more", comment: "Mermaid toggle subtitle"),
                     icon: "diagram",
                     isOn: Binding(get: { preference.enableMermaid }, set: { preference.enableMermaid = $0 })
                 )
                 Divider().padding(.leading, 52)
                 FeatureToggleRow(
-                    title: "KaTeX Math",
-                    subtitle: "Mathematical expressions and equations",
+                    title: NSLocalizedString("KaTeX Math", comment: "KaTeX toggle title"),
+                    subtitle: NSLocalizedString("Mathematical expressions and equations", comment: "KaTeX toggle subtitle"),
                     icon: "function",
                     isOn: Binding(get: { preference.enableKatex }, set: { preference.enableKatex = $0 })
                 )
                 Divider().padding(.leading, 52)
                 FeatureToggleRow(
-                    title: "Emoji Support",
-                    subtitle: "GitHub flavored emoji codes like :smile:",
+                    title: NSLocalizedString("Emoji Support", comment: "Emoji toggle title"),
+                    subtitle: NSLocalizedString("GitHub flavored emoji codes like :smile:", comment: "Emoji toggle subtitle"),
                     icon: "face.smiling",
                     isOn: Binding(get: { preference.enableEmoji }, set: { preference.enableEmoji = $0 })
                 )
                 Divider().padding(.leading, 52)
                 FeatureToggleRow(
-                    title: "Collapse Blockquotes by Default",
-                    subtitle: "Collapse blockquote sections when opening a document",
+                    title: NSLocalizedString("Collapse Blockquotes by Default", comment: "Blockquote collapse toggle title"),
+                    subtitle: NSLocalizedString("Collapse blockquote sections when opening a document", comment: "Blockquote collapse toggle subtitle"),
                     icon: "text.quote",
                     isOn: Binding(get: { preference.collapseBlockquotesByDefault }, set: { preference.collapseBlockquotesByDefault = $0 })
                 )
                 Divider().padding(.leading, 52)
                 FeatureToggleRow(
-                    title: "Show Line Numbers",
-                    subtitle: "Display source line numbers in rendered preview and source view",
+                    title: NSLocalizedString("Show Line Numbers", comment: "Line numbers toggle title"),
+                    subtitle: NSLocalizedString("Display source line numbers in rendered preview and source view", comment: "Line numbers toggle subtitle"),
                     icon: "list.number",
                     isOn: Binding(get: { preference.showLineNumbers }, set: { preference.showLineNumbers = $0 })
                 )
@@ -312,11 +336,14 @@ struct EditorSettingsView: View {
         VStack(alignment: .leading, spacing: 24) {
             // Font Size
             VStack(alignment: .leading, spacing: 12) {
-                SettingsSectionHeader(title: "Typography", description: "Adjust the reading experience")
+                SettingsSectionHeader(
+                    title: NSLocalizedString("Typography", comment: "Typography section title"),
+                    description: NSLocalizedString("Adjust the reading experience", comment: "Typography section description")
+                )
 
                 VStack(spacing: 0) {
                     HStack {
-                        Text("Font Size")
+                        Text(NSLocalizedString("Font Size", comment: "Font size label"))
                             .font(.system(size: 13))
                         Spacer()
                         Text("\(Int(preference.baseFontSize))px")
@@ -354,10 +381,14 @@ struct EditorSettingsView: View {
 
             // Code Theme
             VStack(alignment: .leading, spacing: 12) {
-                SettingsSectionHeader(title: "Code Highlighting", description: "Syntax highlighting theme for code blocks")
+                SettingsSectionHeader(
+                    title: NSLocalizedString("Code Highlighting", comment: "Code theme section title"),
+                    description: NSLocalizedString("Syntax highlighting theme for code blocks", comment: "Code theme section description")
+                )
 
                 VStack(spacing: 0) {
-                    CodeThemeRow(name: "Default", id: "default", color: Color(NSColor.textColor))
+                    CodeThemeRow(name: NSLocalizedString("Default", comment: "Default code theme"),
+                                 id: "default", color: Color(NSColor.textColor))
                     Divider().padding(.leading, 36)
                     CodeThemeRow(name: "GitHub", id: "github", color: Color(red: 0.141, green: 0.161, blue: 0.243))
                     Divider().padding(.leading, 36)

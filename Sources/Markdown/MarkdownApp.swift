@@ -107,7 +107,7 @@ struct MarkdownApp: App {
                     .buttonStyle(PlainButtonStyle())
                     .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
-                    .help("Reload File (⌘R)")
+                    .help(NSLocalizedString("Reload File (⌘R)", comment: "Reload file tooltip"))
 
                     Button(action: {
                         NotificationCenter.default.post(name: .zoomOut, object: nil)
@@ -119,7 +119,7 @@ struct MarkdownApp: App {
                     .buttonStyle(PlainButtonStyle())
                     .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
-                    .help("Zoom Out")
+                    .help(NSLocalizedString("Zoom Out", comment: "Zoom out tooltip"))
 
                     Button(action: {
                         NotificationCenter.default.post(name: .resetZoom, object: nil)
@@ -131,7 +131,7 @@ struct MarkdownApp: App {
                     .buttonStyle(PlainButtonStyle())
                     .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
-                    .help("Reset Zoom (⌘0)")
+                    .help(NSLocalizedString("Reset Zoom (⌘0)", comment: "Reset zoom tooltip"))
 
                     Button(action: {
                         NotificationCenter.default.post(name: .zoomIn, object: nil)
@@ -143,7 +143,7 @@ struct MarkdownApp: App {
                     .buttonStyle(PlainButtonStyle())
                     .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
-                    .help("Zoom In")
+                    .help(NSLocalizedString("Zoom In", comment: "Zoom in tooltip"))
 
                     Button(action: {
                         NotificationCenter.default.post(name: .toggleHelp, object: nil)
@@ -155,7 +155,7 @@ struct MarkdownApp: App {
                     .buttonStyle(PlainButtonStyle())
                     .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
-                    .help("Show Help")
+                    .help(NSLocalizedString("Show Help", comment: "Show help tooltip"))
 
                     Button(action: {
                         viewMode = (viewMode == .preview) ? .source : .preview
@@ -167,7 +167,9 @@ struct MarkdownApp: App {
                     .buttonStyle(PlainButtonStyle())
                     .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
-                    .help(viewMode == .source ? "Show Preview" : "Show Source")
+                    .help(viewMode == .source
+                          ? NSLocalizedString("Show Preview", comment: "Show preview tooltip")
+                          : NSLocalizedString("Show Source", comment: "Show source tooltip"))
 
                     Button(action: {
                         switch preference.currentMode {
@@ -183,7 +185,7 @@ struct MarkdownApp: App {
                     .buttonStyle(PlainButtonStyle())
                     .background(Color(NSColor.windowBackgroundColor).opacity(0.85))
                     .clipShape(Circle())
-                    .help("Toggle Theme (System / Light / Dark)")
+                    .help(NSLocalizedString("Toggle Theme (System / Light / Dark)", comment: "Theme toggle tooltip"))
                 }
                 .padding([.top, .trailing], 10)
             }
@@ -275,18 +277,20 @@ struct MarkdownApp: App {
                 Button(action: {
                     viewMode = (viewMode == .preview) ? .source : .preview
                 }) {
-                    Text(viewMode == .source ? "Show Preview" : "Show Source")
+                    Text(viewMode == .source
+                         ? NSLocalizedString("Show Preview", comment: "Show preview menu item")
+                         : NSLocalizedString("Show Source", comment: "Show source menu item"))
                 }
                 .keyboardShortcut("m", modifiers: [.command, .shift])
 
-                Button("Reset Zoom") {
+                Button(NSLocalizedString("Reset Zoom", comment: "Reset zoom menu item")) {
                     NotificationCenter.default.post(name: .resetZoom, object: nil)
                 }
                 .keyboardShortcut("0", modifiers: .command)
 
                 Divider()
 
-                Menu("Appearance") {
+                Menu(NSLocalizedString("Appearance", comment: "Appearance submenu")) {
                     ForEach(AppearanceMode.allCases) { mode in
                         Button(action: {
                             preference.currentMode = mode

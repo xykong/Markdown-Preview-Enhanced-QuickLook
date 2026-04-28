@@ -1,18 +1,92 @@
-/* Menu Items */
+/* === Menu Items === */
+"Reload File" = "Datei neu laden";
+"Open in External Editor" = "In externem Editor öffnen";
+"Export as HTML…" = "Als HTML exportieren…";
+"Export as PDF…" = "Als PDF exportieren…";
 "Find..." = "Suchen…";
-
-/* Context Menu */
-"Context menu search item" = "Suchen…";
-
-/* Search UI */
-"Search menu item" = "Suchen…";
-
-/* Updater */
+"FluxMarkdown Help" = "FluxMarkdown-Hilfe";
+"README" = "README";
+"Report an Issue" = "Problem melden";
+"Release Notes" = "Versionshinweise";
+"Show Preview" = "Vorschau anzeigen";
+"Show Source" = "Quelltext anzeigen";
+"Reset Zoom" = "Zoom zurücksetzen";
+"Appearance" = "Erscheinungsbild";
 "Check for Updates..." = "Nach Updates suchen…";
 
-/* Toast Messages */
+/* === Context Menu / Search === */
+"Context menu search item" = "Suchen…";
+"Search menu item" = "Suchen…";
+
+/* === Toolbar Tooltips === */
+"Reload File (⌘R)" = "Datei neu laden (⌘R)";
+"Zoom Out" = "Verkleinern";
+"Reset Zoom (⌘0)" = "Zoom zurücksetzen (⌘0)";
+"Zoom In" = "Vergrößern";
+"Show Help" = "Hilfe anzeigen";
+"Toggle Theme (System / Light / Dark)" = "Erscheinungsbild wechseln (System / Hell / Dunkel)";
+
+/* === Appearance Modes === */
+"Light" = "Hell";
+"Dark" = "Dunkel";
+"System" = "System";
+
+/* === Settings: Tabs === */
+"Rendering" = "Darstellung";
+"Editor" = "Editor";
+
+/* === Settings: Theme Section === */
+"Theme" = "Erscheinungsbild";
+"Choose your preferred interface style" = "Bevorzugten Stil der Oberfläche wählen";
+
+/* === Settings: Language Section === */
+"Language" = "Sprache";
+"Interface language for the entire app" = "Sprache der gesamten App";
+"System Default" = "Systemstandard";
+
+/* === Settings: Features Section === */
+"Features" = "Funktionen";
+"Enable or disable rendering capabilities" = "Render-Funktionen aktivieren oder deaktivieren";
+"Mermaid Diagrams" = "Mermaid-Diagramme";
+"Flowcharts, sequence diagrams, and more" = "Flussdiagramme, Sequenzdiagramme und mehr";
+"KaTeX Math" = "KaTeX-Mathematik";
+"Mathematical expressions and equations" = "Mathematische Ausdrücke und Gleichungen";
+"Emoji Support" = "Emoji-Unterstützung";
+"GitHub flavored emoji codes like :smile:" = "GitHub-Emoji-Codes wie :smile:";
+"Collapse Blockquotes by Default" = "Zitat-Blöcke standardmäßig einklappen";
+"Collapse blockquote sections when opening a document" = "Zitat-Abschnitte beim Öffnen eines Dokuments einklappen";
+"Show Line Numbers" = "Zeilennummern anzeigen";
+"Display source line numbers in rendered preview and source view" = "Quellzeilennummern in der gerenderten Vorschau und der Quelltextansicht anzeigen";
+
+/* === Settings: Typography Section === */
+"Typography" = "Typografie";
+"Adjust the reading experience" = "Leseerlebnis anpassen";
+"Font Size" = "Schriftgröße";
+"Font Size:" = "Schriftgröße:";
+
+/* === Settings: Code Highlighting Section === */
+"Code Highlighting" = "Code-Hervorhebung";
+"Syntax highlighting theme for code blocks" = "Syntax-Hervorhebung für Codeblöcke";
+"Default" = "Standard";
+
+/* === Settings: Window === */
+"Settings" = "Einstellungen";
+
+/* === Welcome View === */
+"Open a Markdown file or drop it here to start." = "Markdown-Datei öffnen oder hierher ziehen, um zu beginnen.";
+"Open Markdown File…" = "Markdown-Datei öffnen…";
+"Drag & drop .md/.mdx/.txt here" = ".md/.mdx/.txt hierher ziehen";
+"QuickLook" = "QuickLook";
+"In Finder, select a file and press Space." = "Im Finder eine Datei auswählen und Leertaste drücken.";
+"Open with App" = "Mit App öffnen";
+"Double-click a .md file to open it here." = ".md-Datei doppelklicken, um sie hier zu öffnen.";
+"Drag & Drop" = "Drag & Drop";
+"Drop files onto the + area to open." = "Dateien auf den +-Bereich ziehen, um sie zu öffnen.";
+"Open Settings" = "Einstellungen öffnen";
+"Troubleshooting" = "Fehlerbehebung";
+"Open" = "Öffnen";
+"FluxMarkdown App Icon" = "FluxMarkdown-App-Symbol";
+
+/* === Toast Messages === */
 "QuickLook preview does not support link navigation" = "Die QuickLook-Vorschau unterstützt keine Link-Navigation";
 "Double-click .md file to open in main app for full functionality" = "Doppelklicke die .md-Datei, um sie in der Hauptanwendung mit vollem Funktionsumfang zu öffnen";
-
-/* External Editor */
-"Open in External Editor" = "In externem Editor öffnen";

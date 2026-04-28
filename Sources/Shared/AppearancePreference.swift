@@ -11,9 +11,9 @@ public enum AppearanceMode: String, CaseIterable, Identifiable {
     
     public var displayName: String {
         switch self {
-        case .light: return "Light"
-        case .dark: return "Dark"
-        case .system: return "System"
+        case .light: return NSLocalizedString("Light", comment: "Light appearance mode")
+        case .dark: return NSLocalizedString("Dark", comment: "Dark appearance mode")
+        case .system: return NSLocalizedString("System", comment: "System appearance mode")
         }
     }
     
@@ -191,6 +191,7 @@ public class AppearancePreference: ObservableObject {
             objectWillChange.send()
             sharedStore.set(newValue, forKey: uiLanguageKey)
             scheduleSyncToSharedStore()
+            LocalizationManager.apply(languageCode: newValue)
         }
     }
 
