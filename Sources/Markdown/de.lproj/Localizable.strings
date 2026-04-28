@@ -1,0 +1,15 @@
+/* Menu Items */
+"Find..." = "Suchen…";
+
+/* Context Menu */
+"Context menu search item" = "Suchen…";
+
+/* Search UI */
+"Search menu item" = "Suchen…";
+
+/* Updater */
+"Check for Updates..." = "Nach Updates suchen…";
+
+/* Toast Messages */
+"QuickLook preview does not support link navigation" = "Die QuickLook-Vorschau unterstützt keine Link-Navigation";
+"Double-click .md file to open in main app for full functionality" = "Doppelklicke die .md-Datei, um sie in der Hauptanwendung mit vollem Funktionsumfang zu öffnen";
