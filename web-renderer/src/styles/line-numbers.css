@@ -12,7 +12,7 @@
  */
 
 /* Activate gutter: add left padding to create gutter space */
-html[data-line-numbers="true"] #markdown-preview {
+html[data-line-numbers="true"] #markdown-preview:not(.source-mode) {
   padding-left: 3.5em !important;
   position: relative;
   border-left: 1px solid var(--line-num-border, rgba(128,128,128,0.2));
@@ -21,12 +21,12 @@ html[data-line-numbers="true"] #markdown-preview {
 
 /* Only direct children get position:relative — prevents nested li/p inside
    ul/blockquote from creating a new positioning context for ::before */
-html[data-line-numbers="true"] #markdown-preview > [data-source-line] {
+html[data-line-numbers="true"] #markdown-preview:not(.source-mode) > [data-source-line] {
   position: relative;
 }
 
 /* Gutter number: only on direct children, pulled into the left padding area */
-html[data-line-numbers="true"] #markdown-preview > [data-source-line]::before {
+html[data-line-numbers="true"] #markdown-preview:not(.source-mode) > [data-source-line]::before {
   content: attr(data-source-line);
   position: absolute;
   left: -3.5em;
@@ -51,9 +51,9 @@ html[data-theme="dark"][data-line-numbers="true"] #markdown-preview {
 
 /* Don't show line numbers on code blocks (pre is a direct child but has its own
    line numbering via highlight.js; suppress the gutter number there) */
-html[data-line-numbers="true"] #markdown-preview > pre[data-source-line]::before {
+html[data-line-numbers="true"] #markdown-preview:not(.source-mode) > pre[data-source-line]::before {
   display: none;
 }
-html[data-line-numbers="true"] #markdown-preview > pre[data-source-line] {
+html[data-line-numbers="true"] #markdown-preview:not(.source-mode) > pre[data-source-line] {
   position: static;
 }
