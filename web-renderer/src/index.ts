@@ -372,6 +372,7 @@ let katexPlugin: ((md: MarkdownIt) => void) | null = null;
 let katexEnabled = false;
 let emojiEnabled = false;
 let graphvizInstance: { dot: (src: string) => string } | null = null;
+let lastShowLineNumbers: boolean = true;
 
 interface RenderOptions {
     baseUrl?: string;
@@ -801,6 +802,10 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
             blockquoteCollapse.setInitialState(options.collapseBlockquotes === true);
         }
 
+        const showLineNumbers = options.showLineNumbers !== false;
+        document.documentElement.setAttribute('data-line-numbers', showLineNumbers ? 'true' : 'false');
+        lastShowLineNumbers = showLineNumbers;
+
         if (detectRtlContent(renderBody)) {
             outputDiv.setAttribute('dir', 'rtl');
         } else {
@@ -863,6 +868,7 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
 
 window.renderSource = function(text: string, theme: string, prevContent?: string) {
     logToSwift(`[renderSource] START textLen=${text.length} theme=${theme}`);
+    document.documentElement.setAttribute('data-line-numbers', lastShowLineNumbers ? 'true' : 'false');
     const normalizedTheme = (theme === 'light') ? 'default' : theme;
     document.documentElement.setAttribute('data-theme', normalizedTheme);
     const outputDiv = document.getElementById('markdown-preview');

@@ -29,3 +29,20 @@ describe('line-numbers CSS attribute injection', () => {
     expect(dom.window.document.documentElement.getAttribute('data-line-numbers')).toBe('false');
   });
 });
+
+describe('showLineNumbers option', () => {
+  it('sets data-line-numbers=true on html when enabled', () => {
+    const dom = new JSDOM('<!DOCTYPE html><html><head></head><body></body></html>');
+    const doc = dom.window.document;
+
+    function applyLineNumbers(enabled: boolean) {
+      doc.documentElement.setAttribute('data-line-numbers', enabled ? 'true' : 'false');
+    }
+
+    applyLineNumbers(true);
+    expect(doc.documentElement.getAttribute('data-line-numbers')).toBe('true');
+
+    applyLineNumbers(false);
+    expect(doc.documentElement.getAttribute('data-line-numbers')).toBe('false');
+  });
+});
