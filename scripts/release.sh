@@ -136,8 +136,27 @@ if [ ! -f "$DMG_PATH" ]; then
     exit 1
 fi
 
+echo "📦 Building MacPorts source tarball..."
+MACPORTS_TARBALL="build/artifacts/FluxMarkdown-${NEW_FULL_VERSION}-macports-source.tar.gz"
+if ./scripts/create_macports_tarball.sh "$NEW_FULL_VERSION"; then
+    echo "✅ MacPorts tarball created: $MACPORTS_TARBALL"
+    if [ -f "macports/Portfile" ]; then
+        git add macports/Portfile
+        git commit -m "chore(macports): update Portfile checksums for v$NEW_FULL_VERSION" || true
+        git push origin master || true
+        echo "✅ macports/Portfile committed"
+    fi
+else
+    echo "⚠️  MacPorts tarball creation failed (non-fatal)"
+    MACPORTS_TARBALL=""
+fi
+
 echo "📦 Creating GitHub Release v$NEW_FULL_VERSION..."
-gh release create "v$NEW_FULL_VERSION" "$DMG_PATH" \
+RELEASE_ASSETS="$DMG_PATH"
+if [ -n "$MACPORTS_TARBALL" ] && [ -f "$MACPORTS_TARBALL" ]; then
+    RELEASE_ASSETS="$RELEASE_ASSETS $MACPORTS_TARBALL"
+fi
+gh release create "v$NEW_FULL_VERSION" $RELEASE_ASSETS \
     --title "v$NEW_FULL_VERSION" \
     --notes-file "$RELEASE_NOTES_FILE" \
     --draft=false \
