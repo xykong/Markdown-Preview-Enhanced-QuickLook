@@ -1,4 +1,7 @@
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.31.402] - 2026-04-29
 
 ### Added
 - **全局 UI 语言切换** (#34, thanks [@timokox](https://github.com/timokox)): 设置中的语言选择器现在控制整个应用界面语言，而不仅限于帮助面板
