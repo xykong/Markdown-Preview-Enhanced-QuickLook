@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.31.402</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.31.402</link>
+            <sparkle:version>402</sparkle:version>
+            <sparkle:shortVersionString>1.31.402</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Tue, 28 Apr 2026 18:17:35 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.31.402/FluxMarkdown.dmg"
+                sparkle:edSignature="8Yik2T387DB0mHfO0Qc8orPeWXSUItGHwzG/hL0yzTvaQ8bKU0sZIyPqTCDtf4uqCIg5yAcrvfvJgIFG3DoDCw=="
+                length="10798553"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Added</h3><ul><li><strong>全局 UI 语言切换</strong> (#34, thanks [](https://github.com/timokox)): 设置中的语言选择器现在控制整个应用界面语言，而不仅限于帮助面板</li><li>&nbsp;&nbsp;&nbsp;&nbsp;新增 <code>LocalizationManager</code>：通过运行时替换 <code>Bundle.main</code> 子类，使所有 <code>NSLocalizedString</code> 调用在不重启的情况下即时切换语言</li><li>&nbsp;&nbsp;&nbsp;&nbsp;<code>AppearancePreference.uiLanguage</code> setter 调用 <code>apply()</code> 以触发 SwiftUI 视图重新渲染</li><li>&nbsp;&nbsp;&nbsp;&nbsp;AppKit 原生菜单栏（文件/编辑等）、<code>Settings</code> 场景标题、Sparkle 更新窗口等通过 <code>AppleLanguages</code> 在下次启动时切换，Settings 页面新增"立即重启"提示</li><li>&nbsp;&nbsp;&nbsp;&nbsp;新增 <strong>Deutsch（德语）</strong> 和 <strong>Français（法语）</strong> 语言选项；补全所有 UI 字符串的 <code>en</code> / <code>zh-Hans</code> / <code>de</code> / <code>fr</code> 本地化</li><li>&nbsp;&nbsp;&nbsp;&nbsp;Help overlay（<code>?</code> 面板）扩展支持 <code>de</code> / <code>fr</code>，并包含 <code>navigator.language</code> fallback 逻辑</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.31.402">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.31.398</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.31.398</link>
             <sparkle:version>398</sparkle:version>
