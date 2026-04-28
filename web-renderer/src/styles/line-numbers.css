@@ -1,0 +1,46 @@
+/*
+ * Line number gutter for rendered Markdown preview.
+ *
+ * Requires: data-source-line="N" on block elements (injected by markdown-it renderToken hook).
+ * Activated by: data-line-numbers="true" on <html>.
+ *
+ * Strategy: CSS-only, no DOM changes. Uses ::before pseudo-element + attr() to display
+ * the source line number. The gutter is created by adding left padding to #markdown-preview
+ * and positioning ::before absolutely in that space.
+ */
+
+/* Only active when line numbers are enabled */
+html[data-line-numbers="true"] #markdown-preview {
+  position: relative;
+  padding-left: 3.5em;
+  border-left: 1px solid var(--line-num-border, rgba(128,128,128,0.2));
+}
+
+/* Gutter number on each annotated block element */
+html[data-line-numbers="true"] #markdown-preview [data-source-line]::before {
+  content: attr(data-source-line);
+  position: absolute;
+  left: 0;
+  width: 3em;
+  text-align: right;
+  padding-right: 0.5em;
+  font-size: 0.75em;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  line-height: inherit;
+  color: var(--line-num-color, rgba(128,128,128,0.5));
+  user-select: none;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+/* Dark theme */
+html[data-theme="dark"][data-line-numbers="true"] #markdown-preview {
+  --line-num-color: rgba(200,200,200,0.35);
+  --line-num-border: rgba(200,200,200,0.15);
+}
+
+/* Don't show line numbers on or inside code blocks */
+html[data-line-numbers="true"] #markdown-preview pre[data-source-line]::before,
+html[data-line-numbers="true"] #markdown-preview pre [data-source-line]::before {
+  display: none;
+}

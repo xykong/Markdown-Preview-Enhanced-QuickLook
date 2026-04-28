@@ -90,6 +90,7 @@ import './styles/print.css';
 import './styles/help-overlay.css';
 import './styles/blockquote-collapse.css';
 import './styles/diff-animations.css';
+import './styles/line-numbers.css';
 
 import MarkdownIt from 'markdown-it';
 import hljs from 'highlight.js/lib/core';
@@ -385,6 +386,7 @@ interface RenderOptions {
     uiLanguage?: string;
     collapseBlockquotes?: boolean;
     prevContent?: string;
+    showLineNumbers?: boolean;
 }
 
 let currentContext: 'quicklook' | 'app' = 'app';
@@ -411,6 +413,36 @@ function applyCodeTheme(theme: string): void {
         styleEl.textContent = css + darkOverride;
     } else {
         styleEl?.remove();
+    }
+}
+
+function addLineNumbersToCodeBlocks(container: HTMLElement): void {
+    const codeBlocks = container.querySelectorAll('pre.hljs');
+    for (const pre of codeBlocks) {
+        const code = pre.querySelector('code');
+        if (code && (
+            code.classList.contains('language-mermaid') ||
+            code.classList.contains('language-vega') ||
+            code.classList.contains('language-vega-lite') ||
+            code.classList.contains('language-dot') ||
+            code.classList.contains('language-graphviz')
+        )) {
+            continue;
+        }
+
+        pre.classList.add('line-numbers');
+        const codeEl = pre.querySelector('code');
+        if (!codeEl) continue;
+
+        const rawHtml = codeEl.innerHTML;
+        const html = rawHtml.endsWith('\n') ? rawHtml.slice(0, -1) : rawHtml;
+        const lines = html.split('\n');
+
+        const wrappedLines = lines.map((lineHtml, i) =>
+            `<span class="code-line" data-line="${i + 1}">${lineHtml}</span>`
+        ).join('\n');
+
+        codeEl.innerHTML = wrappedLines;
     }
 }
 
@@ -754,6 +786,10 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         logToSwift(`[renderMarkdown:${callId}] UPDATING DOM innerHTML`);
         outputDiv.innerHTML = tempDiv.innerHTML;
         logToSwift(`[renderMarkdown:${callId}] DOM UPDATED successfully`);
+
+        if (options.showLineNumbers) {
+            addLineNumbersToCodeBlocks(outputDiv);
+        }
 
         if (options.prevContent && options.prevContent.length > 0) {
             const prevBody = extractFrontMatter(options.prevContent).body;
