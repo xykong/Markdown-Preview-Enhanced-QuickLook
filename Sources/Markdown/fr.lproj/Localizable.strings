@@ -43,6 +43,8 @@
 "Language" = "Langue";
 "Interface language for the entire app" = "Langue de l’interface pour toute l’application";
 "System Default" = "Par défaut du système";
+"Some menus update only after restarting the app." = "Certains menus ne sont mis à jour qu’après le redémarrage de l’app.";
+"Restart Now" = "Redémarrer maintenant";
 
 /* === Settings: Features Section === */
 "Features" = "Fonctionnalités";

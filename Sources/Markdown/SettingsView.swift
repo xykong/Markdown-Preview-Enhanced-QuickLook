@@ -191,8 +191,33 @@ struct AppearanceSettingsView: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(Color(NSColor.separatorColor), lineWidth: 1)
             )
+
+            if preference.uiLanguage != LocalizationManager.launchPreference {
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .foregroundColor(.accentColor)
+                    Text(NSLocalizedString("Some menus update only after restarting the app.", comment: "Restart hint"))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                    Button(NSLocalizedString("Restart Now", comment: "Restart now button")) {
+                        relaunchApp()
+                    }
+                    .buttonStyle(.bordered)
+                }
+                .padding(.top, 6)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private func relaunchApp() {
+        let bundleURL = Bundle.main.bundleURL
+        let task = Process()
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+        task.arguments = ["-n", "-a", bundleURL.path]
+        try? task.run()
+        NSApp.terminate(nil)
     }
 
     private func LanguageOptionRow(label: String, value: String, current: String, action: @escaping () -> Void) -> some View {

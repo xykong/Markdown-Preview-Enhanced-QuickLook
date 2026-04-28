@@ -192,6 +192,7 @@ public class AppearancePreference: ObservableObject {
             sharedStore.set(newValue, forKey: uiLanguageKey)
             scheduleSyncToSharedStore()
             LocalizationManager.apply(languageCode: newValue)
+            LocalizationManager.applyAppleLanguages(for: newValue)
         }
     }
 

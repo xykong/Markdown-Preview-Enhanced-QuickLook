@@ -43,6 +43,8 @@
 "Language" = "语言";
 "Interface language for the entire app" = "整个应用的界面语言";
 "System Default" = "系统默认";
+"Some menus update only after restarting the app." = "部分菜单需要重新启动应用后才会更新。";
+"Restart Now" = "立即重新启动";
 
 /* === Settings: Features Section === */
 "Features" = "功能";
