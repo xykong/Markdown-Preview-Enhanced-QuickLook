@@ -196,7 +196,7 @@ public class AppearancePreference: ObservableObject {
 
     public var showLineNumbers: Bool {
         get {
-            guard sharedStore.object(forKey: showLineNumbersKey) != nil else { return true }
+            guard sharedStore.object(forKey: showLineNumbersKey) != nil else { return false }
             return sharedStore.bool(forKey: showLineNumbersKey)
         }
         set {

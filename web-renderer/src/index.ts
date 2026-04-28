@@ -372,7 +372,7 @@ let katexPlugin: ((md: MarkdownIt) => void) | null = null;
 let katexEnabled = false;
 let emojiEnabled = false;
 let graphvizInstance: { dot: (src: string) => string } | null = null;
-let lastShowLineNumbers: boolean = true;
+let lastShowLineNumbers: boolean = false;
 
 interface RenderOptions {
     baseUrl?: string;

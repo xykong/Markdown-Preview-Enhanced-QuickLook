@@ -261,8 +261,8 @@ struct RenderingSettingsView: View {
                 )
                 Divider().padding(.leading, 52)
                 FeatureToggleRow(
-                    title: "Line Numbers in Code Blocks",
-                    subtitle: "Show line numbers in rendered code blocks",
+                    title: "Show Line Numbers",
+                    subtitle: "Display source line numbers in rendered preview and source view",
                     icon: "list.number",
                     isOn: Binding(get: { preference.showLineNumbers }, set: { preference.showLineNumbers = $0 })
                 )
