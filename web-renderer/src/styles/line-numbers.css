@@ -4,8 +4,10 @@
  * Requires: data-source-line="N" on block elements (injected by markdown-it renderToken hook).
  * Activated by: data-line-numbers="true" on <html>.
  *
- * Strategy: Each block element with data-source-line gets a ::before pseudo-element
- * positioned in the left padding area of #markdown-preview via negative margin-left.
+ * Strategy: Only DIRECT children of #markdown-preview get a gutter number.
+ * Using `>` child combinator prevents li/blockquote nested elements from
+ * also showing numbers (they carry data-source-line too, which caused
+ * duplication and mis-positioned numbers inside lists and blockquotes).
  * Font size is fixed in px (not em) to avoid inheriting heading sizes.
  */
 
@@ -17,13 +19,14 @@ html[data-line-numbers="true"] #markdown-preview {
   box-sizing: border-box;
 }
 
-/* Each annotated block element: make relative so ::before can anchor to it */
-html[data-line-numbers="true"] #markdown-preview [data-source-line] {
+/* Only direct children get position:relative — prevents nested li/p inside
+   ul/blockquote from creating a new positioning context for ::before */
+html[data-line-numbers="true"] #markdown-preview > [data-source-line] {
   position: relative;
 }
 
-/* Gutter number: pull it into the left padding area */
-html[data-line-numbers="true"] #markdown-preview [data-source-line]::before {
+/* Gutter number: only on direct children, pulled into the left padding area */
+html[data-line-numbers="true"] #markdown-preview > [data-source-line]::before {
   content: attr(data-source-line);
   position: absolute;
   left: -3.5em;
@@ -46,13 +49,11 @@ html[data-theme="dark"][data-line-numbers="true"] #markdown-preview {
   --line-num-border: rgba(200,200,200,0.15);
 }
 
-/* Don't show line numbers on or inside code blocks */
-html[data-line-numbers="true"] #markdown-preview pre[data-source-line]::before,
-html[data-line-numbers="true"] #markdown-preview pre [data-source-line]::before {
+/* Don't show line numbers on code blocks (pre is a direct child but has its own
+   line numbering via highlight.js; suppress the gutter number there) */
+html[data-line-numbers="true"] #markdown-preview > pre[data-source-line]::before {
   display: none;
 }
-
-/* Don't show on pre's immediate annotated children either (fence wrapper divs) */
-html[data-line-numbers="true"] #markdown-preview pre[data-source-line] {
+html[data-line-numbers="true"] #markdown-preview > pre[data-source-line] {
   position: static;
 }
