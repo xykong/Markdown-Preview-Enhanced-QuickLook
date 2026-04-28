@@ -296,7 +296,6 @@ struct MarkdownWebView: NSViewRepresentable {
             lastEnableKatex = enableKatex
             lastEnableEmoji = enableEmoji
             lastCodeHighlightTheme = codeHighlightTheme
-            lastShowLineNumbers = showLineNumbers
 
             if fileURL != currentFileURL {
                 currentFileURL = fileURL
@@ -355,6 +354,7 @@ struct MarkdownWebView: NSViewRepresentable {
             lastRenderedContent = content
             lastViewMode = viewMode
             lastCollapseBlockquotesByDefault = collapseBlockquotesByDefault
+            lastShowLineNumbers = showLineNumbers
 
             guard let contentData = try? JSONSerialization.data(withJSONObject: [content], options: []),
                   let contentJsonArray = String(data: contentData, encoding: .utf8) else {
