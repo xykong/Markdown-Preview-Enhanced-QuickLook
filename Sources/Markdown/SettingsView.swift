@@ -212,6 +212,12 @@ struct AppearanceSettingsView: View {
     }
 
     private func relaunchApp() {
+        // Force-flush both the shared preference store (0.3s debounced) and the
+        // standard user defaults (where AppleLanguages lives) so the spawned
+        // instance reads the current picker selection, not a stale value.
+        AppearancePreference.shared.flushSharedPreferences()
+        UserDefaults.standard.synchronize()
+
         let bundleURL = Bundle.main.bundleURL
         let task = Process()
         task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
