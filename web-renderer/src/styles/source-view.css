@@ -63,6 +63,15 @@
     overflow: visible;
 }
 
+body:has(#markdown-preview.source-mode) {
+  padding: 0;
+}
+
+#markdown-preview.source-mode {
+  padding: 0 !important;
+  border-left: none !important;
+}
+
 /* Hide line number gutter in source view when line numbers are disabled */
 html[data-line-numbers="false"] .source-diff-gutter {
   display: none;

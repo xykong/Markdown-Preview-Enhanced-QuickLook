@@ -654,6 +654,8 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         return;
     }
 
+    outputDiv.classList.remove('source-mode');
+
     if (options.fontSize) {
         outputDiv.style.fontSize = options.fontSize + 'px';
     }
@@ -880,6 +882,8 @@ window.renderSource = function(text: string, theme: string, prevContent?: string
         logToSwift("JS Error: markdown-preview element not found");
         return;
     }
+
+    outputDiv.classList.add('source-mode');
 
     try {
         const oldText = (prevContent && prevContent.length > 0) ? prevContent : '';
