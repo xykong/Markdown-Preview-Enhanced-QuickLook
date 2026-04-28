@@ -132,8 +132,12 @@
     }
 }
 
-@media (max-width: 1200px) {
+/* On very narrow viewports, use a smaller button instead of hiding it */
+@media (max-width: 480px) {
     .blockquote-collapse-toggle {
-        display: none;
+        width: 36px;
+        height: 36px;
+        top: 100px;
+        right: 12px;
     }
 }
