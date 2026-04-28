@@ -1,5 +1,9 @@
 ## [Unreleased]
-_无待发布的变更_
+
+### Added
+- **German (de) Localization** (#31, thanks @timokox): Added German translations for all UI strings including menu items, search, updater, toast messages, and the new "Open in External Editor" menu item.
+- **French (fr) Localization** (#32, thanks @timokox): Added French translations for all UI strings including menu items, search, updater, toast messages, and the new "Open in External Editor" menu item.
+- **Open in External Editor** (#33, thanks @timokox): Added "Open in External Editor" menu item (⌥⌘E) under the File menu. Opens the current document in the user's default plain-text editor via `open -t`, allowing quick handoff to TextEdit/IDE/etc. without re-associating the file type.
 
 ## [1.30.391] - 2026-04-28
 

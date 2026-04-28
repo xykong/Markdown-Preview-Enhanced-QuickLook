@@ -1,7 +1,7 @@
 ---
 name: publish
 description: FluxMarkdown 完整发布工作流。用于发布新版本、版本升级或更新分发渠道（GitHub、Sparkle、Homebrew）。触发词包括 "release", "publish", "bump version", "make release", "create release" 或任何涉及版本管理和分发更新的请求。
-model: animal-gateway/glm-5
+model: animal-gateway/glm-5.1
 ---
 
 # Publish 命令 - 发布工作流
@@ -22,7 +22,7 @@ model: animal-gateway/glm-5
 7. **确认后执行** - 运行所有步骤，无需再次提示
 
 **参数解析：**
-- 无参数 (`/publish`) → 默认升级 patch 号（Build 递增）
+- 无参数 (`/publish`) → 默认升级 minor 号（Build 递增）
 - `patch|minor|major` → 应用指定的版本升级类型
 - 指定完整版本（如 `1.3.140`）→ 将 `.version` 设置为该值
 
