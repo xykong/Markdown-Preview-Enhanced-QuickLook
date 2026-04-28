@@ -1,4 +1,7 @@
 ## [Unreleased]
+_无待发布的变更_
+
+## [1.31.398] - 2026-04-28
 
 ### Added
 - **German (de) Localization** (#31, thanks @timokox): Added German translations for all UI strings including menu items, search, updater, toast messages, and the new "Open in External Editor" menu item.
