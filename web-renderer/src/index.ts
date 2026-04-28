@@ -753,6 +753,10 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
 
         const renderBody = body;
 
+        const showLineNumbers = options.showLineNumbers !== false;
+        document.documentElement.setAttribute('data-line-numbers', showLineNumbers ? 'true' : 'false');
+        lastShowLineNumbers = showLineNumbers;
+
         const outline = extractOutline(md, renderBody);
         if (toc) toc.render(outline);
 
@@ -788,7 +792,7 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         outputDiv.innerHTML = tempDiv.innerHTML;
         logToSwift(`[renderMarkdown:${callId}] DOM UPDATED successfully`);
 
-        if (options.showLineNumbers) {
+        if (showLineNumbers) {
             addLineNumbersToCodeBlocks(outputDiv);
         }
 
@@ -801,10 +805,6 @@ window.renderMarkdown = async function (text: string, options: RenderOptions = {
         if (blockquoteCollapse) {
             blockquoteCollapse.setInitialState(options.collapseBlockquotes === true);
         }
-
-        const showLineNumbers = options.showLineNumbers !== false;
-        document.documentElement.setAttribute('data-line-numbers', showLineNumbers ? 'true' : 'false');
-        lastShowLineNumbers = showLineNumbers;
 
         if (detectRtlContent(renderBody)) {
             outputDiv.setAttribute('dir', 'rtl');
