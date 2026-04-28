@@ -114,6 +114,7 @@ public class AppearancePreference: ObservableObject {
     private let enableEmojiKey = "enableEmoji"
     private let collapseBlockquotesByDefaultKey = "collapseBlockquotesByDefault"
     private let uiLanguageKey = "uiLanguage"
+    private let showLineNumbersKey = "showLineNumbers"
 
     public var baseFontSize: Double {
         get {
@@ -189,6 +190,18 @@ public class AppearancePreference: ObservableObject {
         set {
             objectWillChange.send()
             sharedStore.set(newValue, forKey: uiLanguageKey)
+            scheduleSyncToSharedStore()
+        }
+    }
+
+    public var showLineNumbers: Bool {
+        get {
+            guard sharedStore.object(forKey: showLineNumbersKey) != nil else { return true }
+            return sharedStore.bool(forKey: showLineNumbersKey)
+        }
+        set {
+            objectWillChange.send()
+            sharedStore.set(newValue, forKey: showLineNumbersKey)
             scheduleSyncToSharedStore()
         }
     }
