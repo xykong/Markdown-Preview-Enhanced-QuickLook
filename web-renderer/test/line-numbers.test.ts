@@ -46,3 +46,25 @@ describe('showLineNumbers option', () => {
     expect(doc.documentElement.getAttribute('data-line-numbers')).toBe('false');
   });
 });
+
+describe('source view gutter visibility', () => {
+  it('source-diff-wrap has gutter element', () => {
+    const dom = new JSDOM(`
+      <div class="source-diff-wrap source-view-light">
+        <div class="source-diff-gutter">
+          <span class="source-diff-line-num">1</span>
+          <span class="source-diff-line-num">2</span>
+        </div>
+        <div class="source-diff-content">
+          <span class="source-diff-line">line one</span>
+          <span class="source-diff-line">line two</span>
+        </div>
+      </div>
+    `);
+    const gutter = dom.window.document.querySelector('.source-diff-gutter');
+    expect(gutter).not.toBeNull();
+    const nums = dom.window.document.querySelectorAll('.source-diff-line-num');
+    expect(nums.length).toBe(2);
+  });
+});
+

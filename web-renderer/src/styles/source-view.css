@@ -62,3 +62,13 @@
     padding: 0;
     overflow: visible;
 }
+
+/* Hide line number gutter in source view when line numbers are disabled */
+html[data-line-numbers="false"] .source-diff-gutter {
+  display: none;
+}
+
+html[data-line-numbers="false"] .source-diff-wrap {
+  grid-template-columns: 1fr;
+}
+
