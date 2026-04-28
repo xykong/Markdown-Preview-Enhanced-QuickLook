@@ -9,7 +9,7 @@ declare global {
     }
 }
 
-type Lang = 'zh' | 'en';
+type Lang = 'zh' | 'en' | 'de' | 'fr';
 
 interface I18n {
     title: string;
@@ -100,6 +100,74 @@ const STRINGS: Record<Lang, I18n> = {
             },
         },
     },
+    de: {
+        title: '⌨️ FluxMarkdown Funktionsübersicht',
+        contextBadgeQL: 'QuickLook-Vorschau',
+        contextBadgeApp: 'FluxMarkdown-App',
+        badgeApp: 'App',
+        qlBannerText: 'QuickLook fängt Tastatureingaben ab. Nur <strong>Cmd+Scrollen</strong> und <strong>Pinch-Geste</strong> funktionieren; benutze die Symbolleisten-Buttons oder öffne die Datei per Doppelklick in der App, um auf alle Funktionen zuzugreifen.',
+        footerQL: 'Klick auf den Hintergrund oder <kbd>✕</kbd>, um zu schließen',
+        footerApp: '<kbd>?</kbd> oder <kbd>Esc</kbd> zum Schließen · <kbd>⌘</kbd> 2 Sek. halten zum erneuten Öffnen',
+        toastText: '💡 Drücke <kbd>?</kbd> oder klicke auf <strong>?</strong> in der Symbolleiste, um alle Shortcuts zu sehen',
+        closeLabel: 'Schließen',
+        cmdHoldCheckboxLabel: 'Dieses Panel automatisch öffnen, wenn ⌘ 2 Sek. gehalten wird',
+        groups: {
+            searchNav: {
+                title: 'Suche & Navigation',
+                items: ['Suche öffnen / schließen', 'Nächster Treffer', 'Vorheriger Treffer', 'Suche schließen', 'TOC-Button (oben rechts)'],
+            },
+            zoom: {
+                title: 'Zoom',
+                items: ['Vergrößern', 'Verkleinern', 'Zoom zurücksetzen', 'Scroll-Zoom', 'Pinch-to-Zoom'],
+            },
+            view: {
+                title: 'Ansicht',
+                items: ['Vorschau / Quelltext umschalten', 'Quelltext-Button (oben rechts </>)', 'Theme umschalten (☀/🌙 oben rechts)'],
+            },
+            export: {
+                title: 'Exportieren',
+                items: ['Als HTML exportieren', 'Als PDF exportieren'],
+            },
+            settings: {
+                title: 'Einstellungen',
+                items: ['Einstellungen öffnen', 'Nach Updates suchen', 'Hilfe-Button (? oben rechts)', 'Dieses Hilfe-Panel anzeigen'],
+            },
+        },
+    },
+    fr: {
+        title: '⌨️ Guide des fonctionnalités de FluxMarkdown',
+        contextBadgeQL: 'Aperçu Coup d’œil',
+        contextBadgeApp: 'FluxMarkdown App',
+        badgeApp: 'App',
+        qlBannerText: 'Coup d’œil intercepte les événements clavier. Seuls <strong>Cmd+défilement</strong> et le <strong>geste de pincement</strong> fonctionnent ; utilisez les boutons de la barre d’outils ou double-cliquez pour ouvrir dans l’app et accéder à toutes les fonctions.',
+        footerQL: 'Cliquer sur le fond ou <kbd>✕</kbd> pour fermer',
+        footerApp: '<kbd>?</kbd> ou <kbd>Esc</kbd> pour fermer · Maintenir <kbd>⌘</kbd> 2 s pour rouvrir',
+        toastText: '💡 Appuyez sur <kbd>?</kbd> ou cliquez sur <strong>?</strong> dans la barre d’outils pour voir tous les raccourcis',
+        closeLabel: 'Fermer',
+        cmdHoldCheckboxLabel: 'Ouvrir automatiquement ce panneau en maintenant ⌘ pendant 2 s',
+        groups: {
+            searchNav: {
+                title: 'Recherche & Navigation',
+                items: ['Ouvrir / fermer la recherche', 'Résultat suivant', 'Résultat précédent', 'Fermer la recherche', 'Bouton TOC (en haut à droite)'],
+            },
+            zoom: {
+                title: 'Zoom',
+                items: ['Zoom avant', 'Zoom arrière', 'Réinitialiser le zoom', 'Zoom par défilement', 'Zoom par pincement'],
+            },
+            view: {
+                title: 'Affichage',
+                items: ['Basculer aperçu / source', 'Bouton source (en haut à droite </>)', 'Basculer le thème (☀/🌙 en haut à droite)'],
+            },
+            export: {
+                title: 'Exporter',
+                items: ['Exporter en HTML', 'Exporter en PDF'],
+            },
+            settings: {
+                title: 'Réglages',
+                items: ['Ouvrir les réglages', 'Rechercher les mises à jour', 'Bouton aide (? en haut à droite)', 'Afficher ce panneau d’aide'],
+            },
+        },
+    },
 };
 
 interface ShortcutGroup {
@@ -162,9 +230,12 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
 
 function detectLang(): Lang {
     const stored = window.__fluxLang;
-    if (stored === 'zh' || stored === 'en') return stored;
-    const sys = navigator.language || '';
-    return sys.startsWith('zh') ? 'zh' : 'en';
+    if (stored === 'zh' || stored === 'en' || stored === 'de' || stored === 'fr') return stored;
+    const sys = (navigator.language || '').toLowerCase();
+    if (sys.startsWith('zh')) return 'zh';
+    if (sys.startsWith('de')) return 'de';
+    if (sys.startsWith('fr')) return 'fr';
+    return 'en';
 }
 
 export class HelpOverlay {

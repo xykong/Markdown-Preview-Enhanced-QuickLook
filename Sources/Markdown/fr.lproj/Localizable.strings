@@ -1,18 +1,94 @@
-/* Menu Items */
+/* === Menu Items === */
+"Reload File" = "Recharger le fichier";
+"Open in External Editor" = "Ouvrir dans un éditeur externe";
+"Export as HTML…" = "Exporter en HTML…";
+"Export as PDF…" = "Exporter en PDF…";
 "Find..." = "Rechercher…";
-
-/* Context Menu */
-"Context menu search item" = "Rechercher…";
-
-/* Search UI */
-"Search menu item" = "Rechercher…";
-
-/* Updater */
+"FluxMarkdown Help" = "Aide FluxMarkdown";
+"README" = "README";
+"Report an Issue" = "Signaler un problème";
+"Release Notes" = "Notes de version";
+"Show Preview" = "Afficher l’aperçu";
+"Show Source" = "Afficher la source";
+"Reset Zoom" = "Réinitialiser le zoom";
+"Appearance" = "Apparence";
 "Check for Updates..." = "Rechercher les mises à jour…";
 
-/* Toast Messages */
+/* === Context Menu / Search === */
+"Context menu search item" = "Rechercher…";
+"Search menu item" = "Rechercher…";
+
+/* === Toolbar Tooltips === */
+"Reload File (⌘R)" = "Recharger le fichier (⌘R)";
+"Zoom Out" = "Zoom arrière";
+"Reset Zoom (⌘0)" = "Réinitialiser le zoom (⌘0)";
+"Zoom In" = "Zoom avant";
+"Show Help" = "Afficher l’aide";
+"Toggle Theme (System / Light / Dark)" = "Changer le thème (Système / Clair / Sombre)";
+
+/* === Appearance Modes === */
+"Light" = "Clair";
+"Dark" = "Sombre";
+"System" = "Système";
+
+/* === Settings: Tabs === */
+"Rendering" = "Rendu";
+"Editor" = "Éditeur";
+
+/* === Settings: Theme Section === */
+"Theme" = "Thème";
+"Choose your preferred interface style" = "Choisir le style d’interface préféré";
+
+/* === Settings: Language Section === */
+"Language" = "Langue";
+"Interface language for the entire app" = "Langue de l’interface pour toute l’application";
+"System Default" = "Par défaut du système";
+"Some menus update only after restarting the app." = "Certains menus ne sont mis à jour qu’après le redémarrage de l’app.";
+"Restart Now" = "Redémarrer maintenant";
+
+/* === Settings: Features Section === */
+"Features" = "Fonctionnalités";
+"Enable or disable rendering capabilities" = "Activer ou désactiver les capacités de rendu";
+"Mermaid Diagrams" = "Diagrammes Mermaid";
+"Flowcharts, sequence diagrams, and more" = "Organigrammes, diagrammes de séquence, etc.";
+"KaTeX Math" = "Maths KaTeX";
+"Mathematical expressions and equations" = "Expressions et équations mathématiques";
+"Emoji Support" = "Prise en charge des emojis";
+"GitHub flavored emoji codes like :smile:" = "Codes emoji style GitHub comme :smile:";
+"Collapse Blockquotes by Default" = "Réduire les citations par défaut";
+"Collapse blockquote sections when opening a document" = "Réduire les sections de citation à l’ouverture d’un document";
+"Show Line Numbers" = "Afficher les numéros de ligne";
+"Display source line numbers in rendered preview and source view" = "Afficher les numéros de ligne dans l’aperçu et la vue source";
+
+/* === Settings: Typography Section === */
+"Typography" = "Typographie";
+"Adjust the reading experience" = "Ajuster l’expérience de lecture";
+"Font Size" = "Taille de la police";
+"Font Size:" = "Taille de la police :";
+
+/* === Settings: Code Highlighting Section === */
+"Code Highlighting" = "Coloration syntaxique";
+"Syntax highlighting theme for code blocks" = "Thème de coloration pour les blocs de code";
+"Default" = "Par défaut";
+
+/* === Settings: Window === */
+"Settings" = "Réglages";
+
+/* === Welcome View === */
+"Open a Markdown file or drop it here to start." = "Ouvrir un fichier Markdown ou le déposer ici pour commencer.";
+"Open Markdown File…" = "Ouvrir un fichier Markdown…";
+"Drag & drop .md/.mdx/.txt here" = "Glisser-déposer .md/.mdx/.txt ici";
+"QuickLook" = "Coup d’œil";
+"In Finder, select a file and press Space." = "Dans le Finder, sélectionnez un fichier et appuyez sur Espace.";
+"Open with App" = "Ouvrir avec l’app";
+"Double-click a .md file to open it here." = "Double-cliquer sur un fichier .md pour l’ouvrir ici.";
+"Drag & Drop" = "Glisser-déposer";
+"Drop files onto the + area to open." = "Déposer les fichiers sur la zone + pour les ouvrir.";
+"Open Settings" = "Ouvrir les réglages";
+"Troubleshooting" = "Dépannage";
+"Open" = "Ouvrir";
+"FluxMarkdown App Icon" = "Icône de l’app FluxMarkdown";
+
+/* === Toast Messages === */
 "QuickLook preview does not support link navigation" = "L’aperçu QuickLook ne prend pas en charge la navigation par liens";
 "Double-click .md file to open in main app for full functionality" = "Double-cliquez sur le fichier .md pour l’ouvrir dans l’application principale et accéder à toutes les fonctionnalités";
-
-/* External Editor */
-"Open in External Editor" = "Ouvrir dans un éditeur externe";

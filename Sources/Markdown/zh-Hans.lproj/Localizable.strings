@@ -1,18 +1,94 @@
-/* Menu Items */
+/* === Menu Items === */
+"Reload File" = "重新加载文件";
+"Open in External Editor" = "在外部编辑器中打开";
+"Export as HTML…" = "导出为 HTML…";
+"Export as PDF…" = "导出为 PDF…";
 "Find..." = "查找...";
-
-/* Context Menu */
-"Context menu search item" = "查找...";
-
-/* Search UI */
-"Search menu item" = "查找...";
-
-/* Updater */
+"FluxMarkdown Help" = "FluxMarkdown 帮助";
+"README" = "README";
+"Report an Issue" = "报告问题";
+"Release Notes" = "发行说明";
+"Show Preview" = "显示预览";
+"Show Source" = "显示源码";
+"Reset Zoom" = "重置缩放";
+"Appearance" = "外观";
 "Check for Updates..." = "检查更新...";
 
-/* Toast Messages */
+/* === Context Menu / Search === */
+"Context menu search item" = "查找...";
+"Search menu item" = "查找...";
+
+/* === Toolbar Tooltips === */
+"Reload File (⌘R)" = "重新加载文件 (⌘R)";
+"Zoom Out" = "缩小";
+"Reset Zoom (⌘0)" = "重置缩放 (⌘0)";
+"Zoom In" = "放大";
+"Show Help" = "显示帮助";
+"Toggle Theme (System / Light / Dark)" = "切换主题(系统 / 浅色 / 深色)";
+
+/* === Appearance Modes === */
+"Light" = "浅色";
+"Dark" = "深色";
+"System" = "系统";
+
+/* === Settings: Tabs === */
+"Rendering" = "渲染";
+"Editor" = "编辑器";
+
+/* === Settings: Theme Section === */
+"Theme" = "主题";
+"Choose your preferred interface style" = "选择您偏好的界面风格";
+
+/* === Settings: Language Section === */
+"Language" = "语言";
+"Interface language for the entire app" = "整个应用的界面语言";
+"System Default" = "系统默认";
+"Some menus update only after restarting the app." = "部分菜单需要重新启动应用后才会更新。";
+"Restart Now" = "立即重新启动";
+
+/* === Settings: Features Section === */
+"Features" = "功能";
+"Enable or disable rendering capabilities" = "启用或禁用渲染功能";
+"Mermaid Diagrams" = "Mermaid 图表";
+"Flowcharts, sequence diagrams, and more" = "流程图、时序图等";
+"KaTeX Math" = "KaTeX 数学";
+"Mathematical expressions and equations" = "数学表达式与公式";
+"Emoji Support" = "Emoji 支持";
+"GitHub flavored emoji codes like :smile:" = "GitHub 风格的 emoji 代码,如 :smile:";
+"Collapse Blockquotes by Default" = "默认折叠引用块";
+"Collapse blockquote sections when opening a document" = "打开文档时折叠引用块部分";
+"Show Line Numbers" = "显示行号";
+"Display source line numbers in rendered preview and source view" = "在渲染预览和源码视图中显示源行号";
+
+/* === Settings: Typography Section === */
+"Typography" = "排版";
+"Adjust the reading experience" = "调整阅读体验";
+"Font Size" = "字体大小";
+"Font Size:" = "字体大小:";
+
+/* === Settings: Code Highlighting Section === */
+"Code Highlighting" = "代码高亮";
+"Syntax highlighting theme for code blocks" = "代码块的语法高亮主题";
+"Default" = "默认";
+
+/* === Settings: Window === */
+"Settings" = "设置";
+
+/* === Welcome View === */
+"Open a Markdown file or drop it here to start." = "打开 Markdown 文件或拖放至此处以开始。";
+"Open Markdown File…" = "打开 Markdown 文件…";
+"Drag & drop .md/.mdx/.txt here" = "将 .md/.mdx/.txt 拖放至此";
+"QuickLook" = "快速查看";
+"In Finder, select a file and press Space." = "在访达中选择文件并按空格键。";
+"Open with App" = "用应用打开";
+"Double-click a .md file to open it here." = "双击 .md 文件即可在此打开。";
+"Drag & Drop" = "拖放";
+"Drop files onto the + area to open." = "将文件拖到 + 区域以打开。";
+"Open Settings" = "打开设置";
+"Troubleshooting" = "故障排除";
+"Open" = "打开";
+"FluxMarkdown App Icon" = "FluxMarkdown 应用图标";
+
+/* === Toast Messages === */
 "QuickLook preview does not support link navigation" = "QuickLook 预览模式不支持链接跳转";
 "Double-click .md file to open in main app for full functionality" = "请双击 .md 文件用主应用打开以使用完整功能";
-
-/* External Editor */
-"Open in External Editor" = "在外部编辑器中打开";

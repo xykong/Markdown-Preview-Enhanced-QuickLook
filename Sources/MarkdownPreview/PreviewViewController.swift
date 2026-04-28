@@ -224,11 +224,13 @@ public class PreviewViewController: NSViewController, QLPreviewingController, WK
     public override init(nibName nibNameOrNil: NSNib.Name?, bundle nibBundleOrNil: Bundle?) {
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
         os_log("🔵 init(nibName:bundle:) called", log: logger, type: .debug)
+        LocalizationManager.bootstrap(initialPreference: AppearancePreference.shared.uiLanguage)
     }
-    
+
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
         os_log("🔵 init(coder:) called", log: logger, type: .debug)
+        LocalizationManager.bootstrap(initialPreference: AppearancePreference.shared.uiLanguage)
     }
     
     private var themeButton: NSButton!

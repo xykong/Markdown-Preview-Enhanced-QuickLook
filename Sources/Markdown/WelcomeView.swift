@@ -74,14 +74,14 @@ struct WelcomeView: View {
                             .stroke(Color(NSColor.separatorColor).opacity(0.8), lineWidth: 1)
                     )
                     .shadow(color: Color.black.opacity(0.12), radius: 10, x: 0, y: 6)
-                    .accessibilityLabel(Text("FluxMarkdown App Icon"))
+                    .accessibilityLabel(Text(NSLocalizedString("FluxMarkdown App Icon", comment: "App icon accessibility label")))
             }
 
             Text("FluxMarkdown")
                 .font(.system(size: 26, weight: .semibold))
                 .foregroundColor(.primary)
 
-            Text("Open a Markdown file or drop it here to start.")
+            Text(NSLocalizedString("Open a Markdown file or drop it here to start.", comment: "Welcome subtitle"))
                 .font(.system(size: 13))
                 .foregroundColor(.secondary)
         }
@@ -99,11 +99,11 @@ struct WelcomeView: View {
                             .font(.system(size: 44, weight: .semibold))
                             .foregroundColor(isTargeted ? Color.accentColor : Color.secondary)
 
-                        Text("Open Markdown File…")
+                        Text(NSLocalizedString("Open Markdown File…", comment: "Open file button"))
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.primary)
 
-                        Text("Drag & drop .md/.mdx/.txt here")
+                        Text(NSLocalizedString("Drag & drop .md/.mdx/.txt here", comment: "Drop hint"))
                             .font(.system(size: 12))
                             .foregroundColor(.secondary)
 
@@ -126,19 +126,25 @@ struct WelcomeView: View {
 
     private var tips: some View {
         VStack(alignment: .leading, spacing: 10) {
+            let quickLookTitle = NSLocalizedString("QuickLook", comment: "Tip title")
+            let quickLookSubtitle = NSLocalizedString("In Finder, select a file and press Space.", comment: "QuickLook tip subtitle")
             if #available(macOS 12.0, *) {
-                TipRow(icon: "space", title: "QuickLook", subtitle: "In Finder, select a file and press Space.")
+                TipRow(icon: "space", title: quickLookTitle, subtitle: quickLookSubtitle)
             } else {
-                TipRow(icon: "keyboard", title: "QuickLook", subtitle: "In Finder, select a file and press Space.")
+                TipRow(icon: "keyboard", title: quickLookTitle, subtitle: quickLookSubtitle)
             }
-            TipRow(icon: "doc.text", title: "Open with App", subtitle: "Double-click a .md file to open it here.")
-            TipRow(icon: "arrow.down.doc", title: "Drag & Drop", subtitle: "Drop files onto the + area to open.")
+            TipRow(icon: "doc.text",
+                   title: NSLocalizedString("Open with App", comment: "Tip title"),
+                   subtitle: NSLocalizedString("Double-click a .md file to open it here.", comment: "Open with App tip subtitle"))
+            TipRow(icon: "arrow.down.doc",
+                   title: NSLocalizedString("Drag & Drop", comment: "Tip title"),
+                   subtitle: NSLocalizedString("Drop files onto the + area to open.", comment: "Drag and drop tip subtitle"))
 
             Divider()
                 .padding(.top, 2)
 
             HStack(spacing: 10) {
-                Button("Open Settings") {
+                Button(NSLocalizedString("Open Settings", comment: "Open settings button")) {
                     settingsWindowManager.show()
                 }
                 .buttonStyle(BorderlessButtonStyle())
@@ -147,7 +153,7 @@ struct WelcomeView: View {
                 Text("•")
                     .foregroundColor(Color.secondary.opacity(0.6))
 
-                Button("Troubleshooting") {
+                Button(NSLocalizedString("Troubleshooting", comment: "Troubleshooting button")) {
                     if let url = URL(string: "https://github.com/xykong/flux-markdown/blob/master/docs/user/HELP.md") {
                         openURL(url)
                     }
@@ -187,7 +193,7 @@ struct WelcomeView: View {
         panel.canChooseFiles = true
         panel.canChooseDirectories = false
         panel.allowedContentTypes = allowedContentTypes
-        panel.prompt = "Open"
+        panel.prompt = NSLocalizedString("Open", comment: "Open file panel prompt")
 
         if panel.runModal() == .OK {
             open(urls: panel.urls)
@@ -449,7 +455,7 @@ private final class SettingsWindowManager: NSObject {
             backing: .buffered,
             defer: false
         )
-        window.title = "Settings"
+        window.title = NSLocalizedString("Settings", comment: "Settings window title")
         window.center()
         window.contentView = hostingView
         window.isReleasedWhenClosed = false
