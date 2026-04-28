@@ -7,6 +7,23 @@
         <language>zh-CN</language>
 
         <item>
+            <title>Version 1.31.398</title>
+            <link>https://github.com/xykong/flux-markdown/releases/tag/v1.31.398</link>
+            <sparkle:version>398</sparkle:version>
+            <sparkle:shortVersionString>1.31.398</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <pubDate>Tue, 28 Apr 2026 09:19:33 +0000</pubDate>
+            <enclosure
+                url="https://github.com/xykong/flux-markdown/releases/download/v1.31.398/FluxMarkdown.dmg"
+                sparkle:edSignature="9pSv713MEB415oi6xLxV8+fio5h8Svzdt6iTto1CrWIJkMbAKCBl7vZZSy40KgQlJG6ujAwDG3C2w0GvE0r2DA=="
+                length="10746629"
+                type="application/octet-stream" />
+            <description><![CDATA[
+                <h2>更新内容</h2><h3>Added</h3><ul><li><strong>German (de) Localization</strong> (#31, thanks ): Added German translations for all UI strings including menu items, search, updater, toast messages, and the new "Open in External Editor" menu item.</li><li><strong>French (fr) Localization</strong> (#32, thanks ): Added French translations for all UI strings including menu items, search, updater, toast messages, and the new "Open in External Editor" menu item.</li><li><strong>Open in External Editor</strong> (#33, thanks ): Added "Open in External Editor" menu item (⌥⌘E) under the File menu. Opens the current document in the user's default plain-text editor via <code>open -t</code>, allowing quick handoff to TextEdit/IDE/etc. without re-associating the file type.</li></ul><p><a href="https://github.com/xykong/flux-markdown/releases/tag/v1.31.398">查看完整更新日志</a></p>
+            ]]></description>
+        </item>
+        
+        <item>
             <title>Version 1.30.391</title>
             <link>https://github.com/xykong/flux-markdown/releases/tag/v1.30.391</link>
             <sparkle:version>391</sparkle:version>
